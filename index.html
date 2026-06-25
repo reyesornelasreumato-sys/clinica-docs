@@ -525,6 +525,7 @@
       <button class="med-class-btn" onclick="addMedClasse('dmards')">🔬 DMARDs</button>
       <button class="med-class-btn" onclick="addMedClasse('antiinflamatorios')">🔥 Anti-inflamatórios</button>
       <button class="med-class-btn" onclick="addMedClasse('diversos')">📋 Medicações Diversas</button>
+      <button class="med-class-btn" onclick="addMedClasse('imunobio')">💉 Imunobiológicos</button>
     </div>
 
     <div id="meds-list"></div>
@@ -833,11 +834,43 @@
       { nome: 'Alopurinol 300mg', pos: '1 comprimido/dia com refeição', dur: 'uso contínuo' },
       { nome: 'Colchicina 0,5mg', pos: '1 comprimido de 12/12h com refeição', dur: 'uso contínuo' },
       { nome: 'Gabapentina 300mg', pos: '1 comprimido de 8/8h', dur: 'uso contínuo' },
+      { nome: 'Duloxetina 30mg', pos: '1 cápsula/dia com refeição', dur: 'uso contínuo' },
       { nome: 'Duloxetina 60mg', pos: '1 cápsula/dia com refeição', dur: 'uso contínuo' },
       { nome: 'Amitriptilina 25mg', pos: '1 comprimido à noite', dur: 'uso contínuo', especial: true },
       { nome: 'Pregabalina 75mg', pos: '1 cápsula de 12/12h', dur: 'uso contínuo', especial: true },
       { nome: 'Pregabalina 150mg', pos: '1 cápsula de 12/12h', dur: 'uso contínuo', especial: true },
       { nome: 'Hidroxizina 25mg', pos: '1 comprimido à noite', dur: 'conforme avaliação', especial: true },
+      { nome: 'Ártico Sachê', pos: '01 sachê diluído em 100ml de água ao dia', dur: 'uso contínuo' },
+      { nome: 'Artrolive', pos: '1 cápsula via oral 3 vezes ao dia', dur: 'uso contínuo' },
+      { nome: 'CONDROFLEX®', pos: '1 envelope por dia', dur: 'uso contínuo' },
+      { nome: 'Colágeno do Tipo II 40mg', pos: '01 cápsula ao dia', dur: 'uso contínuo' },
+      { nome: 'PIASCLEDINE® 300mg', pos: '1 cápsula ao dia durante a refeição', dur: 'uso contínuo' },
+      { nome: 'Motore — Curcuma Longa 500mg', pos: '01 comprimido de 12/12h (máximo 2 comprimidos de 12/12h)', dur: 'uso contínuo' },
+      { nome: 'Flex MSM (Curcuma + MSM)', pos: '01 comprimido ao dia', dur: 'uso contínuo' },
+      { nome: 'Alpha Puravida (Woman / Man / AaZ)', pos: '01 comprimido ao dia', dur: 'uso contínuo' },
+    ]},
+    imunobio: { label: 'Imunobiológicos', icon: '💉', meds: [
+      { nome: 'Adalimumabe 40mg — Humira® (SC)', pos: 'Aplicar 40mg por via subcutânea a cada 2 semanas', dur: 'uso contínuo' },
+      { nome: 'Etanercepte 50mg — Enbrel® (SC)', pos: 'Aplicar 50mg por via subcutânea 1x/semana', dur: 'uso contínuo' },
+      { nome: 'Certolizumabe Pegol 200mg — Cimzia® (SC)', pos: 'Indução: 400mg SC nas semanas 0, 2 e 4 — Manutenção: 200mg SC a cada 2 semanas', dur: 'uso contínuo' },
+      { nome: 'Golimumabe 50mg — Simponi® (SC)', pos: 'Aplicar 50mg por via subcutânea 1x/mês (mesmo dia todo mês)', dur: 'uso contínuo' },
+      { nome: 'Infliximabe — Remicade® (IV)', pos: 'Infusão IV conforme protocolo (dose mg/kg — semanas 0, 2, 6, depois a cada 8 semanas)', dur: 'uso contínuo' },
+      { nome: 'Tocilizumabe 162mg — Actemra® (SC)', pos: 'Aplicar 162mg por via subcutânea 1x/semana', dur: 'uso contínuo' },
+      { nome: 'Tocilizumabe — Actemra® (IV)', pos: 'Infusão IV 8mg/kg a cada 4 semanas (máx. 800mg/dose)', dur: 'uso contínuo' },
+      { nome: 'Sarilumabe 200mg — Kevzara® (SC)', pos: 'Aplicar 200mg por via subcutânea a cada 2 semanas', dur: 'uso contínuo' },
+      { nome: 'Abatacepte 125mg — Orencia® (SC)', pos: 'Aplicar 125mg por via subcutânea 1x/semana', dur: 'uso contínuo' },
+      { nome: 'Abatacepte — Orencia® (IV)', pos: 'Infusão IV conforme peso (500mg / 750mg / 1000mg) nas semanas 0, 2 e 4, depois a cada 4 semanas', dur: 'uso contínuo' },
+      { nome: 'Rituximabe 1000mg — MabThera® (IV)', pos: 'Infusão IV de 1000mg — 2 doses com intervalo de 2 semanas — repetir em 6 meses se necessário', dur: 'uso contínuo' },
+      { nome: 'Belimumabe 200mg — Benlysta® (SC)', pos: 'Aplicar 200mg por via subcutânea 1x/semana', dur: 'uso contínuo' },
+      { nome: 'Belimumabe — Benlysta® (IV)', pos: 'Infusão IV 10mg/kg nas semanas 0, 2 e 4, depois a cada 4 semanas', dur: 'uso contínuo' },
+      { nome: 'Anifrolumabe 300mg — Saphnelo® (IV)', pos: 'Infusão IV 300mg a cada 4 semanas', dur: 'uso contínuo' },
+      { nome: 'Secuquinumabe 150mg — Cosentyx® (SC)', pos: 'Indução: 150mg SC nas semanas 0, 1, 2, 3 e 4 — Manutenção: 150mg SC 1x/mês', dur: 'uso contínuo' },
+      { nome: 'Ixequizumabe 80mg — Taltz® (SC)', pos: 'Indução: 160mg SC na semana 0 — Manutenção: 80mg SC a cada 4 semanas', dur: 'uso contínuo' },
+      { nome: 'Ustecinumabe 45mg — Stelara® (SC)', pos: 'Dose inicial IV conforme peso; manutenção: 45mg SC nas semanas 4 e 16, depois a cada 12 semanas', dur: 'uso contínuo' },
+      { nome: 'Guselcumabe 100mg — Tremfya® (SC)', pos: 'Aplicar 100mg SC nas semanas 0 e 4, depois a cada 8 semanas', dur: 'uso contínuo' },
+      { nome: 'Risanquizumabe 150mg — Skyrizi® (SC)', pos: 'Aplicar 150mg SC nas semanas 0 e 4, depois a cada 12 semanas', dur: 'uso contínuo' },
+      { nome: 'Canacinumabe 150mg — Ilaris® (SC)', pos: 'Aplicar 150mg por via subcutânea — intervalo conforme indicação', dur: 'uso contínuo' },
+      { nome: 'Anacinra 100mg — Kineret® (SC)', pos: 'Aplicar 100mg por via subcutânea 1x/dia', dur: 'uso contínuo' },
     ]},
   };
 
