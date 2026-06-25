@@ -1,0 +1,1612 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dr. Laerte Canedo — Documentos Médicos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lora:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --brand:       #1a6b5a;
+      --brand-light: #e8f4f1;
+      --brand-mid:   #2d8c76;
+      --text-primary:   #1a1f1e;
+      --text-secondary: #4a5650;
+      --text-muted:     #8a9e99;
+      --bg:          #f5f7f6;
+      --surface:     #ffffff;
+      --border:      #dce5e2;
+      --border-soft: #edf1ef;
+      --danger:      #c0392b;
+      --danger-light: #fdf0ef;
+      --radius-sm:   6px;
+      --radius-md:   10px;
+      --radius-lg:   16px;
+      --shadow-sm:   0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md:   0 4px 16px rgba(0,0,0,0.08);
+    }
+
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-primary); min-height: 100vh; font-size: 15px; line-height: 1.6; }
+
+    /* ── HEADER ── */
+    header { background: var(--surface); border-bottom: 1px solid var(--border-soft); padding: 0 2rem; height: 64px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: var(--shadow-sm); }
+    .header-left { display: flex; flex-direction: column; }
+    .header-doctor { font-family: 'Lora', serif; font-size: 16px; font-weight: 600; color: var(--text-primary); letter-spacing: -0.01em; }
+    .header-crm { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+    .header-right { font-size: 13px; color: var(--text-muted); }
+
+    /* ── LAYOUT ── */
+    .container { max-width: 920px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    /* ── LOCAL SELECTOR ── */
+    .local-selector { background: var(--surface); border: 1px solid var(--border-soft); border-radius: var(--radius-lg); padding: 1.25rem 1.75rem; margin-bottom: 1.25rem; box-shadow: var(--shadow-sm); }
+    .local-selector-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brand); margin-bottom: 10px; }
+    .local-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
+    .local-card {
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: all 0.15s;
+      background: var(--surface);
+      text-align: left;
+    }
+    .local-card:hover { border-color: var(--brand); background: var(--brand-light); }
+    .local-card.selected { border-color: var(--brand); background: var(--brand-light); }
+    .local-card-name { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.3; margin-bottom: 3px; }
+    .local-card.selected .local-card-name { color: var(--brand); }
+    .local-card-addr { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
+    .local-card-check { display: none; width: 18px; height: 18px; background: var(--brand); border-radius: 50%; float: right; margin-left: 6px; align-items: center; justify-content: center; flex-shrink: 0; }
+    .local-card.selected .local-card-check { display: flex; }
+    .local-card-check svg { width: 10px; height: 10px; stroke: #fff; fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+
+    /* ── PATIENT BLOCK ── */
+    .patient-block { background: var(--surface); border: 2px solid var(--brand-light); border-radius: var(--radius-lg); padding: 1.5rem 1.75rem; margin-bottom: 1.25rem; box-shadow: var(--shadow-sm); position: relative; }
+    .patient-block-header { display: flex; align-items: center; gap: 10px; margin-bottom: 1rem; }
+    .patient-block-icon { width: 36px; height: 36px; background: var(--brand-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .patient-block-icon svg { width: 18px; height: 18px; stroke: var(--brand); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .patient-block-title { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+    .patient-block-sub { font-size: 13px; color: var(--text-muted); }
+    .patient-badge { display: none; position: absolute; top: 1.25rem; right: 1.25rem; background: var(--brand-light); color: var(--brand); font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; border: 1px solid rgba(26,107,90,0.2); align-items: center; gap: 5px; }
+    .patient-badge.visible { display: flex; }
+    .patient-badge svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2.5; }
+
+    /* ── PAGE TITLE ── */
+    .page-title { margin-bottom: 1.25rem; }
+    .page-title h1 { font-family: 'Lora', serif; font-size: 20px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px; }
+    .page-title p { font-size: 14px; color: var(--text-muted); }
+
+    /* ── TABS ── */
+    .tabs { display: flex; gap: 6px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .tab-btn { display: flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--surface); color: var(--text-secondary); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; font-family: 'Inter', sans-serif; }
+    .tab-btn:hover { border-color: var(--brand); color: var(--brand); background: var(--brand-light); }
+    .tab-btn.active { background: var(--brand); color: #fff; border-color: var(--brand); }
+    .tab-btn svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+    /* ── CARD ── */
+    .card { background: var(--surface); border: 1px solid var(--border-soft); border-radius: var(--radius-lg); padding: 1.75rem; box-shadow: var(--shadow-sm); }
+
+    /* ── FORM ── */
+    .section-label { font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brand); margin: 1.5rem 0 0.75rem; padding-bottom: 6px; border-bottom: 1px solid var(--brand-light); }
+    .section-label:first-child { margin-top: 0; }
+    .form-grid { display: grid; gap: 14px; }
+    .cols-1 { grid-template-columns: 1fr; }
+    .cols-2 { grid-template-columns: 1fr 1fr; }
+    .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field label { font-size: 13px; font-weight: 500; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; }
+    .required-star { color: var(--danger); font-size: 14px; line-height: 1; }
+    .field input, .field select, .field textarea { padding: 9px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); color: var(--text-primary); font-size: 14px; font-family: 'Inter', sans-serif; transition: border-color 0.15s; outline: none; }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(26,107,90,0.1); }
+    .field input.error { border-color: var(--danger); box-shadow: 0 0 0 3px rgba(192,57,43,0.1); }
+    .field textarea { resize: vertical; min-height: 90px; line-height: 1.5; }
+    .field-error { font-size: 12px; color: var(--danger); display: none; }
+    .field-error.visible { display: block; }
+
+    /* ── EXAM TYPE BUTTONS ── */
+    .exam-type-btn {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 8px; padding: 1.5rem 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      cursor: pointer; font-family: 'Inter', sans-serif;
+      transition: all 0.15s; color: var(--text-secondary);
+    }
+    .exam-type-btn:hover { border-color: var(--brand); background: var(--brand-light); color: var(--brand); }
+    .exam-type-btn.selected { border-color: var(--brand); background: var(--brand-light); color: var(--brand); }
+    .exam-type-btn span { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+    .exam-type-btn.selected span { color: var(--brand); }
+    .exam-type-btn small { font-size: 12px; color: var(--text-muted); }
+
+    /* ── PRESET PANELS ── */
+    .preset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+    .preset-btn {
+      display: flex; flex-direction: column; gap: 6px;
+      padding: 14px; border-radius: var(--radius-md);
+      border: 1.5px solid var(--border); background: var(--surface);
+      cursor: pointer; font-family: 'Inter', sans-serif;
+      text-align: left; transition: all 0.15s;
+    }
+    .preset-btn:hover { border-color: var(--brand); background: var(--brand-light); }
+    .preset-btn.active { border-color: var(--brand); background: var(--brand-light); }
+    .preset-btn-top { display: flex; align-items: center; justify-content: space-between; }
+    .preset-icon { font-size: 20px; line-height: 1; }
+    .preset-check {
+      width: 20px; height: 20px; border-radius: 50%;
+      background: var(--border); display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: background 0.15s;
+    }
+    .preset-btn.active .preset-check { background: var(--brand); }
+    .preset-name { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.3; }
+    .preset-btn.active .preset-name { color: var(--brand); }
+    .preset-count { font-size: 11px; color: var(--text-muted); }
+    .preset-btn.active .preset-count { color: var(--brand-mid); }
+
+    /* ── CATALOG ── */
+    .catalog-section-header {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.07em;
+      text-transform: uppercase; padding: 8px 12px;
+      background: var(--brand-light); color: var(--brand);
+      border-radius: var(--radius-sm); margin-bottom: 10px;
+      margin-top: 4px;
+    }
+    .catalog-section-more {
+      margin-top: 1.5rem;
+      background: var(--border-soft); color: var(--text-muted);
+    }
+    .cat-group { margin-bottom: 1.1rem; }
+    .cat-group-title {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--brand);
+      margin-bottom: 7px; padding-bottom: 5px;
+      border-bottom: 1px solid var(--brand-light);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .cat-select-all {
+      font-size: 11px; font-weight: 500; color: var(--brand-mid);
+      cursor: pointer; text-transform: none; letter-spacing: 0;
+      background: none; border: none; font-family: 'Inter', sans-serif;
+      padding: 0; text-decoration: underline; text-underline-offset: 2px;
+    }
+    .cat-items { display: flex; flex-wrap: wrap; gap: 6px; }
+    .exam-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 12px; border-radius: 999px;
+      border: 1px solid var(--border); background: var(--surface);
+      color: var(--text-muted); font-size: 13px;
+      cursor: pointer; font-family: 'Inter', sans-serif;
+      transition: all 0.12s; user-select: none;
+    }
+    .exam-chip:hover { border-color: var(--brand); color: var(--brand); background: var(--brand-light); }
+
+    /* azul — selecionado por painel (preset) */
+    .exam-chip.chip-preset {
+      border-color: #2563eb;
+      background: #eff6ff;
+      color: #1d4ed8;
+      font-weight: 500;
+    }
+    .exam-chip.chip-preset::before { content: '✓ '; font-size: 11px; }
+    .exam-chip.chip-preset:hover { background: #dbeafe; border-color: #1d4ed8; }
+
+    /* verde — selecionado manualmente (fora do preset) */
+    .exam-chip.chip-manual-sel {
+      border-color: var(--brand);
+      background: var(--brand-light);
+      color: var(--brand);
+      font-weight: 500;
+    }
+    .exam-chip.chip-manual-sel::before { content: '✓ '; font-size: 11px; }
+
+    .cat-group-preset .cat-group-title { border-bottom-color: #bfdbfe; }
+    .cat-group-preset > .cat-group-title { color: #1d4ed8 !important; }
+    .cat-group-title.cat-group-preset { color: #1d4ed8; border-bottom-color: #bfdbfe; }
+
+    /* ── DOC CARD HEADER ── */
+    .doc-card { margin-bottom: 1.25rem; }
+    .doc-card-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border-soft); }
+    .doc-card-title { font-family: 'Lora', serif; font-size: 16px; font-weight: 600; color: var(--text-primary); }
+    .date-toggle-inline { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .date-toggle-label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+    .dtb { padding: 5px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); color: var(--text-secondary); font-size: 12px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.12s; }
+    .dtb:hover { border-color: var(--brand); color: var(--brand); background: var(--brand-light); }
+    .dtb.active { background: var(--brand); color: #fff; border-color: var(--brand); }
+    .date-req-err { font-size: 11px; color: var(--danger); display: none; }
+    .date-req-err.visible { display: inline; }
+
+    /* ── TAB MULTI-SELECT ── */
+    .tab-btn.active { background: var(--brand); color: #fff; border-color: var(--brand); }
+
+    /* ── GERAR TODOS ── */
+    .btn-gerar-todos { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: var(--radius-md); border: none; background: var(--brand); color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; width: 100%; justify-content: center; transition: background 0.15s; }
+    .btn-gerar-todos:hover { background: var(--brand-mid); }
+
+    /* ── DATE OPTION BUTTONS (legacy, kept for compat) ── */
+    .date-opt-btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--surface); color: var(--text-secondary); font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s; }
+    .date-opt-btn:hover { border-color: var(--brand); color: var(--brand); background: var(--brand-light); }
+    .date-opt-btn.active { background: var(--brand); color: #fff; border-color: var(--brand); }
+
+    /* ── EXAM LIST ITEMS ── */
+    .ex-items { display: flex; flex-direction: column; gap: 3px; }
+    .ex-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 7px 12px; border-radius: var(--radius-sm);
+      cursor: pointer; font-size: 14px;
+      border: 1px solid transparent;
+      transition: all 0.1s;
+      user-select: none;
+    }
+    .ex-item-on {
+      background: #eff6ff; border-color: #93c5fd; color: #1d4ed8;
+    }
+    .ex-item-off {
+      background: var(--bg); border-color: var(--border-soft); color: var(--text-secondary);
+    }
+    .ex-item-off:hover { background: var(--brand-light); border-color: var(--brand); color: var(--brand); }
+    .ex-item-check {
+      width: 20px; height: 20px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700; flex-shrink: 0;
+    }
+    .ex-item-on .ex-item-check { background: #2563eb; color: #fff; }
+    .ex-item-off .ex-item-check { background: var(--border); color: var(--text-muted); }
+    .med-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; margin-bottom: 8px; align-items: center; }
+
+    /* ── EXAM TAGS ── */
+    .exam-add-row { display: flex; gap: 8px; margin-bottom: 10px; }
+    .exam-add-row input { flex: 1; }
+    .tag-list { display: flex; flex-wrap: wrap; gap: 6px; min-height: 28px; }
+    .tag { display: inline-flex; align-items: center; gap: 5px; background: var(--brand-light); color: var(--brand); border: 1px solid rgba(26,107,90,0.2); border-radius: 999px; padding: 4px 10px; font-size: 13px; font-weight: 500; }
+    .tag button { background: none; border: none; color: var(--brand-mid); cursor: pointer; font-size: 16px; line-height: 1; padding: 0 0 1px; }
+
+    /* ── BUTTONS ── */
+    .btn { display: inline-flex; align-items: center; gap: 7px; padding: 9px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); color: var(--text-secondary); font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s; }
+    .btn:hover { border-color: var(--brand); color: var(--brand); background: var(--brand-light); }
+    .btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .btn-primary { background: var(--brand); color: #fff; border-color: var(--brand); padding: 11px 24px; font-size: 14px; }
+    .btn-primary:hover { background: var(--brand-mid); color: #fff; border-color: var(--brand-mid); }
+    .btn-danger { color: var(--danger); border-color: #f5c6c2; }
+    .btn-danger:hover { background: var(--danger-light); border-color: var(--danger); }
+    .form-actions { margin-top: 1.75rem; padding-top: 1.25rem; border-top: 1px solid var(--border-soft); display: flex; align-items: center; gap: 10px; }
+
+    /* ── PREVIEW ── */
+    #preview-section { display: none; margin-top: 1.5rem; }
+    .preview-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+    .preview-header h2 { font-size: 15px; font-weight: 600; color: var(--text-secondary); }
+    .preview-card { background: var(--surface); border: 1px solid var(--border-soft); border-radius: var(--radius-lg); padding: 3rem; box-shadow: var(--shadow-md); max-width: 700px; margin: 0 auto; }
+
+    /* ── DOCUMENT STYLES ── */
+    .doc-letterhead { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.5rem; padding-bottom: 1.25rem; border-bottom: 2px solid var(--brand); gap: 1rem; }
+    .doc-letterhead-logo { flex-shrink: 0; }
+    .doc-logo-placeholder { width: 72px; height: 72px; border: 1.5px dashed var(--border); border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--text-muted); text-align: center; line-height: 1.3; padding: 6px; }
+    .doc-letterhead-center { flex: 1; text-align: center; }
+    .doc-letterhead-center h2 { font-family: 'Lora', serif; font-size: 17px; font-weight: 600; color: var(--brand); margin-bottom: 3px; }
+    .doc-letterhead-center .doc-specialty { font-size: 13px; color: var(--text-secondary); margin-bottom: 2px; }
+    .doc-letterhead-center .doc-crm { font-size: 12px; color: var(--text-muted); }
+    .doc-letterhead-right { flex-shrink: 0; text-align: right; font-size: 12px; color: var(--text-muted); line-height: 1.6; max-width: 200px; }
+    .doc-letterhead-right strong { display: block; color: var(--text-secondary); font-size: 12px; margin-bottom: 2px; }
+    .doc-title-banner { text-align: center; margin-bottom: 1.5rem; }
+    .doc-title-banner h3 { font-size: 14px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); background: var(--brand-light); display: inline-block; padding: 6px 20px; border-radius: 999px; }
+    .doc-section { margin-bottom: 1.1rem; font-size: 14px; line-height: 1.75; color: var(--text-primary); }
+    .doc-section-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--brand); margin-bottom: 4px; }
+    .doc-divider { border: none; border-top: 1px solid var(--border-soft); margin: 1rem 0; }
+    .doc-footer-row { display: flex; align-items: flex-end; justify-content: space-between; margin-top: 2.5rem; padding-top: 1rem; border-top: 1px solid var(--border-soft); }
+    .doc-date-place { font-size: 12px; color: var(--text-muted); }
+    .doc-signature { text-align: center; }
+    .doc-signature .sig-line { width: 200px; border-top: 1px solid var(--text-primary); margin: 0 auto 8px; }
+    .doc-signature p { font-size: 12px; color: var(--text-secondary); margin-bottom: 1px; }
+    .doc-signature .sig-name { font-weight: 600; font-size: 13px; color: var(--text-primary); }
+    .med-item { padding: 8px 0; border-bottom: 1px solid var(--border-soft); }
+    .med-item:last-child { border-bottom: none; }
+    .med-item strong { font-size: 14px; display: block; }
+    .med-item span { font-size: 13px; color: var(--text-secondary); }
+    .exam-list-doc { padding: 0; list-style: none; }
+    .exam-list-doc li { padding: 5px 0; border-bottom: 1px solid var(--border-soft); font-size: 14px; display: flex; align-items: center; gap: 8px; }
+    .exam-list-doc li:last-child { border-bottom: none; }
+    .exam-bullet { width: 6px; height: 6px; border-radius: 50%; background: var(--brand); flex-shrink: 0; }
+
+    /* ── PRINT ── */
+    @media print {
+      body { background: #fff; }
+      header, .local-selector, .patient-block, .tabs, .card:not(.preview-card), #preview-section .preview-header { display: none !important; }
+      #preview-section { display: block !important; margin-top: 0; }
+      .preview-card { box-shadow: none; border: none; padding: 0.5rem; max-width: 100%; }
+      .doc-logo-placeholder { border-style: solid; }
+    }
+
+    @media (max-width: 640px) {
+      .cols-2, .cols-3 { grid-template-columns: 1fr; }
+      .local-cards { grid-template-columns: 1fr 1fr; }
+      .med-row { grid-template-columns: 1fr auto; }
+      .med-row input:nth-child(2) { grid-column: 1; }
+      .preview-card { padding: 1.25rem; }
+      header { padding: 0 1rem; }
+      .header-right { display: none; }
+      .doc-letterhead { flex-direction: column; align-items: center; text-align: center; }
+      .doc-letterhead-right { text-align: center; max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <span class="header-doctor">Dr. Laerte Canedo Ornelas Filho</span>
+    <span class="header-crm">CRM 211172 &nbsp;·&nbsp; Médico Reumatologista</span>
+  </div>
+  <span class="header-right">Gerador de documentos médicos</span>
+</header>
+
+<div class="container">
+
+  <!-- ══ SELETOR DE LOCAL ══ -->
+  <div class="local-selector">
+    <div class="local-selector-label">Local de atendimento</div>
+    <div class="local-cards" id="local-cards">
+
+      <button class="local-card" onclick="selectLocal(0)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div class="local-card-name">Hospital e Maternidade<br>Ribeirão Pires — Rede D'Or</div>
+          <span class="local-card-check"><svg viewBox="0 0 12 12"><polyline points="2 6 5 9 10 3"/></svg></span>
+        </div>
+        <div class="local-card-addr">R. Dr. Nicolau Assef, 52<br>Ribeirão Pires - SP<br>(11) 4827-1000</div>
+      </button>
+
+      <button class="local-card" onclick="selectLocal(1)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div class="local-card-name">Clínica e Diagnósticos<br>Leforte Alphaville</div>
+          <span class="local-card-check"><svg viewBox="0 0 12 12"><polyline points="2 6 5 9 10 3"/></svg></span>
+        </div>
+        <div class="local-card-addr">Al. Araguaia, 943<br>Alphaville, Barueri - SP<br>(11) 4020-0057</div>
+      </button>
+
+      <button class="local-card" onclick="selectLocal(2)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div class="local-card-name">Hospital Nove de Julho<br>Alphaville</div>
+          <span class="local-card-check"><svg viewBox="0 0 12 12"><polyline points="2 6 5 9 10 3"/></svg></span>
+        </div>
+        <div class="local-card-addr">Av. Cauaxi, 118<br>Alphaville, Barueri - SP<br>(11) 4020-0057</div>
+      </button>
+
+      <button class="local-card" onclick="selectLocal(3)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div class="local-card-name">Consultório Particular<br>Pinheiros</div>
+          <span class="local-card-check"><svg viewBox="0 0 12 12"><polyline points="2 6 5 9 10 3"/></svg></span>
+        </div>
+        <div class="local-card-addr">R. Pais Leme, 215 — sala 710<br>Pinheiros, São Paulo - SP<br>(11) 98828-2545</div>
+      </button>
+
+    </div>
+  </div>
+
+  <!-- ══ PACIENTE ══ -->
+  <div class="patient-block" id="patient-block">
+    <div class="patient-block-header">
+      <div class="patient-block-icon">
+        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+      <div>
+        <div class="patient-block-title">Dados do paciente</div>
+        <div class="patient-block-sub">Preenchidos uma vez — usados em todos os documentos</div>
+      </div>
+    </div>
+    <div class="patient-badge" id="patient-badge">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      Paciente identificado
+    </div>
+    <div class="form-grid cols-3">
+      <div class="field">
+        <label>Nome do paciente <span class="required-star">*</span></label>
+        <input id="pac-nome" placeholder="Nome completo" oninput="onPacienteChange()" />
+        <span class="field-error" id="err-pac-nome">Campo obrigatório</span>
+      </div>
+      <div class="field">
+        <label>Data de nascimento <span class="required-star">*</span></label>
+        <input id="pac-nasc" type="date" oninput="onPacienteChange()" />
+        <span class="field-error" id="err-pac-nasc">Campo obrigatório</span>
+      </div>
+      <div class="field">
+        <label>Sexo</label>
+        <select id="pac-sexo"><option value="">Selecionar</option><option>Feminino</option><option>Masculino</option><option>Outro</option></select>
+      </div>
+    </div>
+    <div class="form-grid cols-1" style="margin-top:14px">
+      <div class="field">
+        <label>Endereço completo <span class="required-star">*</span></label>
+        <input id="pac-end" placeholder="Rua, número, bairro, cidade — SP" oninput="onPacienteChange()" />
+        <span class="field-error" id="err-pac-end">Campo obrigatório</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ TÍTULO + ABAS (multi-seleção) ══ -->
+  <div class="page-title">
+    <h1>Documentos</h1>
+    <p>Selecione um ou mais documentos, preencha e gere tudo de uma vez.</p>
+  </div>
+
+  <div class="tabs" role="tablist" id="tabs-row">
+    <button class="tab-btn active" data-tab="relatorio" onclick="toggleTab(this)">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Relatório médico
+    </button>
+    <button class="tab-btn" data-tab="receita" onclick="toggleTab(this)">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+      Receita médica
+    </button>
+    <button class="tab-btn" data-tab="exames" onclick="toggleTab(this)">
+      <svg viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v11m0 0h10m-10 0H3m0 0v5a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5"/></svg>
+      Exames laboratoriais
+    </button>
+    <button class="tab-btn" data-tab="imagem" onclick="toggleTab(this)">
+      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      Exames de imagem
+    </button>
+    <button class="tab-btn" data-tab="atestado" onclick="toggleTab(this)">
+      <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      Atestado médico
+    </button>
+  </div>
+
+  <!-- BOTÃO GERAR TUDO -->
+  <div id="gerar-todos-wrap" style="display:none;margin-bottom:1.25rem">
+    <button class="btn btn-gerar-todos" onclick="gerarTodos()">
+      <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Gerar todos os documentos selecionados em PDF
+    </button>
+  </div>
+
+  <!-- ══ RELATÓRIO ══ -->
+  <div id="tab-relatorio" class="card doc-card" style="display:block">
+    <div class="doc-card-header">
+      <span class="doc-card-title">Relatório médico</span>
+      <div class="date-toggle-inline">
+        <span class="date-toggle-label">Data:</span>
+        <button class="dtb" data-doc="relatorio" data-val="com" onclick="setDocData(this)">Com data</button>
+        <button class="dtb" data-doc="relatorio" data-val="sem" onclick="setDocData(this)">Sem data</button>
+        <input type="hidden" class="doc-data-val" id="data-relatorio" value="">
+        <span class="date-req-err" id="err-data-relatorio">Selecione</span>
+      </div>
+    </div>
+    <p class="section-label">Conteúdo</p>
+    <div class="form-grid cols-1">
+      <div class="field"><label>Diagnóstico principal (CID opcional)</label><input id="r-diag" placeholder="Ex: Artrite Reumatoide — M05" /></div>
+      <div class="field"><label>Anamnese / História clínica</label><textarea id="r-anamnese" placeholder="Paciente relata..."></textarea></div>
+      <div class="field"><label>Exame físico</label><textarea id="r-exame" placeholder="PA: 120/80 mmHg, FC: 72 bpm..."></textarea></div>
+      <div class="field"><label>Conduta / Conclusão</label><textarea id="r-conduta" placeholder="Inicia-se tratamento com..."></textarea></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" onclick="gerarUm('relatorio')">
+        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Gerar PDF
+      </button>
+      <button class="btn" onclick="limpar('relatorio')">Limpar</button>
+    </div>
+  </div>
+
+  <!-- ══ RECEITA ══ -->
+  <div id="tab-receita" class="card doc-card" style="display:none">
+    <div class="doc-card-header">
+      <span class="doc-card-title">Receita médica</span>
+      <div class="date-toggle-inline">
+        <span class="date-toggle-label">Data:</span>
+        <button class="dtb" data-doc="receita" data-val="com" onclick="setDocData(this)">Com data</button>
+        <button class="dtb" data-doc="receita" data-val="sem" onclick="setDocData(this)">Sem data</button>
+        <input type="hidden" class="doc-data-val" id="data-receita" value="">
+        <span class="date-req-err" id="err-data-receita">Selecione</span>
+      </div>
+    </div>
+    <p class="section-label">Medicamentos prescritos</p>
+    <div id="meds-list">
+      <div class="med-row">
+        <input class="med-name" placeholder="Medicamento e dosagem — ex: Metotrexato 15mg" />
+        <input class="med-pos" placeholder="Posologia — ex: 1 comprimido/semana" />
+        <button class="btn btn-danger" onclick="rmMed(this)" title="Remover">✕</button>
+      </div>
+    </div>
+    <button class="btn" onclick="addMed()" style="margin-top:4px">+ Adicionar medicamento</button>
+    <p class="section-label">Observações</p>
+    <div class="form-grid cols-1">
+      <div class="field"><textarea id="rc-obs" placeholder="Retornar em 30 dias..."></textarea></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" onclick="gerarUm('receita')">
+        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Gerar PDF
+      </button>
+      <button class="btn" onclick="limpar('receita')">Limpar</button>
+    </div>
+  </div>
+
+  <!-- ══ EXAMES LABORATORIAIS ══ -->
+  <div id="tab-exames" class="card doc-card" style="display:none">
+    <div class="doc-card-header">
+      <span class="doc-card-title">Exames laboratoriais</span>
+      <div class="date-toggle-inline">
+        <span class="date-toggle-label">Data:</span>
+        <button class="dtb" data-doc="exames" data-val="com" onclick="setDocData(this)">Com data</button>
+        <button class="dtb" data-doc="exames" data-val="sem" onclick="setDocData(this)">Sem data</button>
+        <input type="hidden" class="doc-data-val" id="data-exames" value="">
+        <span class="date-req-err" id="err-data-exames">Selecione</span>
+      </div>
+    </div>
+    <p class="section-label" style="margin-top:0">Selecione um ou mais painéis</p>
+    <div class="preset-grid">
+      <button class="preset-btn" data-key="ar"  onclick="togglePreset(this)"><div class="preset-btn-top"><span class="preset-icon">🦴</span><span class="preset-check"><svg viewBox="0 0 12 12" style="width:10px;height:10px;stroke:#fff;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round"><polyline points="2 6 5 9 10 3"/></svg></span></div><div class="preset-name">Artrite Reumatoide</div></button>
+      <button class="preset-btn" data-key="lup" onclick="togglePreset(this)"><div class="preset-btn-top"><span class="preset-icon">🌙</span><span class="preset-check"><svg viewBox="0 0 12 12" style="width:10px;height:10px;stroke:#fff;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round"><polyline points="2 6 5 9 10 3"/></svg></span></div><div class="preset-name">Lúpus</div></button>
+      <button class="preset-btn" data-key="esp" onclick="togglePreset(this)"><div class="preset-btn-top"><span class="preset-icon">🔱</span><span class="preset-check"><svg viewBox="0 0 12 12" style="width:10px;height:10px;stroke:#fff;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round"><polyline points="2 6 5 9 10 3"/></svg></span></div><div class="preset-name">Espondilite</div></button>
+      <button class="preset-btn" data-key="sjo" onclick="togglePreset(this)"><div class="preset-btn-top"><span class="preset-icon">💧</span><span class="preset-check"><svg viewBox="0 0 12 12" style="width:10px;height:10px;stroke:#fff;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round"><polyline points="2 6 5 9 10 3"/></svg></span></div><div class="preset-name">Sjögren</div></button>
+      <button class="preset-btn" data-key="vas" onclick="togglePreset(this)"><div class="preset-btn-top"><span class="preset-icon">🩸</span><span class="preset-check"><svg viewBox="0 0 12 12" style="width:10px;height:10px;stroke:#fff;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round"><polyline points="2 6 5 9 10 3"/></svg></span></div><div class="preset-name">Vasculite</div></button>
+      <button class="preset-btn" data-key="mio" onclick="togglePreset(this)"><div class="preset-btn-top"><span class="preset-icon">💪</span><span class="preset-check"><svg viewBox="0 0 12 12" style="width:10px;height:10px;stroke:#fff;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round"><polyline points="2 6 5 9 10 3"/></svg></span></div><div class="preset-name">Miosites</div></button>
+      <button class="preset-btn" data-key="scl" onclick="togglePreset(this)"><div class="preset-btn-top"><span class="preset-icon">🧬</span><span class="preset-check"><svg viewBox="0 0 12 12" style="width:10px;height:10px;stroke:#fff;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round"><polyline points="2 6 5 9 10 3"/></svg></span></div><div class="preset-name">Esclerodermia</div></button>
+      <button class="preset-btn" data-key="saf" onclick="togglePreset(this)"><div class="preset-btn-top"><span class="preset-icon">🧲</span><span class="preset-check"><svg viewBox="0 0 12 12" style="width:10px;height:10px;stroke:#fff;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round"><polyline points="2 6 5 9 10 3"/></svg></span></div><div class="preset-name">Antifosfolipídeo</div></button>
+      <button class="preset-btn" data-key="ost" onclick="togglePreset(this)"><div class="preset-btn-top"><span class="preset-icon">🦷</span><span class="preset-check"><svg viewBox="0 0 12 12" style="width:10px;height:10px;stroke:#fff;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round"><polyline points="2 6 5 9 10 3"/></svg></span></div><div class="preset-name">Osteoporose</div></button>
+      <button class="preset-btn" data-key="imb" onclick="togglePreset(this)"><div class="preset-btn-top"><span class="preset-icon">💉</span><span class="preset-check"><svg viewBox="0 0 12 12" style="width:10px;height:10px;stroke:#fff;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round"><polyline points="2 6 5 9 10 3"/></svg></span></div><div class="preset-name">Rastreio ImBio</div></button>
+    </div>
+    <div id="ex-lista-painel" style="display:none;margin-top:1.25rem"><div id="ex-lista-inner"></div></div>
+    <p class="section-label" style="margin-top:1.25rem">Adicionar exame manualmente</p>
+    <div class="exam-add-row">
+      <input id="exam-input" placeholder="Digite um exame e pressione Enter" onkeydown="if(event.key==='Enter'){addExamManual();event.preventDefault();}"/>
+      <button class="btn" onclick="addExamManual()">+ Adicionar</button>
+    </div>
+    <div id="ex-tags-wrap" style="display:none;margin-top:1rem">
+      <p class="section-label">Exames selecionados</p>
+      <div id="exam-tags" style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 0"></div>
+    </div>
+    <p class="section-label">Justificativa clínica</p>
+    <div class="form-grid cols-1">
+      <div class="field"><label>Hipótese diagnóstica</label><input id="ex-hip" placeholder="Ex: Investigação de artrite inflamatória" /></div>
+      <div class="field"><label>Observações</label><textarea id="ex-obs" placeholder="Jejum, urgência, preparo especial..."></textarea></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" onclick="gerarUm('exames')">
+        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Gerar PDF
+      </button>
+      <button class="btn" onclick="limpar('exames')">Limpar</button>
+    </div>
+  </div>
+
+  <!-- ══ EXAMES DE IMAGEM ══ -->
+  <div id="tab-imagem" class="card doc-card" style="display:none">
+    <div class="doc-card-header">
+      <span class="doc-card-title">Exames de imagem</span>
+      <div class="date-toggle-inline">
+        <span class="date-toggle-label">Data:</span>
+        <button class="dtb" data-doc="imagem" data-val="com" onclick="setDocData(this)">Com data</button>
+        <button class="dtb" data-doc="imagem" data-val="sem" onclick="setDocData(this)">Sem data</button>
+        <input type="hidden" class="doc-data-val" id="data-imagem" value="">
+        <span class="date-req-err" id="err-data-imagem">Selecione</span>
+      </div>
+    </div>
+    <p class="section-label" style="margin-top:0">Selecione os exames</p>
+    <div id="img-catalog-inner"></div>
+    <p class="section-label">Adicionar exame manualmente</p>
+    <div class="exam-add-row">
+      <input id="img-input" placeholder="Ex: Radiografia de mãos bilateral AP" onkeydown="if(event.key==='Enter'){addImgManual();event.preventDefault();}"/>
+      <button class="btn" onclick="addImgManual()">+ Adicionar</button>
+    </div>
+    <div id="img-tags-wrap" style="display:none;margin-top:1rem">
+      <p class="section-label">Exames selecionados</p>
+      <div id="img-tags" style="display:flex;flex-wrap:wrap;gap:6px;padding:4px 0"></div>
+    </div>
+    <p class="section-label">Justificativa clínica</p>
+    <div class="form-grid cols-1">
+      <div class="field"><label>Hipótese diagnóstica</label><input id="img-hip" placeholder="Ex: Investigação de artropatia inflamatória" /></div>
+      <div class="field"><label>Observações</label><textarea id="img-obs" placeholder="Contraste, urgência, lateralidade..."></textarea></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" onclick="gerarUm('imagem')">
+        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Gerar PDF
+      </button>
+      <button class="btn" onclick="limpar('imagem')">Limpar</button>
+    </div>
+  </div>
+
+  <!-- ══ ATESTADO ══ -->
+  <div id="tab-atestado" class="card doc-card" style="display:none">
+    <div class="doc-card-header">
+      <span class="doc-card-title">Atestado médico</span>
+      <div class="date-toggle-inline">
+        <span class="date-toggle-label">Data:</span>
+        <button class="dtb" data-doc="atestado" data-val="com" onclick="setDocData(this)">Com data</button>
+        <button class="dtb" data-doc="atestado" data-val="sem" onclick="setDocData(this)">Sem data</button>
+        <input type="hidden" class="doc-data-val" id="data-atestado" value="">
+        <span class="date-req-err" id="err-data-atestado">Selecione</span>
+      </div>
+    </div>
+    <div class="form-grid cols-2" style="margin-top:0">
+      <div class="field"><label>CPF do paciente (opcional)</label><input id="at-cpf" placeholder="000.000.000-00" /></div>
+    </div>
+    <p class="section-label">Afastamento</p>
+    <div class="form-grid cols-3">
+      <div class="field"><label>Dias de afastamento</label><input id="at-dias" type="number" min="1" value="1" /></div>
+      <div class="field"><label>Data de início</label><input id="at-inicio" type="date" /></div>
+      <div class="field"><label>CID (opcional)</label><input id="at-cid" placeholder="Ex: M05.8" /></div>
+    </div>
+    <div class="form-grid cols-1" style="margin-top:12px">
+      <div class="field"><label>Observações</label><textarea id="at-obs" placeholder="Recomenda-se repouso relativo..."></textarea></div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" onclick="gerarUm('atestado')">
+        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Gerar PDF
+      </button>
+      <button class="btn" onclick="limpar('atestado')">Limpar</button>
+    </div>
+  </div>
+
+  <!-- preview removido — PDF abre em nova aba -->
+
+</div>
+
+<script>
+  /* ── DADOS FIXOS DO MÉDICO ── */
+  const MEDICO = {
+    nome:       'Dr. Laerte Canedo Ornelas Filho',
+    crm:        'CRM 211172',
+    specialty:  'Médico Reumatologista',
+  };
+
+  const LOCAIS = [
+    { nome: 'Hospital e Maternidade Ribeirão Pires — Rede D\'Or São Luiz', cidade: 'Ribeirão Pires', end: 'R. Dr. Nicolau Assef, 52 — Centro Alto, Ribeirão Pires - SP, 09424-070', tel: '(11) 4827-1000' },
+    { nome: 'Clínica e Diagnósticos Leforte Alphaville',                   cidade: 'Barueri',        end: 'Alameda Araguaia, 943 — Alphaville Comercial, Barueri - SP',             tel: '(11) 4020-0057' },
+    { nome: 'Hospital Nove de Julho Alphaville',                           cidade: 'Barueri',        end: 'Av. Cauaxi, 118 — Alphaville, Barueri - SP, 06454-020',                  tel: '(11) 4020-0057' },
+    { nome: 'Consultório Particular — Pinheiros',                         cidade: 'São Paulo',      end: 'R. Pais Leme, 215 — sala 710, Pinheiros, São Paulo - SP',                 tel: '(11) 98828-2545' },
+  ];
+
+  let localSelecionado = null;
+  const tabs = ['relatorio','receita','exames','atestado'];
+
+  /* ── LOCAL ── */
+  function selectLocal(idx) {
+    localSelecionado = idx;
+    document.querySelectorAll('.local-card').forEach((c,i) => c.classList.toggle('selected', i===idx));
+  }
+
+  /* ── PACIENTE ── */
+  function onPacienteChange() {
+    const nome = document.getElementById('pac-nome').value.trim();
+    const nasc = document.getElementById('pac-nasc').value;
+    const end  = document.getElementById('pac-end').value.trim();
+    document.getElementById('patient-badge').classList.toggle('visible', !!(nome && nasc && end));
+  }
+
+  function getPaciente() {
+    return {
+      nome: document.getElementById('pac-nome').value.trim(),
+      nasc: fDateById('pac-nasc'),
+      sexo: document.getElementById('pac-sexo').value,
+      end:  document.getElementById('pac-end').value.trim(),
+    };
+  }
+
+  function validarPaciente() {
+    const campos = [
+      { id: 'pac-nome', err: 'err-pac-nome' },
+      { id: 'pac-nasc', err: 'err-pac-nasc' },
+      { id: 'pac-end',  err: 'err-pac-end'  },
+    ];
+    let ok = true;
+    campos.forEach(({ id, err }) => {
+      const el = document.getElementById(id);
+      const empty = !el.value.trim();
+      el.classList.toggle('error', empty);
+      document.getElementById(err).classList.toggle('visible', empty);
+      if (empty) ok = false;
+    });
+    if (!ok) document.getElementById('patient-block').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return ok;
+  }
+
+  /* ── TABS (multi-select) ── */
+  const ALL_TABS = ['relatorio','receita','exames','imagem','atestado'];
+  const activeTabs = new Set(['relatorio']);
+
+  function toggleTab(btn) {
+    const tab = btn.dataset.tab;
+    const el  = document.getElementById('tab-' + tab);
+    if (activeTabs.has(tab)) {
+      if (activeTabs.size === 1) return;
+      activeTabs.delete(tab);
+      btn.classList.remove('active');
+      el.style.display = 'none';
+    } else {
+      activeTabs.add(tab);
+      btn.classList.add('active');
+      el.style.display = 'block';
+      if (tab === 'imagem') renderImgCatalog();
+    }
+    updateGerarTodos();
+  }
+
+  function updateGerarTodos() {
+    const wrap = document.getElementById('gerar-todos-wrap');
+    if (wrap) wrap.style.display = activeTabs.size > 1 ? 'block' : 'none';
+  }
+
+  /* ── DATA POR DOCUMENTO ── */
+  function setDocData(btn) {
+    const doc = btn.dataset.doc;
+    const val = btn.dataset.val;
+    document.getElementById('data-' + doc).value = val;
+    document.querySelectorAll(`.dtb[data-doc="${doc}"]`).forEach(b => b.classList.toggle('active', b.dataset.val === val));
+    document.getElementById('err-data-' + doc).classList.remove('visible');
+  }
+
+  function getDocData(doc) {
+    return document.getElementById('data-' + doc)?.value || '';
+  }
+
+  function validarData(doc) {
+    const val = getDocData(doc);
+    if (!val) {
+      const err = document.getElementById('err-data-' + doc);
+      if (err) { err.classList.add('visible'); err.scrollIntoView({ behavior:'smooth', block:'center' }); }
+      return false;
+    }
+    return true;
+  }
+
+  function setDataOpt() {} // legacy stub
+  function showPreview(html) { abrirPDF(html); return true; }
+
+  /* ── MEDS ── */
+  function addMed() {
+    const list = document.getElementById('meds-list');
+    const row = document.createElement('div');
+    row.className = 'med-row';
+    row.innerHTML = `<input class="med-name" placeholder="Medicamento e dosagem" /><input class="med-pos" placeholder="Posologia" /><button class="btn btn-danger" onclick="rmMed(this)">✕</button>`;
+    list.appendChild(row);
+  }
+  function rmMed(btn) {
+    const list = document.getElementById('meds-list');
+    if (list.children.length > 1) btn.closest('.med-row').remove();
+  }
+
+  /* ── EXAMES: CATÁLOGO LABORATORIAL ── */
+  const LAB_CATALOG = [
+    { grupo: 'Hematológicos', exames: [
+      'Hemograma completo','Reticulócitos','Esfregaço de sangue periférico',
+      'Ferritina','Ferro sérico','Transferrina','Saturação de transferrina',
+      'TIBC (capacidade de ligação do ferro)','Ácido fólico','Vitamina B12',
+      'Eritropoietina','Haptoglobina','LDH','Bilirrubinas (total, direta, indireta)',
+      'Coombs direto','Coombs indireto','Eletroforese de hemoglobina'
+    ]},
+    { grupo: 'Marcadores inflamatórios', exames: [
+      'PCR (proteína C reativa)','PCR ultrassensível','VHS (velocidade de hemossedimentação)',
+      'Ferritina','IL-6 (Interleucina 6)','TNF-alfa','Amiloide A sérica',
+      'Proteína amiloide sérica (SAA)','Fibrinogênio','Alfa-1 glicoproteína ácida (orosomucoide)'
+    ]},
+    { grupo: 'Anticorpos em reumatologia', exames: [
+      'FAN (ANA — imunofluorescência)','Anti-DNA nativo (anti-dsDNA)','Anti-DNA de fita simples (anti-ssDNA)',
+      'Anti-Sm','Anti-SSA (Ro)','Anti-SSB (La)','Anti-Scl-70 (anti-topoisomerase I)',
+      'Anti-Jo-1','Anti-centrômero','Anti-histona',
+      'Anti-RNP (anti-U1-RNP)','Anti-Ku','Anti-PM-Scl','Anti-Mi-2',
+      'Anti-MDA5','Anti-TIF1-γ','Anti-NXP2','Anti-SAE1',
+      'Fator reumatoide','Anti-CCP (anti-peptídeo citrulinado cíclico)',
+      'Anti-mutated citrullinated vimentin (anti-MCV)',
+      'ANCA-P (perinuclear)','ANCA-C (citoplasmático)','Anti-PR3','Anti-MPO',
+      'Anti-cardiolipina IgG/IgM','Anti-beta2 glicoproteína I IgG/IgM',
+      'Anticoagulante lúpico','Anti-nucléolo','Anti-SRP',
+      'Anticorpos anti-músculo liso (ASMA)'
+    ]},
+    { grupo: 'Sorologias infecciosas', exames: [
+      'VDRL','FTA-Abs','Anti HIV',
+      'Hepatite B — HBsAg','Hepatite B — Anti-HBs','Hepatite B — Anti-HBc total',
+      'Hepatite B — HBeAg','Hepatite B — Anti-HBe','Hepatite B — DNA viral (quantitativo)',
+      'Hepatite C — Anti-HCV','Hepatite C — RNA viral (quantitativo)','Hepatite A — Anti-HAV IgM / IgG',
+      'CMV IgM / IgG','EBV (VCA IgM/IgG, anti-EBNA)','Parvovírus B19 IgM/IgG',
+      'Toxoplasmose IgM/IgG','Rubéola IgM/IgG','Chagas (IgG)','HTLV I e II',
+      'Dengue NS1 / IgM / IgG','Zika IgM/IgG','COVID-19 IgG/IgM'
+    ]},
+    { grupo: 'Função renal', exames: [
+      'Ureia','Creatinina','Taxa de filtração glomerular estimada (TFGe)',
+      'Ácido úrico','Cistatina C','Microalbuminúria (amostra isolada)',
+      'Proteinúria de 24h',
+      'Sódio sérico','Potássio sérico','Cloreto','Bicarbonato',
+      'Cálcio total e iônico','Fósforo','Magnésio'
+    ]},
+    { grupo: 'Função hepática', exames: [
+      'AST (TGO)','ALT (TGP)','Gama-GT (GGT)','Fosfatase alcalina',
+      'Bilirrubina total','Bilirrubina direta','Bilirrubina indireta',
+      'Albumina','Proteínas totais e frações','TP/INR (tempo de protrombina)',
+      'LDH','Amônia sérica'
+    ]},
+    { grupo: 'Coagulação', exames: [
+      'TP / INR','TTPA (tempo de tromboplastina parcial ativada)',
+      'Tempo de trombina','Fibrinogênio','D-dímero',
+      'Proteína C','Proteína S (total e livre)',
+      'Fator V de Leiden (mutação)','Mutação protrombina G20210A',
+      'Plasminogênio'
+    ]},
+    { grupo: 'Metabólico / Endócrino', exames: [
+      'Glicemia de jejum','Hemoglobina glicada (HbA1c)','Insulina de jejum',
+      'HOMA-IR','Colesterol total','HDL','LDL','VLDL','Triglicerídeos',
+      'TSH','T4 livre','T4 total','T3 livre','Anti-TPO','Anti-tireoglobulina',
+      'Vitamina D (25-OH colecalciferol)','PTH (paratormônio intacto)'
+    ]},
+    { grupo: 'Complemento e imunoglobulinas', exames: [
+      'C3 (complemento)','C4 (complemento)','CH50 (complemento hemolítico total)',
+      'C1q','C1-inibidor','IgA total','IgG total','IgM total','IgE total',
+      'Subclasses IgG (IgG1, IgG2, IgG3, IgG4)',
+      'Imunoeletroforese de proteínas séricas','Eletroforese de proteínas séricas',
+      'Crioglobulinas','Cadeias leves livres (kappa / lambda)'
+    ]},
+    { grupo: 'Exames urinários', exames: [
+      'Urina tipo I (EAS / EQU)','Urocultura com antibiograma',
+      'Proteinúria de 24h','Microalbuminúria (amostra isolada)',
+      'Relação proteína/creatinina em urina isolada',
+      'Cálcio urinário de 24h',
+      'Ácido úrico urinário de 24h','Sódio urinário de 24h',
+      'Potássio urinário de 24h','Citrato urinário',
+      'Citologia urinária'
+    ]},
+    { grupo: 'Exames de fezes', exames: [
+      'Parasitológico de fezes (3 amostras)','Coprocultura com antibiograma',
+      'Pesquisa de sangue oculto nas fezes','Calprotectina fecal',
+      'Lactoferrina fecal','Toxina A/B de Clostridium difficile',
+      'Antígeno de H. pylori nas fezes','Gordura fecal (Sudan III)',
+      'pH e substâncias redutoras nas fezes'
+    ]},
+    { grupo: 'PPD e tuberculose', exames: [
+      'PPD (Derivado Proteico Purificado — Mantoux)','IGRA (QuantiFERON-TB Gold Plus)',
+      'Baciloscopia de escarro (BAAR)','Cultura de escarro para micobactérias (Löwenstein-Jensen)',
+      'PCR para Mycobacterium tuberculosis','ADA (adenosina deaminase — líquido pleural/LCR)'
+    ]},
+    { grupo: 'Outros marcadores e enzimas', exames: [
+      'CK (creatinoquinase total)','Aldolase',
+      'Amilase','Lipase',
+      'B2-microglobulina','Procalcitonina',
+      'AFP (alfa-fetoproteína)','PSA total e livre (homens)',
+      'NT-proBNP'
+    ]},
+  ];
+
+  /* ── PAINÉIS PRÉ-PRONTOS ── */
+  const PRESETS = {
+    ar: {
+      label: 'Artrite Reumatoide',
+      exames: [
+        'Hemograma completo',
+        'PCR (proteína C reativa)',
+        'VHS (velocidade de hemossedimentação)',
+        'Fator reumatoide',
+        'Anti-CCP (anti-peptídeo citrulinado cíclico)',
+        'AST (TGO)', 'ALT (TGP)', 'Fosfatase alcalina', 'Gama-GT (GGT)',
+        'Proteínas totais e frações', 'IgG total',
+        'Ureia', 'Creatinina', 'Sódio sérico', 'Potássio sérico', 'Cálcio total e iônico', 'Magnésio',
+        'PTH (paratormônio intacto)', 'Vitamina D (25-OH colecalciferol)',
+        'Hepatite B — HBsAg', 'Hepatite B — Anti-HBs', 'Hepatite B — Anti-HBc total',
+        'Hepatite C — Anti-HCV',
+        'Anti HIV',
+        'VDRL', 'FTA-Abs',
+        'Colesterol total', 'HDL', 'LDL', 'VLDL', 'Triglicerídeos',
+        'Glicemia de jejum', 'Hemoglobina glicada (HbA1c)',
+        'TSH', 'T4 livre',
+      ]
+    },
+    lup: {
+      label: 'Lúpus',
+      exames: [
+        'Hemograma completo',
+        'PCR (proteína C reativa)',
+        'VHS (velocidade de hemossedimentação)',
+        'AST (TGO)', 'ALT (TGP)', 'Fosfatase alcalina', 'Gama-GT (GGT)',
+        'Ureia', 'Creatinina', 'Sódio sérico', 'Potássio sérico', 'Cálcio total e iônico', 'Magnésio',
+        'PTH (paratormônio intacto)', 'Vitamina D (25-OH colecalciferol)',
+        'Relação proteína/creatinina em urina isolada', 'Urina tipo I (EAS / EQU)',
+        'Proteínas totais e frações', 'IgG total',
+        'C3 (complemento)', 'C4 (complemento)',
+        'Anti-DNA nativo (anti-dsDNA)',
+        'FAN (ANA — imunofluorescência)',
+        'Anti-SSA (Ro)', 'Anti-SSB (La)', 'Anti-Sm', 'Anti-RNP (anti-U1-RNP)',
+        'Anti-cardiolipina IgG/IgM', 'Anti-beta2 glicoproteína I IgG/IgM', 'Anticoagulante lúpico',
+        'Hepatite B — HBsAg', 'Hepatite B — Anti-HBs', 'Hepatite B — Anti-HBc total',
+        'Hepatite C — Anti-HCV',
+        'Anti HIV',
+        'VDRL', 'FTA-Abs',
+        'Colesterol total', 'HDL', 'LDL', 'VLDL', 'Triglicerídeos',
+        'Glicemia de jejum', 'Hemoglobina glicada (HbA1c)',
+        'TSH', 'T4 livre',
+      ]
+    },
+    esp: {
+      label: 'Espondilite',
+      exames: [
+        'Hemograma completo',
+        'PCR (proteína C reativa)',
+        'VHS (velocidade de hemossedimentação)',
+        'HLA-B27',
+        'Proteínas totais e frações', 'IgG total',
+        'AST (TGO)', 'ALT (TGP)', 'Fosfatase alcalina', 'Gama-GT (GGT)',
+        'Ureia', 'Creatinina', 'Sódio sérico', 'Potássio sérico', 'Cálcio total e iônico', 'Magnésio',
+        'PTH (paratormônio intacto)', 'Vitamina D (25-OH colecalciferol)',
+        'Hepatite B — HBsAg', 'Hepatite B — Anti-HBs', 'Hepatite B — Anti-HBc total',
+        'Hepatite C — Anti-HCV',
+        'Anti HIV',
+        'VDRL', 'FTA-Abs',
+        'Colesterol total', 'HDL', 'LDL', 'VLDL', 'Triglicerídeos',
+        'Glicemia de jejum', 'Hemoglobina glicada (HbA1c)',
+        'TSH', 'T4 livre',
+      ]
+    },
+    sjo: {
+      label: 'Síndrome de Sjögren',
+      exames: [
+        'Hemograma completo',
+        'PCR (proteína C reativa)',
+        'VHS (velocidade de hemossedimentação)',
+        'FAN (ANA — imunofluorescência)',
+        'Anti-SSA (Ro)', 'Anti-SSB (La)',
+        'Fator reumatoide',
+        'Proteínas totais e frações', 'IgG total', 'IgA total', 'IgM total',
+        'Eletroforese de proteínas séricas',
+        'C3 (complemento)', 'C4 (complemento)',
+        'Crioglobulinas',
+        'AST (TGO)', 'ALT (TGP)', 'Fosfatase alcalina', 'Gama-GT (GGT)',
+        'Anticorpos anti-músculo liso (ASMA)',
+        'Ureia', 'Creatinina', 'Sódio sérico', 'Potássio sérico', 'Cálcio total e iônico', 'Magnésio',
+        'Urina tipo I (EAS / EQU)',
+        'PTH (paratormônio intacto)', 'Vitamina D (25-OH colecalciferol)',
+        'Ácido úrico',
+        'TSH', 'T4 livre',
+        'Hepatite B — HBsAg', 'Hepatite B — Anti-HBs', 'Hepatite B — Anti-HBc total',
+        'Hepatite C — Anti-HCV',
+        'Anti HIV',
+        'VDRL', 'FTA-Abs',
+        'Glicemia de jejum', 'Hemoglobina glicada (HbA1c)',
+        'Colesterol total', 'HDL', 'LDL', 'VLDL', 'Triglicerídeos',
+      ]
+    },
+    vas: {
+      label: 'Vasculite',
+      exames: [
+        'Hemograma completo', 'Reticulócitos', 'Esfregaço de sangue periférico',
+        'PCR (proteína C reativa)',
+        'VHS (velocidade de hemossedimentação)',
+        'ANCA-P (perinuclear)', 'ANCA-C (citoplasmático)',
+        'Anti-PR3', 'Anti-MPO',
+        'FAN (ANA — imunofluorescência)',
+        'Anti-DNA nativo (anti-dsDNA)',
+        'C3 (complemento)', 'C4 (complemento)', 'CH50 (complemento hemolítico total)',
+        'Crioglobulinas',
+        'Fator reumatoide',
+        'Proteínas totais e frações', 'IgG total', 'IgA total', 'IgM total',
+        'Imunoeletroforese de proteínas séricas',
+        'AST (TGO)', 'ALT (TGP)', 'Fosfatase alcalina', 'Gama-GT (GGT)', 'Bilirrubina total',
+        'Ureia', 'Creatinina', 'Sódio sérico', 'Potássio sérico', 'Cálcio total e iônico',
+        'Urina tipo I (EAS / EQU)', 'Proteinúria de 24h',
+        'TP / INR', 'TTPA (tempo de tromboplastina parcial ativada)', 'D-dímero', 'Fibrinogênio',
+        'LDH',
+        'PTH (paratormônio intacto)', 'Vitamina D (25-OH colecalciferol)',
+        'Hepatite B — HBsAg', 'Hepatite B — Anti-HBs', 'Hepatite B — Anti-HBc total',
+        'Hepatite B — DNA viral (quantitativo)',
+        'Hepatite C — Anti-HCV', 'Hepatite C — RNA viral (quantitativo)',
+        'Anti HIV',
+        'VDRL', 'FTA-Abs',
+        'PPD (Derivado Proteico Purificado — Mantoux)',
+        'Glicemia de jejum', 'Hemoglobina glicada (HbA1c)',
+        'Colesterol total', 'HDL', 'LDL', 'VLDL', 'Triglicerídeos',
+        'TSH', 'T4 livre',
+      ]
+    },
+    mio: {
+      label: 'Miosites',
+      exames: [
+        'Hemograma completo',
+        'PCR (proteína C reativa)',
+        'VHS (velocidade de hemossedimentação)',
+        'CK (creatinoquinase total)',
+        'Aldolase',
+        'LDH',
+        'AST (TGO)', 'ALT (TGP)',
+        'FAN (ANA — imunofluorescência)',
+        'Anti-Jo-1',
+        'Anti-MDA5', 'Anti-TIF1-γ', 'Anti-NXP2', 'Anti-SAE1',
+        'Anti-Mi-2', 'Anti-PM-Scl', 'Anti-Ku', 'Anti-SRP',
+        'Anti-SSA (Ro)', 'Anti-SSB (La)',
+        'Proteínas totais e frações', 'IgG total',
+        'Ureia', 'Creatinina', 'Sódio sérico', 'Potássio sérico', 'Cálcio total e iônico', 'Magnésio',
+        'Urina tipo I (EAS / EQU)',
+        'PTH (paratormônio intacto)', 'Vitamina D (25-OH colecalciferol)',
+        'TSH', 'T4 livre',
+        'Hepatite B — HBsAg', 'Hepatite B — Anti-HBs', 'Hepatite B — Anti-HBc total',
+        'Hepatite C — Anti-HCV',
+        'Anti HIV',
+        'VDRL', 'FTA-Abs',
+        'Glicemia de jejum', 'Hemoglobina glicada (HbA1c)',
+        'Colesterol total', 'HDL', 'LDL', 'VLDL', 'Triglicerídeos',
+      ]
+    },
+    scl: {
+      label: 'Esclerodermia',
+      exames: [
+        'Hemograma completo',
+        'PCR (proteína C reativa)',
+        'VHS (velocidade de hemossedimentação)',
+        'FAN (ANA — imunofluorescência)',
+        'Anti-Scl-70 (anti-topoisomerase I)',
+        'Anti-centrômero',
+        'Anti-RNP (anti-U1-RNP)',
+        'Anti-PM-Scl', 'Anti-Ku', 'Anti-Th/To',
+        'Anti-RNA polimerase III',
+        'Fator reumatoide',
+        'Proteínas totais e frações', 'IgG total',
+        'AST (TGO)', 'ALT (TGP)', 'Fosfatase alcalina', 'Gama-GT (GGT)',
+        'Ureia', 'Creatinina', 'Sódio sérico', 'Potássio sérico', 'Cálcio total e iônico', 'Magnésio',
+        'Urina tipo I (EAS / EQU)', 'Proteinúria de 24h',
+        'PTH (paratormônio intacto)', 'Vitamina D (25-OH colecalciferol)',
+        'CK (creatinoquinase total)',
+        'TSH', 'T4 livre',
+        'NT-proBNP',
+        'Hepatite B — HBsAg', 'Hepatite B — Anti-HBs', 'Hepatite B — Anti-HBc total',
+        'Hepatite C — Anti-HCV',
+        'Anti HIV',
+        'VDRL', 'FTA-Abs',
+        'Glicemia de jejum', 'Hemoglobina glicada (HbA1c)',
+        'Colesterol total', 'HDL', 'LDL', 'VLDL', 'Triglicerídeos',
+      ]
+    },
+    saf: {
+      label: 'Sínd. Antifosfolipídeo',
+      exames: [
+        'Hemograma completo', 'Reticulócitos',
+        'PCR (proteína C reativa)',
+        'VHS (velocidade de hemossedimentação)',
+        'Anti-cardiolipina IgG/IgM',
+        'Anti-beta2 glicoproteína I IgG/IgM',
+        'Anticoagulante lúpico',
+        'TP / INR', 'TTPA (tempo de tromboplastina parcial ativada)',
+        'D-dímero', 'Fibrinogênio',
+        'Proteína C', 'Proteína S (total e livre)',
+        'Fator V de Leiden (mutação)', 'Mutação protrombina G20210A',
+        'FAN (ANA — imunofluorescência)',
+        'Anti-DNA nativo (anti-dsDNA)', 'Anti-Sm',
+        'C3 (complemento)', 'C4 (complemento)',
+        'Coombs direto', 'Coombs indireto',
+        'AST (TGO)', 'ALT (TGP)', 'Fosfatase alcalina', 'Gama-GT (GGT)',
+        'Ureia', 'Creatinina', 'Sódio sérico', 'Potássio sérico',
+        'Urina tipo I (EAS / EQU)', 'Proteinúria de 24h',
+        'PTH (paratormônio intacto)', 'Vitamina D (25-OH colecalciferol)',
+        'TSH', 'T4 livre',
+        'Hepatite B — HBsAg', 'Hepatite B — Anti-HBs', 'Hepatite B — Anti-HBc total',
+        'Hepatite C — Anti-HCV',
+        'Anti HIV',
+        'VDRL', 'FTA-Abs',
+        'Glicemia de jejum', 'Hemoglobina glicada (HbA1c)',
+        'Colesterol total', 'HDL', 'LDL', 'VLDL', 'Triglicerídeos',
+      ]
+    },
+    ost: {
+      label: 'Osteoporose',
+      exames: [
+        'Hemograma completo',
+        'PCR (proteína C reativa)',
+        'VHS (velocidade de hemossedimentação)',
+        'Cálcio total e iônico', 'Fósforo', 'Magnésio',
+        'PTH (paratormônio intacto)',
+        'Vitamina D (25-OH colecalciferol)',
+        'Fosfatase alcalina',
+        'Fosfatase alcalina óssea específica',
+        'CTX (C-telopeptídeo do colágeno tipo I — marcador de reabsorção)',
+        'P1NP (pró-peptídeo N-terminal do pró-colágeno tipo I — marcador de formação)',
+        'Albumina', 'Proteínas totais e frações',
+        'Ureia', 'Creatinina',
+        'Urina tipo I (EAS / EQU)',
+        'Cálcio urinário de 24h',
+        'Relação cálcio/creatinina urinária',
+        'TSH', 'T4 livre',
+        'Glicemia de jejum', 'Hemoglobina glicada (HbA1c)',
+        'Eletroforese de proteínas séricas',
+        'Imunoeletroforese de proteínas séricas',
+        'Hepatite B — HBsAg', 'Hepatite B — Anti-HBs', 'Hepatite B — Anti-HBc total',
+        'Hepatite C — Anti-HCV',
+        'Anti HIV',
+      ]
+    },
+    imb: {
+      label: 'Rastreio ImBio',
+      exames: [
+        'PPD (Derivado Proteico Purificado — Mantoux)',
+        'IGRA (QuantiFERON-TB Gold Plus)',
+        'Hepatite B — HBsAg', 'Hepatite B — Anti-HBs', 'Hepatite B — Anti-HBc total',
+        'Hepatite C — Anti-HCV',
+        'Anti HIV',
+        'VDRL', 'FTA-Abs',
+        'Hemograma completo',
+        'Glicemia de jejum',
+        'Ureia', 'Creatinina',
+        'AST (TGO)', 'ALT (TGP)',
+        'Colesterol total', 'HDL', 'LDL', 'VLDL', 'Triglicerídeos',
+      ]
+    },
+  };
+
+  /* ── EXAMES: estado ── */
+  const selectedExams = new Set();
+  const manualExams   = [];
+  const activePresets = new Set();
+
+  function togglePreset(btn) {
+    const key = btn.dataset.key;
+    if (activePresets.has(key)) {
+      activePresets.delete(key);
+      btn.classList.remove('active');
+      // remove exames exclusivos deste preset
+      PRESETS[key].exames.forEach(e => {
+        const inOther = [...activePresets].some(k => PRESETS[k].exames.includes(e));
+        if (!inOther) selectedExams.delete(e);
+      });
+    } else {
+      activePresets.add(key);
+      btn.classList.add('active');
+      PRESETS[key].exames.forEach(e => selectedExams.add(e));
+    }
+    renderListaPainel();
+    renderTags();
+  }
+
+  function renderListaPainel() {
+    const wrap  = document.getElementById('ex-lista-painel');
+    const inner = document.getElementById('ex-lista-inner');
+    if (!wrap || !inner) return;
+
+    if (activePresets.size === 0) {
+      wrap.style.display = 'none';
+      inner.innerHTML = '';
+      return;
+    }
+
+    wrap.style.display = '';
+    inner.innerHTML = [...activePresets].map(key => {
+      const p = PRESETS[key];
+      const itens = p.exames.map(e => {
+        const marcado = selectedExams.has(e);
+        const safe = e.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+        return `<div class="ex-item ${marcado ? 'ex-item-on' : 'ex-item-off'}" data-nome="${safe}" onclick="toggleItem(this)">
+          <span class="ex-item-check">${marcado ? '✓' : '+'}</span>
+          <span>${e}</span>
+        </div>`;
+      }).join('');
+      return `<div class="cat-group">
+        <div class="cat-group-title cat-group-preset">
+          <span>${p.label}</span>
+          <div style="display:flex;gap:10px">
+            <button class="cat-select-all" data-key="${key}" onclick="marcarTodosPreset(this)">marcar todos</button>
+            <button class="cat-select-all" data-key="${key}" onclick="desmarcarTodosPreset(this)">desmarcar todos</button>
+          </div>
+        </div>
+        <div class="ex-items">${itens}</div>
+      </div>`;
+    }).join('');
+  }
+
+  function toggleItem(el) {
+    const nome = el.dataset.nome;
+    if (selectedExams.has(nome)) {
+      selectedExams.delete(nome);
+      el.classList.remove('ex-item-on');
+      el.classList.add('ex-item-off');
+      el.querySelector('.ex-item-check').textContent = '+';
+    } else {
+      selectedExams.add(nome);
+      el.classList.remove('ex-item-off');
+      el.classList.add('ex-item-on');
+      el.querySelector('.ex-item-check').textContent = '✓';
+    }
+    renderTags();
+  }
+
+  function marcarTodosPreset(btn) {
+    PRESETS[btn.dataset.key].exames.forEach(e => selectedExams.add(e));
+    renderListaPainel(); renderTags();
+  }
+
+  function desmarcarTodosPreset(btn) {
+    const key = btn.dataset.key;
+    PRESETS[key].exames.forEach(e => {
+      const inOther = [...activePresets].filter(k=>k!==key).some(k=>PRESETS[k].exames.includes(e));
+      if (!inOther) selectedExams.delete(e);
+    });
+    renderListaPainel(); renderTags();
+  }
+
+  function renderTags() {
+    const all  = [...selectedExams, ...manualExams];
+    const wrap = document.getElementById('ex-tags-wrap');
+    const cont = document.getElementById('exam-tags');
+    if (!cont) return;
+    if (wrap) wrap.style.display = all.length ? '' : 'none';
+    cont.innerHTML = all.map(e => {
+      const safe     = e.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+      const isManual = manualExams.includes(e);
+      return `<span class="tag">${e}<button data-nome="${safe}" data-manual="${isManual}" onclick="rmTag(this)">×</button></span>`;
+    }).join('');
+  }
+
+  function rmTag(btn) {
+    const nome = btn.dataset.nome;
+    if (btn.dataset.manual === 'true') {
+      const i = manualExams.indexOf(nome);
+      if (i > -1) manualExams.splice(i, 1);
+    } else {
+      selectedExams.delete(nome);
+      renderListaPainel();
+    }
+    renderTags();
+  }
+
+  function addExamManual() {
+    const input = document.getElementById('exam-input');
+    const val   = input.value.trim();
+    if (!val || manualExams.includes(val) || selectedExams.has(val)) { input.value = ''; return; }
+    manualExams.push(val);
+    renderTags();
+    input.value = '';
+    input.focus();
+  }
+
+  function getAllExams() { return [...selectedExams, ...manualExams]; }
+
+  /* ── HELPERS ── */
+  function v(id, def='') { const el = document.getElementById(id); return el && el.value.trim() ? el.value.trim() : def; }
+
+  function fDateById(id) {
+    const el = document.getElementById(id);
+    if (!el || !el.value) return '';
+    const [y,m,d] = el.value.split('-');
+    return `${d}/${m}/${y}`;
+  }
+
+  function hoje() { return new Date().toLocaleDateString('pt-BR', {day:'2-digit', month:'long', year:'numeric'}); }
+  function nl2br(s) { return s.replace(/\n/g,'<br>'); }
+
+  function docSec(label, content) {
+    if (!content || content === '<p></p>') return '';
+    return `<div class="doc-section"><div class="doc-section-label">${label}</div>${content}</div><hr class="doc-divider"/>`;
+  }
+
+  /* ── TIMBRADO ── */
+  function letterhead(tipoDoc) {
+    const local = localSelecionado !== null ? LOCAIS[localSelecionado] : null;
+    const logoBox = `<div class="doc-logo-placeholder">Logo<br>instituição</div>`;
+    const localInfo = local
+      ? `<strong>${local.nome}</strong>${local.end}<br>${local.tel}`
+      : `<strong>Consultório</strong>São Paulo - SP`;
+
+    return `
+      <div class="doc-letterhead">
+        <div class="doc-letterhead-logo">${logoBox}</div>
+        <div class="doc-letterhead-center">
+          <h2>${MEDICO.nome}</h2>
+          <div class="doc-specialty">${MEDICO.specialty}</div>
+          <div class="doc-crm">${MEDICO.crm}</div>
+        </div>
+        <div class="doc-letterhead-right">${localInfo}</div>
+      </div>
+      <div class="doc-title-banner"><h3>${tipoDoc}</h3></div>`;
+  }
+
+  function assinatura(doc) {
+    const local = localSelecionado !== null ? LOCAIS[localSelecionado] : null;
+    const cidade = local ? local.cidade : 'São Paulo';
+    const usarData = getDocData(doc) === 'com';
+    const dataStr = usarData ? `${cidade} - SP, ${hoje()}` : `${cidade} - SP`;
+    return `
+      <div class="doc-footer-row">
+        <div class="doc-date-place">${dataStr}</div>
+        <div class="doc-signature">
+          <div class="sig-line"></div>
+          <p class="sig-name">${MEDICO.nome}</p>
+          <p>${MEDICO.crm}</p>
+          <p>${MEDICO.specialty}</p>
+        </div>
+      </div>`;
+  }
+
+  /* ── IMAGEM: catálogo e estado ── */
+  const IMG_CATALOG = [
+    { grupo: 'Radiografia', exames: [
+      'Radiografia de tórax PA e perfil','Radiografia de mãos bilateral AP',
+      'Radiografia de pés bilateral AP','Radiografia de coluna cervical AP e perfil',
+      'Radiografia de coluna lombar AP e perfil','Radiografia de pelve AP',
+      'Radiografia de sacroilíacas AP','Radiografia de ombros bilateral AP',
+      'Radiografia de joelhos bilateral AP e perfil','Radiografia de tornozelos bilateral AP',
+      'Radiografia de quadris bilateral AP',
+    ]},
+    { grupo: 'Ultrassonografia', exames: [
+      'Ultrassonografia de abdome total','Ultrassonografia pélvica',
+      'Ultrassonografia de ombro direito','Ultrassonografia de ombro esquerdo',
+      'Ultrassonografia de joelho direito','Ultrassonografia de joelho esquerdo',
+      'Ultrassonografia de tornozelo direito','Ultrassonografia de tornozelo esquerdo',
+      'Ultrassonografia de quadril direito','Ultrassonografia de quadril esquerdo',
+      'Ultrassonografia de tireoide','Ultrassonografia de partes moles',
+      'Ultrassonografia com Doppler vascular',
+    ]},
+    { grupo: 'Tomografia computadorizada', exames: [
+      'TC de tórax de alta resolução (TCAR)','TC de abdome e pelve com contraste',
+      'TC de coluna cervical','TC de coluna lombar',
+      'TC de crânio','TC de seios da face',
+      'TC de sacroilíacas','TC de pelve',
+      'TC de mãos','TC de pés',
+    ]},
+    { grupo: 'Ressonância magnética', exames: [
+      'RM de crânio com e sem contraste','RM de coluna cervical',
+      'RM de coluna torácica','RM de coluna lombossacra',
+      'RM de sacroilíacas','RM de pelve',
+      'RM de ombro direito','RM de ombro esquerdo',
+      'RM de joelho direito','RM de joelho esquerdo',
+      'RM de quadril direito','RM de quadril esquerdo',
+      'RM de mãos','RM de pés',
+      'RM de corpo inteiro (whole body MRI)',
+    ]},
+    { grupo: 'Medicina nuclear e densitometria', exames: [
+      'Densitometria óssea (coluna e fêmur)','Cintilografia óssea',
+      'PET-CT com FDG','Cintilografia com Gálio',
+    ]},
+    { grupo: 'Ecocardiografia e outros', exames: [
+      'Ecocardiograma transtorácico','Ecocardiograma com Doppler',
+      'Eletrocardiograma','Espirometria com prova broncodilatadora',
+      'Capilaroscopia periungueal',
+    ]},
+  ];
+
+  const selectedImgs = new Set();
+  const manualImgs   = [];
+
+  function renderImgCatalog() {
+    const inner = document.getElementById('img-catalog-inner');
+    if (!inner) return;
+    inner.innerHTML = IMG_CATALOG.map((g, gi) =>
+      `<div class="cat-group">
+        <div class="cat-group-title">${g.grupo}
+          <button class="cat-select-all" data-gi="${gi}" onclick="selectAllImg(this)">selecionar todos</button>
+        </div>
+        <div class="ex-items">${g.exames.map(e => imgItemHtml(e)).join('')}</div>
+      </div>`
+    ).join('');
+  }
+
+  function imgItemHtml(e) {
+    const sel  = selectedImgs.has(e);
+    const safe = e.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+    return `<div class="ex-item ${sel?'ex-item-on':'ex-item-off'}" data-nome="${safe}" onclick="toggleImg(this)">
+      <span class="ex-item-check">${sel?'✓':'+'}</span><span>${e}</span>
+    </div>`;
+  }
+
+  function toggleImg(el) {
+    const nome = el.dataset.nome;
+    if (selectedImgs.has(nome)) {
+      selectedImgs.delete(nome);
+      el.classList.replace('ex-item-on','ex-item-off');
+      el.querySelector('.ex-item-check').textContent = '+';
+    } else {
+      selectedImgs.add(nome);
+      el.classList.replace('ex-item-off','ex-item-on');
+      el.querySelector('.ex-item-check').textContent = '✓';
+    }
+    renderImgTags();
+  }
+
+  function selectAllImg(btn) {
+    IMG_CATALOG[parseInt(btn.dataset.gi)].exames.forEach(e => selectedImgs.add(e));
+    renderImgCatalog(); renderImgTags();
+  }
+
+  function addImgManual() {
+    const input = document.getElementById('img-input');
+    const val   = input.value.trim();
+    if (!val || manualImgs.includes(val) || selectedImgs.has(val)) { input.value=''; return; }
+    manualImgs.push(val);
+    renderImgTags();
+    input.value = ''; input.focus();
+  }
+
+  function renderImgTags() {
+    const all  = [...selectedImgs, ...manualImgs];
+    const wrap = document.getElementById('img-tags-wrap');
+    const cont = document.getElementById('img-tags');
+    if (!cont) return;
+    if (wrap) wrap.style.display = all.length ? '' : 'none';
+    cont.innerHTML = all.map(e => {
+      const safe = e.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+      const isM  = manualImgs.includes(e);
+      return `<span class="tag">${e}<button data-nome="${safe}" data-manual="${isM}" onclick="rmImgTag(this)">×</button></span>`;
+    }).join('');
+  }
+
+  function rmImgTag(btn) {
+    const nome = btn.dataset.nome;
+    if (btn.dataset.manual === 'true') { const i = manualImgs.indexOf(nome); if(i>-1) manualImgs.splice(i,1); }
+    else { selectedImgs.delete(nome); renderImgCatalog(); }
+    renderImgTags();
+  }
+
+  function getAllImgs() { return [...selectedImgs, ...manualImgs]; }
+
+  /* ── GERAR HTML POR TIPO ── */
+  function buildHtml(tipo) {
+    const p = getPaciente();
+    if (tipo === 'relatorio') {
+      const diag = v('r-diag'), anamnese = v('r-anamnese'), exFis = v('r-exame'), conduta = v('r-conduta');
+      return `${letterhead('Relatório Médico')}
+        ${docSec('Paciente', pacienteHtml(p))}
+        ${docSec('Diagnóstico', `<p>${diag}</p>`)}
+        ${docSec('Anamnese / História clínica', `<p>${nl2br(anamnese)}</p>`)}
+        ${docSec('Exame físico', `<p>${nl2br(exFis)}</p>`)}
+        ${docSec('Conduta / Conclusão', `<p>${nl2br(conduta)}</p>`)}
+        ${assinatura('relatorio')}`;
+    }
+    if (tipo === 'receita') {
+      const obs  = v('rc-obs');
+      const meds = [...document.querySelectorAll('#meds-list .med-row')].map((row,i) => {
+        const name = row.querySelector('.med-name').value.trim() || '(não preenchido)';
+        const pos  = row.querySelector('.med-pos').value.trim();
+        return `<div class="med-item"><strong>${i+1}. ${name}</strong>${pos?`<span>${pos}</span>`:''}</div>`;
+      }).join('');
+      return `${letterhead('Receita Médica')}
+        ${docSec('Paciente', pacienteHtml(p))}
+        <div class="doc-section"><div class="doc-section-label">Prescrição</div>${meds}</div><hr class="doc-divider"/>
+        ${obs ? docSec('Observações', `<p>${nl2br(obs)}</p>`) : ''}
+        ${assinatura('receita')}`;
+    }
+    if (tipo === 'exames') {
+      const hip = v('ex-hip'), obs = v('ex-obs');
+      const all = getAllExams();
+      const examList = all.length
+        ? `<ul class="exam-list-doc">${all.map(e=>`<li><span class="exam-bullet"></span>${e}</li>`).join('')}</ul>`
+        : '<p style="color:#8a9e99">Nenhum exame selecionado.</p>';
+      return `${letterhead('Solicitação de Exames Laboratoriais')}
+        ${docSec('Paciente', pacienteHtml(p))}
+        <div class="doc-section"><div class="doc-section-label">Exames solicitados</div>${examList}</div><hr class="doc-divider"/>
+        ${hip ? docSec('Hipótese diagnóstica', `<p>${hip}</p>`) : ''}
+        ${obs ? docSec('Observações / Preparo', `<p>${nl2br(obs)}</p>`) : ''}
+        ${assinatura('exames')}`;
+    }
+    if (tipo === 'imagem') {
+      const hip = v('img-hip'), obs = v('img-obs');
+      const all = getAllImgs();
+      const examList = all.length
+        ? `<ul class="exam-list-doc">${all.map(e=>`<li><span class="exam-bullet"></span>${e}</li>`).join('')}</ul>`
+        : '<p style="color:#8a9e99">Nenhum exame selecionado.</p>';
+      return `${letterhead('Solicitação de Exames de Imagem')}
+        ${docSec('Paciente', pacienteHtml(p))}
+        <div class="doc-section"><div class="doc-section-label">Exames solicitados</div>${examList}</div><hr class="doc-divider"/>
+        ${hip ? docSec('Hipótese diagnóstica', `<p>${hip}</p>`) : ''}
+        ${obs ? docSec('Observações', `<p>${nl2br(obs)}</p>`) : ''}
+        ${assinatura('imagem')}`;
+    }
+    if (tipo === 'atestado') {
+      const cpf  = v('at-cpf');
+      const dias = document.getElementById('at-dias').value || '1';
+      const inicio = fDateById('at-inicio'), cid = v('at-cid'), obs = v('at-obs');
+      const diasTxt   = `${dias} dia${parseInt(dias)>1?'s':''}`;
+      const inicioTxt = inicio ? `, a partir de ${inicio}` : '';
+      const cidTxt    = cid ? ` (CID: ${cid})` : '';
+      const cpfInfo   = cpf ? `<p style="font-size:13px;color:#4a5650">CPF: ${cpf}</p>` : '';
+      return `${letterhead('Atestado Médico')}
+        ${docSec('Paciente', pacienteHtml(p) + cpfInfo)}
+        <div class="doc-section">
+          <div class="doc-section-label">Declaração</div>
+          <p>Atesto que o(a) paciente acima identificado(a) necessita de afastamento de suas atividades laborais pelo período de <strong>${diasTxt}</strong>${inicioTxt}${cidTxt}.</p>
+        </div><hr class="doc-divider"/>
+        ${obs ? docSec('Observações', `<p>${nl2br(obs)}</p>`) : ''}
+        ${assinatura('atestado')}`;
+    }
+    return '';
+  }
+
+  /* ── GERAR UM ── */
+  function gerarUm(tipo) {
+    if (!validarPaciente()) return;
+    if (!validarData(tipo)) return;
+    abrirPDF(buildHtml(tipo));
+  }
+
+  /* ── GERAR TODOS ── */
+  function gerarTodos() {
+    if (!validarPaciente()) return;
+    const tipos = [...activeTabs];
+    for (const t of tipos) { if (!validarData(t)) return; }
+    const SEP = `<div style="page-break-after:always;height:0;margin:0;padding:0"></div>`;
+    const html = tipos.map(t => buildHtml(t)).join(SEP);
+    abrirPDF(html);
+  }
+
+  /* ── GERAR (legacy alias) ── */
+  function gerar(tipo) { gerarUm(tipo); }
+
+  function abrirPDF(html) {
+    const local = localSelecionado !== null ? LOCAIS[localSelecionado] : null;
+    const win = window.open('', '_blank');
+    win.document.write(`<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<title>Documento Médico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lora:wght@500;600&display=swap" rel="stylesheet"/>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif;font-size:13px;line-height:1.7;color:#1a1f1e;background:#fff;padding:2.5cm 2cm}
+  .doc-letterhead{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;padding-bottom:1.2rem;border-bottom:2px solid #1a6b5a;gap:1rem}
+  .doc-letterhead-logo{flex-shrink:0}
+  .doc-logo-placeholder{width:68px;height:68px;border:1px dashed #dce5e2;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#8a9e99;text-align:center;padding:4px}
+  .doc-letterhead-center{flex:1;text-align:center}
+  .doc-letterhead-center h2{font-family:'Lora',serif;font-size:16px;font-weight:600;color:#1a6b5a;margin-bottom:3px}
+  .doc-specialty{font-size:12px;color:#4a5650;margin-bottom:2px}
+  .doc-crm{font-size:11px;color:#8a9e99}
+  .doc-letterhead-right{flex-shrink:0;text-align:right;font-size:11px;color:#8a9e99;line-height:1.6;max-width:190px}
+  .doc-letterhead-right strong{display:block;color:#4a5650;font-size:11px;margin-bottom:2px}
+  .doc-title-banner{text-align:center;margin-bottom:1.5rem}
+  .doc-title-banner h3{font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#4a5650;background:#e8f4f1;display:inline-block;padding:5px 18px;border-radius:999px}
+  .doc-section{margin-bottom:1rem;font-size:13px;line-height:1.7}
+  .doc-section-label{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#1a6b5a;margin-bottom:3px}
+  .doc-divider{border:none;border-top:1px solid #edf1ef;margin:0.9rem 0}
+  .doc-footer-row{display:flex;align-items:flex-end;justify-content:space-between;margin-top:2.5rem;padding-top:1rem;border-top:1px solid #edf1ef}
+  .doc-date-place{font-size:11px;color:#8a9e99}
+  .doc-signature{text-align:center}
+  .sig-line{width:200px;border-top:1px solid #1a1f1e;margin:0 auto 6px}
+  .sig-name{font-size:12px;font-weight:600;color:#1a1f1e;margin-bottom:1px}
+  .doc-signature p{font-size:11px;color:#4a5650;margin-bottom:1px}
+  .med-item{padding:6px 0;border-bottom:1px solid #edf1ef}
+  .med-item:last-child{border-bottom:none}
+  .med-item strong{font-size:13px;display:block}
+  .med-item span{font-size:12px;color:#4a5650}
+  .exam-list-doc{padding:0;list-style:none}
+  .exam-list-doc li{padding:4px 0;border-bottom:1px solid #edf1ef;font-size:13px;display:flex;align-items:center;gap:8px}
+  .exam-list-doc li:last-child{border-bottom:none}
+  .exam-bullet{width:5px;height:5px;border-radius:50%;background:#1a6b5a;flex-shrink:0}
+  @page { margin: 2.5cm 2cm; size: A4; }
+  @media print { body { padding: 0; } }</style>
+</head>
+<body>
+${html}
+<script>window.onload=function(){window.print();}<\/script>
+</body>
+</html>`);
+    win.document.close();
+  }
+
+  function pacienteHtml(p) {
+    const partes = [
+      `<strong>${p.nome || '__________'}</strong>`,
+      p.nasc ? `Nascimento: ${p.nasc}` : '',
+      p.sexo || '',
+    ].filter(Boolean).join(' &nbsp;·&nbsp; ');
+    return `<p>${partes}</p>${p.end ? `<p style="font-size:13px;color:var(--text-secondary)">${p.end}</p>` : ''}`;
+  }
+
+  /* ── LIMPAR ── */
+  function limpar(tipo) {
+    const ids = {
+      relatorio: ['r-diag','r-anamnese','r-exame','r-conduta'],
+      receita:   ['rc-obs'],
+      exames:    ['ex-hip','ex-obs'],
+      imagem:    ['img-hip','img-obs'],
+      atestado:  ['at-cpf','at-dias','at-inicio','at-cid','at-obs'],
+    };
+    (ids[tipo]||[]).forEach(id => { const el=document.getElementById(id); if(el) el.value=el.type==='number'?'1':''; });
+    if (tipo === 'receita') {
+      const list = document.getElementById('meds-list');
+      while (list.children.length > 1) list.removeChild(list.lastChild);
+      list.querySelector('.med-name').value = '';
+      list.querySelector('.med-pos').value = '';
+    }
+    if (tipo === 'exames') {
+      selectedExams.clear(); manualExams.length = 0; activePresets.clear();
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      const inp = document.getElementById('exam-input'); if(inp) inp.value='';
+      renderListaPainel(); renderTags();
+    }
+    if (tipo === 'imagem') {
+      selectedImgs.clear(); manualImgs.length = 0;
+      const inp = document.getElementById('img-input'); if(inp) inp.value='';
+      renderImgCatalog(); renderImgTags();
+    }
+  }
+</script>
+</body>
+</html>
