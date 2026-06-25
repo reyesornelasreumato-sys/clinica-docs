@@ -459,6 +459,10 @@
       <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
       Atestado médico
     </button>
+    <button class="tab-btn" id="btn-modelos" onclick="toggleModelos(this)">
+      <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      Modelos de relatório
+    </button>
   </div>
 
   <!-- BOTÃO GERAR TUDO -->
@@ -656,6 +660,107 @@
         <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Gerar PDF
       </button>
       <button class="btn" onclick="limpar('atestado')">Limpar</button>
+    </div>
+  </div>
+
+  <!-- ══ MODELOS DE RELATÓRIO ══ -->
+  <div id="tab-modelos" class="card doc-card" style="display:none">
+    <div class="doc-card-header">
+      <span class="doc-card-title">Modelos de relatório por doença</span>
+    </div>
+
+    <p class="section-label">Selecione a doença</p>
+    <div class="med-class-btns" id="doenca-btns" style="flex-wrap:wrap">
+      <button class="med-class-btn" data-key="lupus"   onclick="selecionarDoenca('lupus')">LES</button>
+      <button class="med-class-btn" data-key="ar"      onclick="selecionarDoenca('ar')">Artrite Reumatoide</button>
+      <button class="med-class-btn" data-key="dm"      onclick="selecionarDoenca('dm')">Dermatomiosite</button>
+      <button class="med-class-btn" data-key="fm"      onclick="selecionarDoenca('fm')">Fibromialgia</button>
+      <button class="med-class-btn" data-key="op"      onclick="selecionarDoenca('op')">Osteoporose</button>
+      <button class="med-class-btn" data-key="es"      onclick="selecionarDoenca('es')">Esclerose Sistêmica</button>
+      <button class="med-class-btn" data-key="ss"      onclick="selecionarDoenca('ss')">Síndrome de Sjögren</button>
+      <button class="med-class-btn" data-key="gpa"     onclick="selecionarDoenca('gpa')">GPA</button>
+      <button class="med-class-btn" data-key="pam"     onclick="selecionarDoenca('pam')">PAM</button>
+      <button class="med-class-btn" data-key="pan"     onclick="selecionarDoenca('pan')">PAN</button>
+      <button class="med-class-btn" data-key="gepa"    onclick="selecionarDoenca('gepa')">GEPA</button>
+      <button class="med-class-btn" data-key="aij"     onclick="selecionarDoenca('aij')">AIJ</button>
+    </div>
+
+    <div id="modelo-form" style="display:none;margin-top:1.5rem">
+
+      <div id="modelo-doenca-banner" style="background:var(--brand);color:#fff;border-radius:8px;padding:10px 16px;font-weight:700;font-size:15px;margin-bottom:1.2rem"></div>
+
+      <!-- Dados gerais -->
+      <p class="section-label">Dados do diagnóstico</p>
+      <div class="form-grid cols-3">
+        <div class="field"><label>Tempo de diagnóstico</label><input id="mod-tempo" placeholder="Ex: 4 anos e 6 meses"/></div>
+        <div class="field"><label>Classificação / Gravidade</label>
+          <select id="mod-gravidade" style="font-size:13px;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);width:100%">
+            <option>Leve</option><option>Moderada</option><option selected>Grave</option>
+            <option>Moderada a grave</option><option>Refratária</option>
+          </select>
+        </div>
+        <div class="field"><label>Subtipo / forma clínica (opcional)</label><input id="mod-subtipo" placeholder="Ex: nefrite lúpica, difusa…"/></div>
+      </div>
+
+      <!-- Manifestações -->
+      <p class="section-label">Manifestações clínicas presentes</p>
+      <div id="mod-manifestacoes" class="form-grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px 16px"></div>
+      <div class="field" style="margin-top:10px"><label>Outras manifestações (texto livre)</label>
+        <textarea id="mod-outras-manif" placeholder="Descreva manifestações adicionais…" style="min-height:60px"></textarea>
+      </div>
+
+      <!-- Histórico de tratamentos -->
+      <p class="section-label">Histórico de tratamentos realizados</p>
+      <div id="mod-trat-list" style="display:flex;flex-direction:column;gap:8px"></div>
+      <button class="btn" style="margin-top:8px;font-size:13px" onclick="addTratRow()">+ Adicionar medicação</button>
+
+      <!-- Avaliação atual -->
+      <p class="section-label">Avaliação clínica atual</p>
+      <div class="field"><label>Descrição dos sintomas atuais</label>
+        <textarea id="mod-sintomas-atuais" placeholder="Descreva o quadro clínico atual do paciente…" style="min-height:80px"></textarea>
+      </div>
+      <div class="form-grid cols-2" style="margin-top:10px">
+        <div class="field"><label>Avaliação global do médico (0–10)</label><input id="mod-aval-med" type="number" min="0" max="10" placeholder="0–10"/></div>
+        <div class="field"><label>Avaliação global do paciente (0–10)</label><input id="mod-aval-pac" type="number" min="0" max="10" placeholder="0–10"/></div>
+      </div>
+
+      <!-- Escores -->
+      <p class="section-label">Escores de atividade e gravidade</p>
+      <div id="mod-escores" class="form-grid cols-3"></div>
+
+      <!-- DUT-65 -->
+      <div style="background:#e8f4f1;border:1px solid #a8d8c4;border-radius:8px;padding:14px 16px;margin-top:1.5rem">
+        <label style="display:flex;align-items:center;gap:10px;font-weight:600;font-size:13px;cursor:pointer">
+          <input type="checkbox" id="mod-solicita-bio" onchange="toggleBioSection()" style="width:16px;height:16px">
+          Solicitar imunobiológico conforme DUT-65 / PCDT do Ministério da Saúde
+        </label>
+        <div id="mod-bio-section" style="display:none;margin-top:12px">
+          <div class="form-grid cols-2">
+            <div class="field"><label>Imunobiológico solicitado</label>
+              <select id="mod-bio-select" style="font-size:13px;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);width:100%">
+                <option value="">— selecionar —</option>
+              </select>
+            </div>
+            <div class="field"><label>Número de falhas a DMARDs convencionais</label>
+              <select id="mod-falhas" style="font-size:13px;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);width:100%">
+                <option>1 falha</option><option>2 falhas</option><option>3 ou mais falhas</option>
+                <option>Intolerância / contraindicação</option>
+              </select>
+            </div>
+          </div>
+          <div class="field" style="margin-top:8px"><label>Justificativa complementar</label>
+            <textarea id="mod-justificativa" placeholder="Ex: paciente com nefrite lúpica refratária a ciclofosfamida e micofenolato…" style="min-height:70px"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions" style="margin-top:1.5rem">
+        <button class="btn btn-primary" onclick="gerarRelatorioModelo()">
+          <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          Gerar Relatório PDF
+        </button>
+        <button class="btn" onclick="limparModelo()">Limpar</button>
+      </div>
     </div>
   </div>
 
@@ -1860,6 +1965,391 @@
 
   /* ── GERAR (legacy alias) ── */
   function gerar(tipo) { gerarUm(tipo); }
+
+  /* ══ MODELOS DE RELATÓRIO POR DOENÇA ══ */
+  let doencaSelecionada = null;
+
+  const MODELO_DOENCAS = {
+    lupus: {
+      label: 'Lúpus Eritematoso Sistêmico (LES)', cid: 'M32',
+      manifestacoes: ['Artrite / Artralgia','Rash malar','Fotossensibilidade','Alopecia lúpica','Úlceras orais/nasais','Nefrite lúpica (proteinúria / hematúria)','Síndrome nefrótica','Neuropsiquiátrica (convulsão, psicose, cefaleia)','Anemia hemolítica autoimune','Leucopenia / Linfopenia','Plaquetopenia','Pleurite','Pericardite','Pneumonite lúpica','Hipertensão arterial pulmonar (HAP)','Fenômeno de Raynaud','Síndrome Antifosfolípide (SAF)','Vasculite cutânea'],
+      escores: [
+        {id:'sledai',label:'SLEDAI-2K',faixa:'0–105',ref:'< 4 inativo · 4–9 leve · 10–19 moderado · ≥ 20 grave'},
+        {id:'sdi',label:'SDI — Dano acumulado (SLICC)',faixa:'0–47',ref:'0 sem dano · ≥ 1 algum dano'},
+        {id:'anti_dna',label:'Anti-dsDNA (UI/mL)',faixa:'',ref:''},
+        {id:'c3',label:'Complemento C3 (mg/dL)',faixa:'',ref:'VR 90–180'},
+        {id:'c4',label:'Complemento C4 (mg/dL)',faixa:'',ref:'VR 16–47'},
+      ],
+      biologicos: ['Belimumabe SC 200mg (Benlysta®)','Belimumabe IV 10mg/kg (Benlysta®)','Anifrolumabe IV 300mg (Saphnelo®)','Rituximabe IV 1000mg (MabThera®) — uso off-label'],
+      dut: 'DUT-65 e PCDT do Lúpus Eritematoso Sistêmico (CONITEC/MS)',
+    },
+    ar: {
+      label: 'Artrite Reumatoide (AR)', cid: 'M05',
+      manifestacoes: ['Poliartrite simétrica (pequenas articulações)','Poliartrite simétrica (grandes articulações)','Sinovite ativa (edema + dor)','Rigidez matinal > 45 minutos','Erosões articulares (RX / USG / RM)','Deformidades articulares estabelecidas','Limitação funcional progressiva','Nódulos reumatoides','Doença pulmonar intersticial (DPID)','Pleurite reumatoide','Vasculite reumatoide','Anemia de doença crônica','Síndrome de Felty'],
+      escores: [
+        {id:'das28_pcr',label:'DAS28-PCR',faixa:'0–9,4',ref:'< 2,6 remissão · 2,6–3,2 baixa · 3,2–5,1 moderada · > 5,1 alta'},
+        {id:'das28_vhs',label:'DAS28-VHS',faixa:'0–9,4',ref:'< 2,6 remissão · 2,6–3,2 baixa · 3,2–5,1 moderada · > 5,1 alta'},
+        {id:'cdai',label:'CDAI',faixa:'0–76',ref:'≤ 2,8 remissão · ≤ 10 baixa · ≤ 22 moderada · > 22 alta'},
+        {id:'haq',label:'HAQ-DI (funcional)',faixa:'0–3',ref:'0–0,25 sem incapacidade · > 1 incapacidade grave'},
+        {id:'pcr',label:'PCR (mg/L)',faixa:'',ref:''},
+        {id:'vhs',label:'VHS (mm/h)',faixa:'',ref:''},
+        {id:'fr',label:'Fator Reumatoide (UI/mL)',faixa:'',ref:''},
+        {id:'anti_ccp',label:'Anti-CCP (U/mL)',faixa:'',ref:''},
+      ],
+      biologicos: ['Adalimumabe 40mg SC (Humira®)','Etanercepte 50mg SC (Enbrel®)','Certolizumabe Pegol 200mg SC (Cimzia®)','Golimumabe 50mg SC (Simponi®)','Infliximabe IV (Remicade®)','Tocilizumabe 162mg SC (Actemra®)','Tocilizumabe IV (Actemra®)','Sarilumabe 200mg SC (Kevzara®)','Abatacepte 125mg SC (Orencia®)','Abatacepte IV (Orencia®)','Rituximabe IV 1000mg (MabThera®)','Tofacitinibe 5mg (Xeljanz®)','Baricitinibe 4mg (Olumiant®)','Upadacitinibe 15mg (Rinvoq®)'],
+      dut: 'DUT-65 (Diretriz de Utilização Terapêutica para Imunobiológicos na AR — CONITEC/MS)',
+    },
+    dm: {
+      label: 'Dermatomiosite (DM)', cid: 'M33.1',
+      manifestacoes: ['Fraqueza muscular proximal','Rash heliotropo periorbital','Pápulas de Gottron (MCF / IFP)','Eritema em V do decote','Eritema em xale (dorso)','Mãos de mecânico','Calcinose','Pneumonite intersticial (DPID)','Disfagia / disfonia','Artrite / artralgia','Fenômeno de Raynaud','Vasculite cutânea','Ulcerações digitais','Doença cardíaca (pericardite, miocardite)','Neoplasia associada'],
+      escores: [
+        {id:'mmt8',label:'MMT-8 (força muscular)',faixa:'0–80',ref:'< 40 fraqueza grave · 40–64 moderada · ≥ 65 leve'},
+        {id:'cpk',label:'CPK (U/L)',faixa:'',ref:'VR: H 38–174 · M 26–140'},
+        {id:'ldh',label:'LDH (U/L)',faixa:'',ref:'VR 140–280'},
+        {id:'aldolase',label:'Aldolase (U/L)',faixa:'',ref:'VR 1–7,5'},
+        {id:'fvc',label:'CVF (% do previsto)',faixa:'',ref:'< 70% sugere comprometimento'},
+        {id:'dlco',label:'DLCO (% do previsto)',faixa:'',ref:'< 70% sugere comprometimento'},
+      ],
+      biologicos: ['Rituximabe IV 1000mg (MabThera®)','Tocilizumabe IV (Actemra®)','Abatacepte SC/IV (Orencia®)'],
+      dut: 'DUT-65 e PCDT das Miopatias Inflamatórias (CONITEC/MS)',
+    },
+    fm: {
+      label: 'Fibromialgia (FM)', cid: 'M79.7',
+      manifestacoes: ['Dor crônica difusa (> 3 meses)','Fadiga persistente','Distúrbio do sono (sono não restaurador)','Rigidez matinal','Cefaleia crônica / enxaqueca','Síndrome do intestino irritável (SCI)','Bexiga hiperativa','Disfunção cognitiva ("fibro fog")','Parestesias / alodinia','Hipersensibilidade sensorial (ruído, luz, cheiro)','Sintomas de ansiedade','Sintomas depressivos','Síndrome das pernas inquietas'],
+      escores: [
+        {id:'fiq',label:'FIQ Total (Fibromyalgia Impact)',faixa:'0–100',ref:'< 39 leve · 39–59 moderada · > 59 grave'},
+        {id:'wpi',label:'WPI (Widespread Pain Index)',faixa:'0–19',ref:''},
+        {id:'ss',label:'Severity Scale (SS)',faixa:'0–12',ref:''},
+        {id:'eva_dor',label:'EVA da Dor (0–10)',faixa:'0–10',ref:'0–3 leve · 4–6 moderada · 7–10 intensa'},
+        {id:'eva_sono',label:'Qualidade do Sono (0–10)',faixa:'0–10',ref:'10 = pior sono possível'},
+      ],
+      biologicos: [],
+      dut: '',
+    },
+    op: {
+      label: 'Osteoporose (OP)', cid: 'M81',
+      manifestacoes: ['Fratura vertebral por fragilidade','Fratura de quadril (proximal do fêmur)','Fratura de punho (Colles)','Fratura de úmero proximal','Outras fraturas por fragilidade','Dor lombar crônica / cifose','Perda de altura > 4 cm','Hipogonadismo associado','Uso crônico de corticoide (> 3 meses)','Hiperparatireoidismo','Doença celíaca associada','Malabsorção intestinal'],
+      escores: [
+        {id:'t_cl',label:'T-score — Coluna Lombar',faixa:'',ref:'≥ -1,0 normal · -1,0 a -2,5 osteopenia · ≤ -2,5 osteoporose'},
+        {id:'t_cf',label:'T-score — Colo Femoral',faixa:'',ref:'≥ -1,0 normal · -1,0 a -2,5 osteopenia · ≤ -2,5 osteoporose'},
+        {id:'t_qt',label:'T-score — Quadril Total',faixa:'',ref:''},
+        {id:'frax_sf',label:'FRAX 10 anos — Fratura maior (sem DMO)',faixa:'%',ref:'> 20% alto risco'},
+        {id:'frax_qd',label:'FRAX 10 anos — Quadril (sem DMO)',faixa:'%',ref:'> 3% alto risco'},
+        {id:'vit_d',label:'Vitamina D (ng/mL)',faixa:'',ref:'< 20 deficiência · 20–30 insuficiência'},
+        {id:'ctx',label:'CTX sérico (marcador reabsorção)',faixa:'ng/mL',ref:''},
+        {id:'p1np',label:'P1NP (marcador formação)',faixa:'ng/mL',ref:''},
+      ],
+      biologicos: ['Denosumabe 60mg SC (Prolia®)','Romosozumabe 210mg SC (Evenity®)'],
+      dut: 'PCDT da Osteoporose (CONITEC/MS) e DUT do Denosumabe',
+    },
+    es: {
+      label: 'Esclerose Sistêmica (ES)', cid: 'M34',
+      manifestacoes: ['Fenômeno de Raynaud','Esclerodactilia','Envolvimento cutâneo difuso (dcSSc)','Envolvimento cutâneo limitado (lcSSc)','Síndrome CREST','Fibrose pulmonar intersticial (DPID)','Hipertensão arterial pulmonar (HAP)','Crise renal esclerodérmica','Envolvimento cardíaco (bloqueio, pericardite)','Dismotilidade esofágica / refluxo','Constipação / pseudo-obstrução','Diarreia / má-absorção (supercrescimento bacteriano)','Úlceras digitais','Calcinose','Telangiectasias','Artrite / artralgia','Miopatia associada'],
+      escores: [
+        {id:'mrss',label:'mRSS (Rodnan modificado)',faixa:'0–51',ref:'≤ 14 limitado · 15–28 intermediário · > 28 difuso grave'},
+        {id:'fvc',label:'CVF (% do previsto)',faixa:'%',ref:'< 70% sugere comprometimento significativo'},
+        {id:'dlco',label:'DLCO (% do previsto)',faixa:'%',ref:'< 70% comprometido · < 40% grave'},
+        {id:'pap_media',label:'PAP média (eco ou cateter)',faixa:'mmHg',ref:'> 25 mmHg HAP'},
+        {id:'anti_scl70',label:'Anti-Scl-70 (Anti-topoisomerase I)',faixa:'',ref:'Associado à ES difusa e DPID'},
+        {id:'anti_cent',label:'Anti-centrômero',faixa:'',ref:'Associado à ES limitada / CREST / HAP'},
+      ],
+      biologicos: ['Nintedanibe (Ofev®) — fibrose pulmonar','Tocilizumabe IV (Actemra®)','Rituximabe IV (MabThera®)','Iloprost IV (úlceras digitais refratárias)'],
+      dut: 'DUT-65 e PCDT da Esclerose Sistêmica (CONITEC/MS)',
+    },
+    ss: {
+      label: 'Síndrome de Sjögren Primária (SSp)', cid: 'M35.0',
+      manifestacoes: ['Xeroftalmia (olho seco)','Xerostomia (boca seca)','Parotidite recorrente','Artrite / artralgia inflamatória','Fadiga significativa','Nefrite tubulointersticial','Acidose tubular renal','Neuropatia periférica (sensitiva, mista)','Neuropatia autonômica','Vasculite cutânea (púrpura)','Hiperglobulinemia / crioglobulinemia','Crioglobulinemia associada','Linfoma (MALT, difuso de grandes células B)','Miosite associada','Pneumonite intersticial'],
+      escores: [
+        {id:'essdai',label:'ESSDAI (atividade sistêmica)',faixa:'0–123',ref:'< 5 baixa · 5–13 moderada · ≥ 14 alta atividade'},
+        {id:'esspri',label:'ESSPRI (sintomas do paciente)',faixa:'0–10',ref:'< 5 bem controlada'},
+        {id:'anti_ssa',label:'Anti-SSA/Ro (positivo/negativo)',faixa:'',ref:'Presente em ~80% das SSp'},
+        {id:'anti_ssb',label:'Anti-SSB/La (positivo/negativo)',faixa:'',ref:'Presente em ~40–50% das SSp'},
+        {id:'igg',label:'IgG (mg/dL)',faixa:'',ref:'VR 700–1600 mg/dL — Hipergamaglobulinemia comum'},
+        {id:'comp',label:'Complemento C3/C4',faixa:'',ref:'Baixo em vasculite / crioglobulinemia'},
+      ],
+      biologicos: ['Rituximabe IV 1000mg (MabThera®)','Belimumabe SC/IV (Benlysta®) — off-label'],
+      dut: 'DUT-65 e PCDT da Síndrome de Sjögren (CONITEC/MS)',
+    },
+    gpa: {
+      label: 'Granulomatose com Poliangiite (GPA)', cid: 'M31.3',
+      manifestacoes: ['Sinusite granulomatosa crônica (refratária)','Epistaxe recorrente / crosta nasal','Deformidade em sela nasal','Otite média crônica / perda auditiva','Subglote (estenose subglótica)','Nódulos pulmonares / cavitações','Hemorragia alveolar difusa','Glomerulonefrite rapidamente progressiva','Hematúria / proteinúria / cilindros','Esclerite / epiesclerite','Mononeurite múltipla','Vasculite cutânea / púrpura palpável','Nódulos subcutâneos'],
+      escores: [
+        {id:'bvas',label:'BVAS (Birmingham Vasculitis Activity Score)',faixa:'0–63',ref:'0 remissão · > 0 ativo · > 15 muito ativo'},
+        {id:'vdi',label:'VDI (Vasculitis Damage Index)',faixa:'0–64',ref:'Dano acumulado por órgão'},
+        {id:'anca_pr3',label:'ANCA anti-PR3 (c-ANCA)',faixa:'',ref:'Positivo em ~75% das GPA'},
+        {id:'cr',label:'Creatinina sérica (mg/dL)',faixa:'',ref:''},
+        {id:'pcr',label:'PCR (mg/L)',faixa:'',ref:''},
+        {id:'vhs',label:'VHS (mm/h)',faixa:'',ref:''},
+      ],
+      biologicos: ['Rituximabe IV 375mg/m² × 4 semanas (MabThera®) — indução','Rituximabe IV 1000mg × 2 (MabThera®) — manutenção','Rituximabe IV 500mg a cada 6 meses — manutenção'],
+      dut: 'DUT-65 e PCDT das Vasculites ANCA-positivas (CONITEC/MS)',
+    },
+    pam: {
+      label: 'Poliangiite Microscópica (PAM)', cid: 'M31.7',
+      manifestacoes: ['Glomerulonefrite rapidamente progressiva (GNRP)','Hematúria / proteinúria / cilindros hemáticos','Insuficiência renal aguda','Hemorragia alveolar difusa','Mononeurite múltipla','Vasculite cutânea / púrpura palpável','Artralgia / artrite','Esclerite','Epididimite'],
+      escores: [
+        {id:'bvas',label:'BVAS',faixa:'0–63',ref:'0 remissão · > 15 muito ativo'},
+        {id:'vdi',label:'VDI (dano acumulado)',faixa:'0–64',ref:''},
+        {id:'anca_mpo',label:'ANCA anti-MPO (p-ANCA)',faixa:'',ref:'Positivo em ~75% das PAM'},
+        {id:'cr',label:'Creatinina sérica (mg/dL)',faixa:'',ref:''},
+        {id:'pcr',label:'PCR (mg/L)',faixa:'',ref:''},
+        {id:'vhs',label:'VHS (mm/h)',faixa:'',ref:''},
+      ],
+      biologicos: ['Rituximabe IV 375mg/m² × 4 semanas (MabThera®) — indução','Rituximabe IV 500mg a cada 6 meses — manutenção'],
+      dut: 'DUT-65 e PCDT das Vasculites ANCA-positivas (CONITEC/MS)',
+    },
+    pan: {
+      label: 'Poliarterite Nodosa (PAN)', cid: 'M30.0',
+      manifestacoes: ['Mononeurite múltipla','Isquemia mesentérica (dor abdominal pós-prandial)','Hipertensão arterial renovascular','Infarto / aneurisma renal (sem glomerulonefrite)','Vasculite testicular / dor testicular','Livedo reticular','Úlceras cutâneas isquêmicas','Nódulos subcutâneos','Artralgia / artrite','Mialgia','Perda de peso / febre / astenia','Associação com Hepatite B (HBV)'],
+      escores: [
+        {id:'bvas',label:'BVAS',faixa:'0–63',ref:'0 remissão · > 15 muito ativo'},
+        {id:'ffs',label:'FFS (Five-Factor Score)',faixa:'0–5',ref:'0 = mortalidade ~12% · 1 = ~26% · ≥ 2 = ~46%'},
+        {id:'vdi',label:'VDI (dano acumulado)',faixa:'0–64',ref:''},
+        {id:'cr',label:'Creatinina sérica (mg/dL)',faixa:'',ref:''},
+        {id:'hbsag',label:'HBsAg (Hepatite B)',faixa:'',ref:'PAN associada a HBV — tratamento difere'},
+        {id:'pcr',label:'PCR (mg/L)',faixa:'',ref:''},
+      ],
+      biologicos: ['Rituximabe IV (MabThera®) — casos refratários'],
+      dut: 'DUT-65 e PCDT das Vasculites Sistêmicas (CONITEC/MS)',
+    },
+    gepa: {
+      label: 'Granulomatose Eosinofílica com Poliangiite (GEPA)', cid: 'M30.1',
+      manifestacoes: ['Asma grave refratária','Rinite alérgica / polipose nasal','Eosinofilia periférica / tecidual','Infiltrados pulmonares eosinofílicos','Neuropatia periférica (mononeurite múltipla)','Envolvimento cardíaco (miocardite eosinofílica)','Vasculite cutânea / púrpura','Glomerulonefrite (menos frequente)','Esclerite / epiesclerite','Artralgia / artrite'],
+      escores: [
+        {id:'bvas',label:'BVAS',faixa:'0–63',ref:'0 remissão · > 15 muito ativo'},
+        {id:'ffs',label:'FFS (Five-Factor Score)',faixa:'0–5',ref:'Fatores: creatinina > 1,58 · proteinúria > 1g/dia · cardíaco · GI · SNC'},
+        {id:'eosinof',label:'Eosinófilos absolutos (/mm³)',faixa:'',ref:'> 1500/mm³ critério diagnóstico'},
+        {id:'anca_mpo',label:'ANCA anti-MPO (p-ANCA)',faixa:'',ref:'Positivo em ~30–40% — associado à vasculite'},
+        {id:'ige',label:'IgE total (UI/mL)',faixa:'',ref:'Frequentemente elevada'},
+        {id:'pcr',label:'PCR (mg/L)',faixa:'',ref:''},
+      ],
+      biologicos: ['Mepolizumabe 300mg SC (Nucala®) — aprovado para GEPA','Benralizumabe SC — off-label','Rituximabe IV (MabThera®) — casos refratários com ANCA+'],
+      dut: 'DUT-65 e PCDT das Vasculites ANCA-positivas / GEPA (CONITEC/MS)',
+    },
+    aij: {
+      label: 'Artrite Idiopática Juvenil (AIJ)', cid: 'M08',
+      manifestacoes: ['Artrite oligoarticular (≤ 4 articulações)','Artrite poliarticular (≥ 5 articulações)','Artrite sistêmica (febre quotidiana, rash, serosite)','Uveíte anterior crônica (assintomática)','Entesite (inserções tendíneas)','Artrite sacroilíaca / coluna','Lesão articular / erosões','Limitação funcional / escoliose','Retardo do crescimento','Amiloidose secundária (rara)','Anemia de doença crônica','Ferritina muito elevada (forma sistêmica)'],
+      escores: [
+        {id:'jadas27',label:'JADAS-27',faixa:'0–57',ref:'Poliarticular: remissão < 1 · baixa < 3,8 · moderada ≤ 10,5 · alta > 10,5'},
+        {id:'articulacoes_ativas',label:'Nº de articulações ativas',faixa:'',ref:''},
+        {id:'avaliacao_med',label:'Avaliação global do médico (VAS 0–10)',faixa:'',ref:''},
+        {id:'avaliacao_pac',label:'Avaliação global do paciente/responsável (VAS 0–10)',faixa:'',ref:''},
+        {id:'vhs',label:'VHS (mm/h)',faixa:'',ref:''},
+        {id:'pcr',label:'PCR (mg/L)',faixa:'',ref:''},
+        {id:'ferritina',label:'Ferritina (ng/mL)',faixa:'',ref:'Muito elevada na AIJ sistêmica / SAM'},
+      ],
+      biologicos: ['Etanercepte 50mg SC (Enbrel®)','Adalimumabe 40mg SC (Humira®)','Abatacepte IV (Orencia®)','Tocilizumabe IV (Actemra®)','Canacinumabe SC (Ilaris®) — forma sistêmica','Secuquinumabe SC (Cosentyx®) — entesite','Upadacitinibe (Rinvoq®) — ≥ 12 anos'],
+      dut: 'DUT-65 e PCDT da Artrite Idiopática Juvenil (CONITEC/MS)',
+    },
+  };
+
+  function toggleModelos(btn) {
+    const panel = document.getElementById('tab-modelos');
+    const visible = panel.style.display !== 'none';
+    panel.style.display = visible ? 'none' : 'block';
+    btn.classList.toggle('active', !visible);
+  }
+
+  function selecionarDoenca(key) {
+    doencaSelecionada = key;
+    const d = MODELO_DOENCAS[key];
+    document.querySelectorAll('#doenca-btns .med-class-btn').forEach(b =>
+      b.classList.toggle('active', b.dataset.key === key)
+    );
+    document.getElementById('modelo-form').style.display = 'block';
+    document.getElementById('modelo-doenca-banner').textContent = d.label + ' — CID-10: ' + d.cid;
+
+    const mDiv = document.getElementById('mod-manifestacoes');
+    mDiv.innerHTML = d.manifestacoes.map((m, i) =>
+      `<label style="display:flex;align-items:center;gap:8px;font-size:12.5px;cursor:pointer;padding:4px 0">
+        <input type="checkbox" id="manif-${i}" style="width:15px;height:15px;flex-shrink:0"> ${m}
+       </label>`
+    ).join('');
+
+    const eDiv = document.getElementById('mod-escores');
+    eDiv.innerHTML = d.escores.map(e =>
+      `<div class="field">
+        <label style="font-size:12px">${e.label}</label>
+        <input id="escore-${e.id}" placeholder="${e.faixa || 'preencher'}" style="font-size:13px"/>
+        ${e.ref ? `<div style="font-size:10.5px;color:var(--text-secondary);margin-top:3px">${e.ref}</div>` : ''}
+       </div>`
+    ).join('');
+
+    const bioSel = document.getElementById('mod-bio-select');
+    if (d.biologicos.length) {
+      bioSel.innerHTML = `<option value="">— selecionar —</option>` +
+        d.biologicos.map(b => `<option>${b}</option>`).join('');
+      document.getElementById('mod-bio-section').closest('div').style.display = 'block';
+    } else {
+      document.getElementById('mod-bio-section').closest('div').style.display = 'none';
+    }
+    document.getElementById('mod-solicita-bio').checked = false;
+    document.getElementById('mod-bio-section').style.display = 'none';
+  }
+
+  function toggleBioSection() {
+    const checked = document.getElementById('mod-solicita-bio').checked;
+    document.getElementById('mod-bio-section').style.display = checked ? 'block' : 'none';
+  }
+
+  function addTratRow() {
+    const list = document.getElementById('mod-trat-list');
+    const row = document.createElement('div');
+    row.className = 'mod-trat-row';
+    row.style.cssText = 'display:grid;grid-template-columns:2fr 1fr 1.2fr auto;gap:8px;align-items:center';
+    const sel = (opts) => `<select style="font-size:12px;padding:7px 8px;border-radius:6px;border:1px solid var(--border);background:var(--surface);width:100%">${opts.map(o=>`<option>${o}</option>`).join('')}</select>`;
+    row.innerHTML =
+      `<input placeholder="Medicamento e dose (ex: Metotrexato 20mg/semana)" style="font-size:12px"/>` +
+      `<input placeholder="Duração (ex: 12 meses)" style="font-size:12px"/>` +
+      sel(['Boa resposta / remissão','Resposta parcial','Falha terapêutica','Intolerância / efeito adverso','Suspensão por gestação','Em uso atual']) +
+      `<button class="btn btn-danger" style="padding:6px 10px;font-size:12px" onclick="this.closest('.mod-trat-row').remove()">✕</button>`;
+    list.appendChild(row);
+  }
+
+  function buildRelatorioModeloHtml() {
+    const d = MODELO_DOENCAS[doencaSelecionada];
+    const p = getPaciente();
+    const tempo    = document.getElementById('mod-tempo').value.trim();
+    const grav     = document.getElementById('mod-gravidade').value;
+    const subtipo  = document.getElementById('mod-subtipo').value.trim();
+    const outrasM  = document.getElementById('mod-outras-manif').value.trim();
+    const sintAtual = document.getElementById('mod-sintomas-atuais').value.trim();
+    const avalMed  = document.getElementById('mod-aval-med').value;
+    const avalPac  = document.getElementById('mod-aval-pac').value;
+    const solBio   = document.getElementById('mod-solicita-bio').checked;
+    const bioSel   = document.getElementById('mod-bio-select').value;
+    const nFalhas  = document.getElementById('mod-falhas').value;
+    const justif   = document.getElementById('mod-justificativa').value.trim();
+
+    const manifSel = d.manifestacoes.filter((_, i) => document.getElementById(`manif-${i}`)?.checked);
+
+    const tratRows = [...document.querySelectorAll('.mod-trat-row')].map(row => {
+      const ins = row.querySelectorAll('input');
+      const sels = row.querySelectorAll('select');
+      return { med: ins[0]?.value.trim(), dur: ins[1]?.value.trim(), resp: sels[0]?.value };
+    }).filter(r => r.med);
+
+    const escoresPreench = d.escores.map(e => ({
+      label: e.label, val: document.getElementById(`escore-${e.id}`)?.value.trim() || '', ref: e.ref
+    })).filter(e => e.val);
+
+    const falhasDocumentadas = tratRows.filter(r =>
+      r.resp === 'Falha terapêutica' || r.resp === 'Intolerância / efeito adverso'
+    );
+
+    // Bloco de tratamentos
+    const tratHtml = tratRows.length ? `
+      <table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:8px">
+        <thead><tr style="background:#f0f0f0">
+          <th style="text-align:left;padding:6px 8px;border:1px solid #ccc;font-weight:600">Medicamento / Dose</th>
+          <th style="text-align:left;padding:6px 8px;border:1px solid #ccc;font-weight:600">Duração</th>
+          <th style="text-align:left;padding:6px 8px;border:1px solid #ccc;font-weight:600">Resposta</th>
+        </tr></thead>
+        <tbody>${tratRows.map(r =>
+          `<tr>
+            <td style="padding:6px 8px;border:1px solid #ddd">${r.med}</td>
+            <td style="padding:6px 8px;border:1px solid #ddd">${r.dur}</td>
+            <td style="padding:6px 8px;border:1px solid #ddd;${r.resp==='Falha terapêutica'||r.resp==='Intolerância / efeito adverso'?'color:#c0392b;font-weight:600':''}">${r.resp}</td>
+           </tr>`
+        ).join('')}</tbody>
+      </table>` : '<p style="color:#888;font-style:italic">Nenhum tratamento registrado.</p>';
+
+    // Bloco de escores
+    const escoresHtml = escoresPreench.length ? `
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px">
+        ${escoresPreench.map(e => `
+          <div style="background:#f5f9f7;border:1px solid #c8e6d9;border-radius:6px;padding:8px 14px;min-width:130px">
+            <div style="font-size:10px;color:#555;font-weight:600;text-transform:uppercase;letter-spacing:0.03em">${e.label}</div>
+            <div style="font-size:22px;font-weight:700;color:#1a6b5a;margin:2px 0">${e.val}</div>
+            ${e.ref ? `<div style="font-size:9.5px;color:#777;margin-top:2px">${e.ref}</div>` : ''}
+          </div>`).join('')}
+      </div>` : '';
+
+    // Bloco DUT-65
+    const dutHtml = (solBio && bioSel) ? `
+      <div style="border:2px solid #1a6b5a;border-radius:8px;padding:16px 18px;margin-top:1rem;page-break-inside:avoid">
+        <div style="font-size:12px;font-weight:700;color:#1a6b5a;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px">
+          ▸ Solicitação de Imunobiológico — ${d.dut}
+        </div>
+        <p style="text-align:justify;font-size:12.5px;line-height:1.85;margin-bottom:8px">
+          O(A) paciente <strong>${p.nome || '___________'}</strong>, portador(a) de <strong>${d.label}</strong>
+          (CID-10: <strong>${d.cid}</strong>), com diagnóstico estabelecido há <strong>${tempo || '___________'}</strong>,
+          apresenta doença de caráter <strong>${grav}</strong>${subtipo ? `, na forma <strong>${subtipo}</strong>,` : ','}
+          com histórico de ${falhasDocumentadas.length > 0
+            ? `<strong>${falhasDocumentadas.length} falha(s) terapêutica(s)</strong> a tratamentos convencionais documentadas neste relatório`
+            : `<strong>${nFalhas}</strong> a terapias convencionais ou contraindicação a estas`},
+          conforme detalhado no histórico de tratamentos acima.
+        </p>
+        <p style="text-align:justify;font-size:12.5px;line-height:1.85;margin-bottom:8px">
+          Diante do quadro clínico descrito, com atividade de doença objetivada pelos escores registrados e
+          pela avaliação clínica documentada, configura-se indicação terapêutica para uso de imunobiológico
+          nos termos da <strong>${d.dut}</strong> e do Protocolo Clínico e Diretrizes Terapêuticas (PCDT)
+          vigente do Ministério da Saúde / CONITEC.
+        </p>
+        <p style="font-size:12.5px;line-height:1.85;margin-bottom:${justif?'8px':'0'}">
+          <strong>Imunobiológico solicitado:</strong> ${bioSel}
+        </p>
+        ${justif ? `<p style="text-align:justify;font-size:12.5px;line-height:1.85"><strong>Justificativa complementar:</strong> ${justif}</p>` : ''}
+      </div>` : '';
+
+    return `
+      ${letterhead('Relatório Médico')}
+      ${docSec('Identificação do Paciente', pacienteHtml(p))}
+      <div class="doc-section">
+        <div class="doc-section-label">Diagnóstico e Tempo de Doença</div>
+        <p><strong>Diagnóstico:</strong> ${d.label} — CID-10: ${d.cid}</p>
+        ${subtipo ? `<p><strong>Subtipo / forma clínica:</strong> ${subtipo}</p>` : ''}
+        <p><strong>Tempo de diagnóstico:</strong> ${tempo || '___________'}</p>
+        <p><strong>Classificação / Gravidade:</strong> ${grav}</p>
+      </div><hr class="doc-divider"/>
+      ${manifSel.length || outrasM ? `
+      <div class="doc-section">
+        <div class="doc-section-label">Manifestações Clínicas Principais</div>
+        ${manifSel.length ? `<ul style="margin:8px 0 0 16px;line-height:2">${manifSel.map(m=>`<li>${m}</li>`).join('')}</ul>` : ''}
+        ${outrasM ? `<p style="margin-top:8px"><strong>Outras manifestações:</strong> ${outrasM}</p>` : ''}
+      </div><hr class="doc-divider"/>` : ''}
+      <div class="doc-section">
+        <div class="doc-section-label">Histórico de Tratamentos Realizados</div>
+        ${tratHtml}
+      </div><hr class="doc-divider"/>
+      <div class="doc-section">
+        <div class="doc-section-label">Avaliação Clínica Atual</div>
+        ${sintAtual ? `<p style="text-align:justify;line-height:1.85">${sintAtual}</p>` : ''}
+        ${avalMed || avalPac ? `<div style="display:flex;gap:28px;margin-top:10px;font-size:12.5px">
+          ${avalMed ? `<span><strong>Avaliação global do médico:</strong> ${avalMed}/10</span>` : ''}
+          ${avalPac ? `<span><strong>Avaliação global do paciente:</strong> ${avalPac}/10</span>` : ''}
+        </div>` : ''}
+      </div>
+      ${escoresHtml ? `<hr class="doc-divider"/>
+      <div class="doc-section">
+        <div class="doc-section-label">Escores de Atividade e Gravidade</div>
+        ${escoresHtml}
+      </div>` : ''}
+      ${dutHtml}
+      ${assinatura('relatorio')}`;
+  }
+
+  function gerarRelatorioModelo() {
+    if (!doencaSelecionada) { alert('Selecione uma doença primeiro.'); return; }
+    if (!validarPaciente()) return;
+    abrirPDF(buildRelatorioModeloHtml());
+  }
+
+  function limparModelo() {
+    document.getElementById('mod-tempo').value = '';
+    document.getElementById('mod-gravidade').value = 'Grave';
+    document.getElementById('mod-subtipo').value = '';
+    document.getElementById('mod-outras-manif').value = '';
+    document.getElementById('mod-sintomas-atuais').value = '';
+    document.getElementById('mod-aval-med').value = '';
+    document.getElementById('mod-aval-pac').value = '';
+    document.getElementById('mod-justificativa').value = '';
+    document.getElementById('mod-solicita-bio').checked = false;
+    document.getElementById('mod-bio-section').style.display = 'none';
+    document.getElementById('mod-trat-list').innerHTML = '';
+    document.querySelectorAll('#mod-manifestacoes input[type=checkbox]').forEach(c => c.checked = false);
+    document.querySelectorAll('#mod-escores input').forEach(i => i.value = '');
+  }
 
   function abrirPDF(html) {
     const CSS = `
