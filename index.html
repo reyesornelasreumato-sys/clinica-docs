@@ -255,6 +255,15 @@
     .ex-item-on .ex-item-check { background: #2563eb; color: #fff; }
     .ex-item-off .ex-item-check { background: var(--border); color: var(--text-muted); }
     .med-row { display: grid; grid-template-columns: 1fr 1fr auto; gap: 8px; margin-bottom: 8px; align-items: center; }
+    .med-class-btns { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1rem; }
+    .med-class-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--surface); color: var(--text-secondary); font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s; }
+    .med-class-btn:hover { border-color: var(--brand); color: var(--brand); background: var(--brand-light); }
+    .med-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 10px; }
+    .med-card-top { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .med-class-badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: var(--brand-light); color: var(--brand); flex-shrink: 0; }
+    .med-card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+    .med-especial-bar { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: #fff8e1; border: 1px solid #f9a825; border-radius: var(--radius-md); margin-bottom: 1rem; font-size: 13px; color: #5d4037; }
+    @media (max-width: 640px) { .med-card-grid { grid-template-columns: 1fr; } }
 
     /* ── EXAM TAGS ── */
     .exam-add-row { display: flex; gap: 8px; margin-bottom: 10px; }
@@ -499,15 +508,28 @@
         <span class="date-req-err" id="err-data-receita">Selecione</span>
       </div>
     </div>
-    <p class="section-label">Medicamentos prescritos</p>
-    <div id="meds-list">
-      <div class="med-row">
-        <input class="med-name" placeholder="Medicamento e dosagem — ex: Metotrexato 15mg" />
-        <input class="med-pos" placeholder="Posologia — ex: 1 comprimido/semana" />
-        <button class="btn btn-danger" onclick="rmMed(this)" title="Remover">✕</button>
-      </div>
+
+    <p class="section-label">Tipo de receita</p>
+    <label style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--bg);border:1px solid var(--border-soft);border-radius:var(--radius-md);cursor:pointer;margin-bottom:1rem">
+      <input type="checkbox" id="receita-especial-check" onchange="updateEspecialUI()" style="width:16px;height:16px;accent-color:var(--brand);flex-shrink:0">
+      <span style="font-size:14px;font-weight:500">Receita de <strong>Controle Especial</strong> — medicamento controlado (emite 2 vias)</span>
+    </label>
+    <div id="receita-especial-info" class="med-especial-bar" style="display:none">
+      ⚠️ Documento gerado em <strong style="margin:0 3px">2 vias</strong> (1ª via Farmácia · 2ª via Paciente), conforme ANVISA para medicamentos de controle especial.
     </div>
-    <button class="btn" onclick="addMed()" style="margin-top:4px">+ Adicionar medicamento</button>
+
+    <p class="section-label">Adicionar medicamentos por classe</p>
+    <div class="med-class-btns">
+      <button class="med-class-btn" onclick="addMedClasse('antibioticos')">🦠 Antibióticos</button>
+      <button class="med-class-btn" onclick="addMedClasse('analgesicos')">💊 Analgésicos</button>
+      <button class="med-class-btn" onclick="addMedClasse('dmards')">🔬 DMARDs</button>
+      <button class="med-class-btn" onclick="addMedClasse('antiinflamatorios')">🔥 Anti-inflamatórios</button>
+      <button class="med-class-btn" onclick="addMedClasse('diversos')">📋 Medicações Diversas</button>
+    </div>
+
+    <div id="meds-list"></div>
+    <button class="btn" onclick="addMedManual()" style="margin-bottom:1.25rem">✏️ Adicionar medicamento livre</button>
+
     <p class="section-label">Observações</p>
     <div class="form-grid cols-1">
       <div class="field"><textarea id="rc-obs" placeholder="Retornar em 30 dias..."></textarea></div>
@@ -754,18 +776,162 @@
   function setDataOpt() {} // legacy stub
   function showPreview(html) { abrirPDF(html); return true; }
 
-  /* ── MEDS ── */
-  function addMed() {
-    const list = document.getElementById('meds-list');
-    const row = document.createElement('div');
-    row.className = 'med-row';
-    row.innerHTML = `<input class="med-name" placeholder="Medicamento e dosagem" /><input class="med-pos" placeholder="Posologia" /><button class="btn btn-danger" onclick="rmMed(this)">✕</button>`;
-    list.appendChild(row);
+  /* ── CATÁLOGO DE MEDICAMENTOS ── */
+  const MED_CATALOG = {
+    antibioticos: { label: 'Antibióticos', icon: '🦠', meds: [
+      { nome: 'Amoxicilina 500mg', pos: '1 comprimido de 8/8h', dur: '7 dias' },
+      { nome: 'Amoxicilina + Clavulanato 875/125mg', pos: '1 comprimido de 12/12h', dur: '7 dias' },
+      { nome: 'Azitromicina 500mg', pos: '1 comprimido 1x/dia', dur: '5 dias' },
+      { nome: 'Claritromicina 500mg', pos: '1 comprimido de 12/12h', dur: '7 dias' },
+      { nome: 'Ciprofloxacino 500mg', pos: '1 comprimido de 12/12h', dur: '7 dias' },
+      { nome: 'Cefalexina 500mg', pos: '1 comprimido de 6/6h', dur: '7 dias' },
+      { nome: 'Doxiciclina 100mg', pos: '1 comprimido de 12/12h (com água, não deitar por 30min)', dur: '14 dias' },
+      { nome: 'Metronidazol 400mg', pos: '1 comprimido de 8/8h com refeição', dur: '7 dias' },
+      { nome: 'Sulfametoxazol + Trimetoprima 400/80mg', pos: '2 comprimidos de 12/12h', dur: '7 dias' },
+    ]},
+    analgesicos: { label: 'Analgésicos', icon: '💊', meds: [
+      { nome: 'Dipirona Sódica 500mg', pos: '1-2 comprimidos de 6/6h se dor', dur: 'se necessário' },
+      { nome: 'Paracetamol 750mg', pos: '1 comprimido de 6/6h se dor (máx. 4g/dia)', dur: 'se necessário' },
+      { nome: 'Tramadol 50mg', pos: '1 cápsula de 8/8h se dor intensa', dur: 'conforme avaliação', especial: true },
+      { nome: 'Codeína 30mg + Paracetamol 500mg', pos: '1 comprimido de 6/6h se dor', dur: 'conforme avaliação', especial: true },
+      { nome: 'Morfina 10mg (comprimido)', pos: '1 comprimido de 4/4h', dur: 'conforme avaliação', especial: true },
+    ]},
+    dmards: { label: 'DMARDs', icon: '🔬', meds: [
+      { nome: 'Metotrexato 2,5mg', pos: '_____ comprimidos, 1x/semana (____mg/semana) — tomar à noite', dur: 'uso contínuo' },
+      { nome: 'Leflunomida 20mg', pos: '1 comprimido/dia', dur: 'uso contínuo' },
+      { nome: 'Sulfassalazina 500mg', pos: '_____ comprimidos de 12/12h com refeição', dur: 'uso contínuo' },
+      { nome: 'Hidroxicloroquina 400mg', pos: '1 comprimido/dia com refeição', dur: 'uso contínuo' },
+      { nome: 'Azatioprina 50mg', pos: '_____ comprimidos/dia com refeição', dur: 'uso contínuo' },
+      { nome: 'Micofenolato de Mofetila 500mg', pos: '_____ comprimidos de 12/12h com refeição', dur: 'uso contínuo' },
+      { nome: 'Ciclosporina 100mg', pos: '_____ comprimidos de 12/12h (horário fixo)', dur: 'uso contínuo' },
+      { nome: 'Tofacitinibe 5mg', pos: '1 comprimido de 12/12h', dur: 'uso contínuo' },
+      { nome: 'Baricitinibe 4mg', pos: '1 comprimido/dia', dur: 'uso contínuo' },
+      { nome: 'Upadacitinibe 15mg', pos: '1 comprimido/dia (não partir ou mastigar)', dur: 'uso contínuo' },
+      { nome: 'Filgotinibe 200mg', pos: '1 comprimido/dia', dur: 'uso contínuo' },
+    ]},
+    antiinflamatorios: { label: 'Anti-inflamatórios', icon: '🔥', meds: [
+      { nome: 'Ibuprofeno 600mg', pos: '1 comprimido de 8/8h com refeição', dur: '5 dias' },
+      { nome: 'Naproxeno 500mg', pos: '1 comprimido de 12/12h com refeição', dur: '5 dias' },
+      { nome: 'Diclofenaco Sódico 50mg', pos: '1 comprimido de 8/8h com refeição', dur: '5 dias' },
+      { nome: 'Celecoxibe 200mg', pos: '1 comprimido/dia com refeição', dur: '5 dias' },
+      { nome: 'Etoricoxibe 90mg', pos: '1 comprimido/dia com refeição', dur: '5 dias' },
+      { nome: 'Meloxicam 15mg', pos: '1 comprimido/dia com refeição', dur: '5 dias' },
+      { nome: 'Prednisona 5mg', pos: '_____ comprimidos/dia pela manhã com refeição', dur: 'conforme prescrição' },
+      { nome: 'Prednisona 20mg', pos: '_____ comprimidos/dia pela manhã com refeição', dur: 'conforme prescrição' },
+      { nome: 'Metilprednisolona 4mg', pos: '_____ comprimidos/dia pela manhã com refeição', dur: 'conforme prescrição' },
+      { nome: 'Betametasona 0,5mg', pos: '_____ comprimidos/dia pela manhã com refeição', dur: 'conforme prescrição' },
+      { nome: 'Deflazacorte 6mg', pos: '_____ comprimidos/dia pela manhã com refeição', dur: 'conforme prescrição' },
+    ]},
+    diversos: { label: 'Medicações Diversas', icon: '📋', meds: [
+      { nome: 'Omeprazol 20mg', pos: '1 cápsula em jejum 30min antes do café', dur: 'uso contínuo' },
+      { nome: 'Pantoprazol 40mg', pos: '1 comprimido em jejum', dur: 'uso contínuo' },
+      { nome: 'Ácido Fólico 5mg', pos: '1 comprimido/dia (exceto no dia do Metotrexato)', dur: 'uso contínuo' },
+      { nome: 'Cálcio 500mg + Vitamina D 200UI', pos: '1 comprimido 2x/dia com refeição', dur: 'uso contínuo' },
+      { nome: 'Colecalciferol 7.000 UI', pos: '1 cápsula 1x/semana', dur: 'uso contínuo' },
+      { nome: 'Colecalciferol 50.000 UI', pos: '1 cápsula 1x/semana', dur: '8 semanas' },
+      { nome: 'Alopurinol 100mg', pos: '1 comprimido/dia com refeição', dur: 'uso contínuo' },
+      { nome: 'Alopurinol 300mg', pos: '1 comprimido/dia com refeição', dur: 'uso contínuo' },
+      { nome: 'Colchicina 0,5mg', pos: '1 comprimido de 12/12h com refeição', dur: 'uso contínuo' },
+      { nome: 'Gabapentina 300mg', pos: '1 comprimido de 8/8h', dur: 'uso contínuo' },
+      { nome: 'Duloxetina 60mg', pos: '1 cápsula/dia com refeição', dur: 'uso contínuo' },
+      { nome: 'Amitriptilina 25mg', pos: '1 comprimido à noite', dur: 'uso contínuo', especial: true },
+      { nome: 'Pregabalina 75mg', pos: '1 cápsula de 12/12h', dur: 'uso contínuo', especial: true },
+      { nome: 'Pregabalina 150mg', pos: '1 cápsula de 12/12h', dur: 'uso contínuo', especial: true },
+      { nome: 'Hidroxizina 25mg', pos: '1 comprimido à noite', dur: 'conforme avaliação', especial: true },
+    ]},
+  };
+
+  const DUR_OPTS = ['se necessário','7 dias','14 dias','30 dias','60 dias','90 dias','uso contínuo','conforme avaliação médica'];
+
+  function durSelect(selected) {
+    return `<select class="med-dur" style="font-size:13px;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);font-family:'Inter',sans-serif;width:100%">
+      ${DUR_OPTS.map(d => `<option value="${d}" ${d===selected?'selected':''}>${d}</option>`).join('')}
+      <option value="personalizado" ${!DUR_OPTS.includes(selected)?'selected':''}>personalizado...</option>
+    </select>`;
   }
-  function rmMed(btn) {
-    const list = document.getElementById('meds-list');
-    if (list.children.length > 1) btn.closest('.med-row').remove();
+
+  function addMedClasse(classe) {
+    const cat = MED_CATALOG[classe];
+    const opts = cat.meds.map((m, i) =>
+      `<option value="${i}" data-pos="${m.pos.replace(/"/g,'&quot;')}" data-dur="${m.dur}" ${m.especial?'data-especial="1"':''}>
+        ${m.nome}${m.especial ? ' ⚠️' : ''}
+      </option>`
+    ).join('');
+    const card = document.createElement('div');
+    card.className = 'med-card';
+    card.dataset.tipo = 'classe';
+    card.innerHTML = `
+      <div class="med-card-top">
+        <span class="med-class-badge">${cat.icon} ${cat.label}</span>
+        <button class="btn btn-danger" style="margin-left:auto;padding:4px 10px;font-size:12px" onclick="this.closest('.med-card').remove()">✕</button>
+      </div>
+      <div class="field">
+        <label style="font-size:12px;font-weight:600;color:var(--text-secondary)">Medicamento</label>
+        <select class="med-select" onchange="onMedSelect(this)" style="font-size:13px;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);font-family:'Inter',sans-serif;width:100%">
+          <option value="">— selecionar medicamento —</option>${opts}
+        </select>
+      </div>
+      <div class="med-card-grid">
+        <div class="field">
+          <label style="font-size:12px;font-weight:600;color:var(--text-secondary)">Posologia</label>
+          <input class="med-pos" placeholder="Posologia" style="font-size:13px"/>
+        </div>
+        <div class="field">
+          <label style="font-size:12px;font-weight:600;color:var(--text-secondary)">Por quanto tempo</label>
+          ${durSelect('30 dias')}
+        </div>
+      </div>`;
+    document.getElementById('meds-list').appendChild(card);
   }
+
+  function addMedManual() {
+    const card = document.createElement('div');
+    card.className = 'med-card';
+    card.dataset.tipo = 'livre';
+    card.innerHTML = `
+      <div class="med-card-top">
+        <span class="med-class-badge">✏️ Livre</span>
+        <button class="btn btn-danger" style="margin-left:auto;padding:4px 10px;font-size:12px" onclick="this.closest('.med-card').remove()">✕</button>
+      </div>
+      <div class="field">
+        <label style="font-size:12px;font-weight:600;color:var(--text-secondary)">Medicamento, dose e posologia</label>
+        <input class="med-nome" placeholder="Ex: Metotrexato 15mg — 6 comprimidos 1x/semana" style="font-size:13px"/>
+      </div>
+      <div class="field" style="margin-top:8px">
+        <label style="font-size:12px;font-weight:600;color:var(--text-secondary)">Por quanto tempo</label>
+        ${durSelect('30 dias')}
+      </div>`;
+    document.getElementById('meds-list').appendChild(card);
+  }
+
+  function onMedSelect(sel) {
+    const card = sel.closest('.med-card');
+    const opt  = sel.options[sel.selectedIndex];
+    if (!opt.value) return;
+    const pos     = opt.dataset.pos || '';
+    const dur     = opt.dataset.dur || '30 dias';
+    const especial = opt.dataset.especial === '1';
+    const posInput = card.querySelector('.med-pos');
+    const durSel   = card.querySelector('.med-dur');
+    if (posInput) posInput.value = pos;
+    if (durSel) {
+      const match = [...durSel.options].find(o => o.value === dur);
+      if (match) durSel.value = dur;
+    }
+    if (especial) {
+      document.getElementById('receita-especial-check').checked = true;
+      updateEspecialUI();
+    }
+  }
+
+  function updateEspecialUI() {
+    const checked = document.getElementById('receita-especial-check').checked;
+    document.getElementById('receita-especial-info').style.display = checked ? 'flex' : 'none';
+  }
+
+  /* ── MEDS legado (compatibilidade) ── */
+  function addMed() { addMedManual(); }
+  function rmMed(btn) { btn.closest('.med-card, .med-row')?.remove(); }
 
   /* ── EXAMES: CATÁLOGO LABORATORIAL ── */
   const LAB_CATALOG = [
@@ -1444,17 +1610,44 @@
         ${assinatura('relatorio')}`;
     }
     if (tipo === 'receita') {
-      const obs  = v('rc-obs');
-      const meds = [...document.querySelectorAll('#meds-list .med-row')].map((row,i) => {
-        const name = row.querySelector('.med-name').value.trim() || '(não preenchido)';
-        const pos  = row.querySelector('.med-pos').value.trim();
-        return `<div class="med-item"><strong>${i+1}. ${name}</strong>${pos?`<span>${pos}</span>`:''}</div>`;
-      }).join('');
-      return `${letterhead('Receita Médica')}
+      const isEspecial = document.getElementById('receita-especial-check')?.checked;
+      const obs = v('rc-obs');
+      const cards = [...document.querySelectorAll('#meds-list .med-card')];
+      let idx = 0;
+      const medsHtml = cards.map(card => {
+        let nome = '', pos = '', dur = '';
+        if (card.dataset.tipo === 'livre') {
+          nome = card.querySelector('.med-nome')?.value.trim() || '';
+        } else {
+          const sel = card.querySelector('.med-select');
+          if (sel && sel.value !== '') nome = sel.options[sel.selectedIndex].text.replace(/⚠️/g,'').trim();
+          pos = card.querySelector('.med-pos')?.value.trim() || '';
+        }
+        dur = card.querySelector('.med-dur')?.value || '';
+        if (dur === 'personalizado') dur = '';
+        if (!nome) return '';
+        idx++;
+        return `<div class="med-item">
+          <strong>${idx}. ${nome}</strong>
+          ${pos ? `<span>${pos}</span>` : ''}
+          ${dur ? `<span style="color:#1a6b5a;font-size:12px;font-weight:600;display:block;margin-top:2px">Duração: ${dur}</span>` : ''}
+        </div>`;
+      }).filter(Boolean).join('');
+
+      const titulo = isEspecial ? 'Receita de Controle Especial' : 'Receita Médica';
+      const corpo = `${letterhead(titulo)}
         ${docSec('Paciente', pacienteHtml(p))}
-        <div class="doc-section"><div class="doc-section-label">Prescrição</div>${meds}</div><hr class="doc-divider"/>
+        <div class="doc-section"><div class="doc-section-label">Prescrição</div>${medsHtml || '<p style="color:#8a9e99">Nenhum medicamento prescrito.</p>'}</div><hr class="doc-divider"/>
         ${obs ? docSec('Observações', `<p>${nl2br(obs)}</p>`) : ''}
         ${assinatura('receita')}`;
+
+      if (isEspecial) {
+        const via1 = `<div style="font-size:10px;color:#1a6b5a;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">1ª Via — Farmácia</div>${corpo}`;
+        const via2 = `<div style="font-size:10px;color:#1a6b5a;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">2ª Via — Paciente</div>${corpo}`;
+        const sep  = `<div style="border-top:1px dashed #aaa;margin:2.5rem 0;page-break-after:always"></div>`;
+        return via1 + sep + via2;
+      }
+      return corpo;
     }
     if (tipo === 'exames') {
       const hip = v('ex-hip'), obs = v('ex-obs');
@@ -1600,10 +1793,10 @@ ${html}
     };
     (ids[tipo]||[]).forEach(id => { const el=document.getElementById(id); if(el) el.value=el.type==='number'?'1':''; });
     if (tipo === 'receita') {
-      const list = document.getElementById('meds-list');
-      while (list.children.length > 1) list.removeChild(list.lastChild);
-      list.querySelector('.med-name').value = '';
-      list.querySelector('.med-pos').value = '';
+      document.getElementById('meds-list').innerHTML = '';
+      const chk = document.getElementById('receita-especial-check');
+      if (chk) chk.checked = false;
+      updateEspecialUI();
     }
     if (tipo === 'exames') {
       selectedExams.clear(); manualExams.length = 0; activePresets.clear();
