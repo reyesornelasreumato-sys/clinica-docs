@@ -1023,7 +1023,7 @@
   function addMedClasse(classe) {
     const cat = MED_CATALOG[classe];
     const opts = cat.meds.map((m, i) =>
-      `<option value="${i}" data-pos="${m.pos.replace(/"/g,'&quot;')}" data-dur="${m.dur}" ${m.especial?'data-especial="1"':''} ${m.info?`data-info="${m.info.replace(/"/g,'&quot;')}"`:''}
+      `<option value="${i}" data-pos="${m.pos.replace(/"/g,'&quot;')}" data-dur="${m.dur}" ${m.especial?'data-especial="1"':''} ${m.info?`data-info="${m.info.replace(/"/g,'&quot;')}"`:''}>
         ${m.nome}${m.especial ? ' ⚠️' : ''}
       </option>`
     ).join('');
