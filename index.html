@@ -1459,7 +1459,7 @@
       const hip = v('ex-hip'), obs = v('ex-obs');
       const all = getAllExams();
       const examList = all.length
-        ? `<ul class="exam-list-doc">${all.map(e=>`<li><span class="exam-bullet"></span>${e}</li>`).join('')}</ul>`
+        ? `<ul class="exam-list-doc exam-list-2col">${all.map(e=>`<li><span class="exam-bullet"></span>${e}</li>`).join('')}</ul>`
         : '<p style="color:#8a9e99">Nenhum exame selecionado.</p>';
       return `${letterhead('Solicitação de Exames Laboratoriais')}
         ${docSec('Paciente', pacienteHtml(p))}
@@ -1553,6 +1553,8 @@
   .exam-list-doc li{padding:4px 0;border-bottom:1px solid #edf1ef;font-size:13px;display:flex;align-items:center;gap:8px}
   .exam-list-doc li:last-child{border-bottom:none}
   .exam-bullet{width:5px;height:5px;border-radius:50%;background:#1a6b5a;flex-shrink:0}
+  .exam-list-2col{column-count:2;column-gap:2rem}
+  .exam-list-2col li{break-inside:avoid}
   @page { margin: 2.5cm 2cm; size: A4; }
   @media print { body { padding: 0; } }`;
 
