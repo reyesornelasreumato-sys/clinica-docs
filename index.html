@@ -1522,16 +1522,7 @@
   function gerar(tipo) { gerarUm(tipo); }
 
   function abrirPDF(html) {
-    const local = localSelecionado !== null ? LOCAIS[localSelecionado] : null;
-    const win = window.open('', '_blank');
-    win.document.write(`<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8"/>
-<title>Documento Médico</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lora:wght@500;600&display=swap" rel="stylesheet"/>
-<style>
+    const CSS = `
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:'Inter',sans-serif;font-size:13px;line-height:1.7;color:#1a1f1e;background:#fff;padding:2.5cm 2cm}
   .doc-letterhead{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;padding-bottom:1.2rem;border-bottom:2px solid #1a6b5a;gap:1rem}
@@ -1563,14 +1554,27 @@
   .exam-list-doc li:last-child{border-bottom:none}
   .exam-bullet{width:5px;height:5px;border-radius:50%;background:#1a6b5a;flex-shrink:0}
   @page { margin: 2.5cm 2cm; size: A4; }
-  @media print { body { padding: 0; } }</style>
+  @media print { body { padding: 0; } }`;
+
+    const fullHtml = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<title>Documento Médico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lora:wght@500;600&display=swap" rel="stylesheet"/>
+<style>${CSS}</style>
 </head>
 <body>
 ${html}
-<script>window.onload=function(){window.print();}<\/script>
+<script>window.addEventListener('load',function(){setTimeout(function(){window.print();},400);});<\/script>
 </body>
-</html>`);
-    win.document.close();
+</html>`;
+
+    const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+    const url  = URL.createObjectURL(blob);
+    const win  = window.open(url, '_blank');
+    if (win) setTimeout(() => URL.revokeObjectURL(url), 60000);
   }
 
   function pacienteHtml(p) {
