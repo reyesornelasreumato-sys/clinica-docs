@@ -1439,23 +1439,83 @@
   /* ── TIMBRADO ── */
   function letterhead(tipoDoc) {
     const local = localSelecionado !== null ? LOCAIS[localSelecionado] : null;
+    const isConsultorio = localSelecionado === null || localSelecionado === 3;
     const logoStyle = (local && local.logoStyle) || 'max-width:120px;max-height:72px';
-    const logoBox = local && local.logo ? `<img src="${local.logo}" style="${logoStyle};object-fit:contain;display:block" alt="Logo">` : `<div class="doc-logo-placeholder">Logo<br>instituição</div>`;
-    const localInfo = local
-      ? `<strong>${local.nome}</strong>${local.end}<br>${local.tel}`
-      : `<strong>Consultório</strong>São Paulo - SP`;
+    const logoBox = local && local.logo
+      ? `<img src="${local.logo}" style="${logoStyle};object-fit:contain;display:block" alt="Logo">`
+      : `<div class="doc-logo-placeholder">Logo<br>instituição</div>`;
+
+    const centerContent = isConsultorio
+      ? `<h2>${MEDICO.nome}</h2><div class="doc-specialty">${MEDICO.specialty}</div><div class="doc-crm">${MEDICO.crm}</div>`
+      : `<h2>${local.nome}</h2><div class="doc-specialty">${MEDICO.specialty}</div><div class="doc-crm">${MEDICO.crm}</div>`;
+
+    const rightContent = local
+      ? isConsultorio
+        ? `<strong>${local.nome}</strong>${local.end}<br>${local.tel}`
+        : `${local.end}<br>${local.tel}`
+      : `<strong>Consultório Particular</strong>São Paulo - SP`;
 
     return `
       <div class="doc-letterhead">
         <div class="doc-letterhead-logo">${logoBox}</div>
-        <div class="doc-letterhead-center">
-          <h2>${MEDICO.nome}</h2>
-          <div class="doc-specialty">${MEDICO.specialty}</div>
-          <div class="doc-crm">${MEDICO.crm}</div>
-        </div>
-        <div class="doc-letterhead-right">${localInfo}</div>
+        <div class="doc-letterhead-center">${centerContent}</div>
+        <div class="doc-letterhead-right">${rightContent}</div>
       </div>
       <div class="doc-title-banner"><h3>${tipoDoc}</h3></div>`;
+  }
+
+  /* ── RODAPÉ RECEITA ESPECIAL (ANVISA) ── */
+  function footerEspecial() {
+    const local = localSelecionado !== null ? LOCAIS[localSelecionado] : null;
+    const isConsultorio = localSelecionado === null || localSelecionado === 3;
+    const p = getPaciente();
+
+    const emitNome  = isConsultorio ? MEDICO.nome : (local ? local.nome : MEDICO.nome);
+    const emitCRM   = isConsultorio ? `${MEDICO.crm} — ${MEDICO.specialty}` : `${MEDICO.crm} — ${MEDICO.specialty}`;
+    const emitEnd   = local ? local.end : 'R. Pais Leme, 215 — sala 710, Pinheiros, São Paulo - SP';
+    const emitTel   = local ? local.tel : '(11) 98828-2545';
+
+    const linha = (label, val='', largura='100%') =>
+      `<div style="margin-bottom:6px;font-size:10px"><span style="font-weight:600">${label}</span> <span style="border-bottom:1px solid #333;display:inline-block;min-width:60px;width:${largura};vertical-align:bottom">${val}</span></div>`;
+
+    return `
+    <table style="width:100%;border-collapse:collapse;border:1.5px solid #333;margin-top:2.5rem;font-size:10px;font-family:'Inter',sans-serif">
+      <tr>
+        <td style="width:33%;border-right:1.5px solid #333;padding:0">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;text-align:center;background:#f0f0f0;border-bottom:1px solid #333;padding:4px">Identificação do Emitente</div>
+          <div style="padding:8px;line-height:1.6">
+            <strong style="font-size:11px;display:block;margin-bottom:4px">${emitNome}</strong>
+            <span style="font-size:9px;color:#555">${emitCRM}</span><br>
+            <span style="font-size:10px">${emitEnd}</span><br>
+            <span style="font-size:10px">Fone: ${emitTel}</span>
+          </div>
+        </td>
+        <td style="width:33%;border-right:1.5px solid #333;padding:0">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;text-align:center;background:#f0f0f0;border-bottom:1px solid #333;padding:4px">Identificação do Comprador</div>
+          <div style="padding:8px">
+            ${linha('NOME:', p.nome || '')}
+            <div style="display:flex;gap:6px;margin-bottom:6px;font-size:10px">
+              <span>IDENT.: <span style="border-bottom:1px solid #333;display:inline-block;width:70px">&nbsp;</span></span>
+              <span>ORG.: <span style="border-bottom:1px solid #333;display:inline-block;width:35px">&nbsp;</span></span>
+            </div>
+            ${linha('END.:', p.end || '')}
+            <div style="display:flex;gap:6px;margin-bottom:6px;font-size:10px">
+              <span>CIDADE: <span style="border-bottom:1px solid #333;display:inline-block;width:70px">&nbsp;</span></span>
+              <span>UF: <span style="border-bottom:1px solid #333;display:inline-block;width:20px">&nbsp;</span></span>
+            </div>
+            <div style="font-size:10px">FONE: <span style="border-bottom:1px solid #333;display:inline-block;width:120px">&nbsp;</span></div>
+          </div>
+        </td>
+        <td style="width:34%;padding:0">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;text-align:center;background:#f0f0f0;border-bottom:1px solid #333;padding:4px">Identificação do Fornecedor</div>
+          <div style="padding:8px">
+            <div style="text-align:right;font-size:10px;margin-bottom:16px">___/___/______&nbsp;&nbsp;<span style="font-size:9px">DATA</span></div>
+            <div style="border-top:1px solid #333;margin-top:28px;padding-top:4px;font-size:9px;text-align:center">Assinatura do Farmacêutico</div>
+            <div style="margin-top:10px;font-size:10px">Fone: ${emitTel}</div>
+          </div>
+        </td>
+      </tr>
+    </table>`;
   }
 
   function assinatura(doc) {
@@ -1642,8 +1702,9 @@
         ${assinatura('receita')}`;
 
       if (isEspecial) {
-        const via1 = `<div style="font-size:10px;color:#1a6b5a;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">1ª Via — Farmácia</div>${corpo}`;
-        const via2 = `<div style="font-size:10px;color:#1a6b5a;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">2ª Via — Paciente</div>${corpo}`;
+        const footer = footerEspecial();
+        const via1 = `<div style="font-size:10px;color:#1a6b5a;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">1ª Via — Farmácia</div>${corpo}${footer}`;
+        const via2 = `<div style="font-size:10px;color:#1a6b5a;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">2ª Via — Paciente</div>${corpo}${footer}`;
         const sep  = `<div style="border-top:1px dashed #aaa;margin:2.5rem 0;page-break-after:always"></div>`;
         return via1 + sep + via2;
       }
