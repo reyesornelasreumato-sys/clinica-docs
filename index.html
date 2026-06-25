@@ -798,17 +798,28 @@
       { nome: 'Morfina 10mg (comprimido)', pos: '1 comprimido de 4/4h', dur: 'conforme avaliação', especial: true },
     ]},
     dmards: { label: 'DMARDs', icon: '🔬', meds: [
-      { nome: 'Metotrexato 2,5mg', pos: '_____ comprimidos, 1x/semana (____mg/semana) — tomar à noite', dur: 'uso contínuo' },
-      { nome: 'Leflunomida 20mg', pos: '1 comprimido/dia', dur: 'uso contínuo' },
-      { nome: 'Sulfassalazina 500mg', pos: '_____ comprimidos de 12/12h com refeição', dur: 'uso contínuo' },
-      { nome: 'Hidroxicloroquina 400mg', pos: '1 comprimido/dia com refeição', dur: 'uso contínuo' },
-      { nome: 'Azatioprina 50mg', pos: '_____ comprimidos/dia com refeição', dur: 'uso contínuo' },
-      { nome: 'Micofenolato de Mofetila 500mg', pos: '_____ comprimidos de 12/12h com refeição', dur: 'uso contínuo' },
-      { nome: 'Ciclosporina 100mg', pos: '_____ comprimidos de 12/12h (horário fixo)', dur: 'uso contínuo' },
-      { nome: 'Tofacitinibe 5mg', pos: '1 comprimido de 12/12h', dur: 'uso contínuo' },
-      { nome: 'Baricitinibe 4mg', pos: '1 comprimido/dia', dur: 'uso contínuo' },
-      { nome: 'Upadacitinibe 15mg', pos: '1 comprimido/dia (não partir ou mastigar)', dur: 'uso contínuo' },
-      { nome: 'Filgotinibe 200mg', pos: '1 comprimido/dia', dur: 'uso contínuo' },
+      { nome: 'Metotrexato 2,5mg', pos: '_____ comprimidos, 1x/semana (____mg/semana) — tomar à noite', dur: 'uso contínuo',
+        info: '<b>Indicações:</b> AR, APs, LES, vasculites, miopatias inflamatórias, espondilite.<br><b>Dose:</b> 7,5–25 mg/semana (iniciar 7,5–10 mg). Ajustar a cada 4–8 sem.<br><b>Monitorar:</b> Hemograma, TGO/TGP, creatinina (basal, mensal nos primeiros 6 meses, depois trimestral).<br><b>Obs:</b> Suplementar ácido fólico 5 mg/dia (exceto no dia do MTX). Contraindicado na gestação.' },
+      { nome: 'Leflunomida 20mg', pos: '1 comprimido/dia', dur: 'uso contínuo',
+        info: '<b>Indicações:</b> AR, APs — alternativa ao MTX ou em combinação.<br><b>Dose:</b> 20 mg/dia (pode iniciar 100 mg/dia por 3 dias como carga — não recomendado na prática por toxicidade).<br><b>Monitorar:</b> PA, enzimas hepáticas, hemograma. Meia-vida longa (washout com colestiramina se necessário).<br><b>Contraindicado na gestação</b> — washout obrigatório antes de engravidar.' },
+      { nome: 'Sulfassalazina 500mg', pos: '_____ comprimidos de 12/12h com refeição', dur: 'uso contínuo',
+        info: '<b>Indicações:</b> AR (leve-moderada), APs periférica, EsA periférica, artrite reativa.<br><b>Dose:</b> Início 500 mg/dia, aumentar 500 mg/semana até 2–3 g/dia (4–6 cp/dia).<br><b>Monitorar:</b> Hemograma (1–3 meses iniciais). Pode causar leucopenia, hepatotoxicidade, tontura.<br><b>Vantagem:</b> Segura na gestação (monitorar folato).' },
+      { nome: 'Hidroxicloroquina 400mg', pos: '1 comprimido/dia com refeição', dur: 'uso contínuo',
+        info: '<b>Indicações:</b> LES (atividade sistêmica, cutânea, articular), Síndrome de Sjögren, AR leve, DMTC.<br><b>Dose:</b> 5 mg/kg/dia (máx 400 mg/dia). Reduzir para 200 mg/dia em insuficiência renal grave.<br><b>Monitorar:</b> Avaliação oftalmológica basal e anual após 5 anos de uso (risco de maculopatia).<br><b>Vantagem:</b> Segura na gestação e amamentação.' },
+      { nome: 'Azatioprina 50mg', pos: '_____ comprimidos/dia com refeição', dur: 'uso contínuo',
+        info: '<b>Indicações:</b> LES (renal, hematológico, neuropsiquiátrico), miopatias, vasculites, síndrome de Sjögren.<br><b>Dose:</b> 1,5–2,5 mg/kg/dia (50–200 mg/dia). Iniciar 50 mg/dia, aumentar gradualmente.<br><b>Monitorar:</b> Hemograma quinzenalmente no 1º mês, depois mensal. Cuidado com alopurinol (reduz dose em 75%).<br><b>Segura na gestação</b> (com monitoramento).' },
+      { nome: 'Micofenolato de Mofetila 500mg', pos: '_____ comprimidos de 12/12h com refeição', dur: 'uso contínuo',
+        info: '<b>Indicações:</b> Nefrite lúpica (1ª linha indução + manutenção), miopatias refratárias, LES sistêmico grave, esclerodermia sistêmica.<br><b>Dose:</b> 2–3 g/dia (1–1,5 g de 12/12h). Indução: 3 g/dia; manutenção: 2 g/dia.<br><b>Monitorar:</b> Hemograma, creatinina, proteinúria.<br><b>Contraindicado na gestação</b> — trocar por azatioprina antes de engravidar.' },
+      { nome: 'Ciclosporina 100mg', pos: '_____ comprimidos de 12/12h (horário fixo)', dur: 'uso contínuo',
+        info: '<b>Indicações:</b> AR refratária, miopatias, nefrite lúpica refratária, psoríase grave, pericardite recorrente.<br><b>Dose:</b> 2,5–5 mg/kg/dia em 2 tomadas (horário fixo). Iniciar 2,5 mg/kg/dia.<br><b>Monitorar:</b> PA 2x/semana inicialmente; creatinina mensal. Múltiplas interações medicamentosas.<br><b>Obs:</b> Evitar AINE. Nefrotóxico — suspender se creatinina ↑ > 30% do basal.' },
+      { nome: 'Tofacitinibe 5mg', pos: '1 comprimido de 12/12h', dur: 'uso contínuo',
+        info: '<b>Indicações:</b> AR moderada-grave (2ª linha), APs, EA, artrite idiopática juvenil, colite ulcerativa.<br><b>Mecanismo:</b> JAK1/3 inibidor.<br><b>Dose:</b> 5 mg 2x/dia (AR, APs, EA); 10 mg 2x/dia (indução CU por 8 sem).<br><b>Triagem obrigatória:</b> TBC (PPD/IGRA), hepatites B e C, hemograma, lipídios.<br><b>Vacinar</b> contra herpes zoster antes. Evitar em > 65 anos e tabagistas (risco cardiovascular e neoplásico).' },
+      { nome: 'Baricitinibe 4mg', pos: '1 comprimido/dia', dur: 'uso contínuo',
+        info: '<b>Indicações:</b> AR moderada-grave (falha a MTX ou anti-TNF), dermatite atópica grave.<br><b>Mecanismo:</b> JAK1/2 inibidor.<br><b>Dose:</b> 4 mg/dia (AR); 2 mg/dia em IR moderada ou > 75 anos.<br><b>Triagem obrigatória:</b> TBC, hepatites B e C, hemograma, lipídios.<br><b>Monitorar:</b> Linfócitos (suspender se < 500/mm³), lipídios, creatinina.' },
+      { nome: 'Upadacitinibe 15mg', pos: '1 comprimido/dia (não partir ou mastigar)', dur: 'uso contínuo',
+        info: '<b>Indicações:</b> AR, APs, EA, espondilite não radiográfica, dermatite atópica, colite ulcerativa, doença de Crohn.<br><b>Mecanismo:</b> JAK1 seletivo.<br><b>Dose:</b> 15 mg/dia (AR, EA, DA leve-mod); 30 mg/dia (DA grave, APs); 45 mg/dia por 8 sem → 30 mg/dia (CU/DC).<br><b>Triagem obrigatória:</b> TBC, hepatites, hemograma, lipídios.<br><b>Não partir</b> o comprimido de liberação prolongada.' },
+      { nome: 'Filgotinibe 200mg', pos: '1 comprimido/dia', dur: 'uso contínuo',
+        info: '<b>Indicações:</b> AR moderada-grave (aprovado na UE; uso off-label no Brasil).<br><b>Mecanismo:</b> JAK1 seletivo.<br><b>Dose:</b> 200 mg/dia; 100 mg/dia em IR moderada.<br><b>Triagem obrigatória:</b> TBC, hepatites, hemograma.<br><b>Obs:</b> Menor impacto em JAK2 (menos anemia e alterações eritrocitárias).' },
     ]},
     antiinflamatorios: { label: 'Anti-inflamatórios', icon: '🔥', meds: [
       { nome: 'Ibuprofeno 600mg', pos: '1 comprimido de 8/8h com refeição', dur: '5 dias' },
@@ -850,27 +861,48 @@
       { nome: 'Alpha Puravida (Woman / Man / AaZ)', pos: '01 comprimido ao dia', dur: 'uso contínuo' },
     ]},
     imunobio: { label: 'Imunobiológicos', icon: '💉', meds: [
-      { nome: 'Adalimumabe 40mg — Humira® (SC)', pos: 'Aplicar 40mg por via subcutânea a cada 2 semanas', dur: 'uso contínuo' },
-      { nome: 'Etanercepte 50mg — Enbrel® (SC)', pos: 'Aplicar 50mg por via subcutânea 1x/semana', dur: 'uso contínuo' },
-      { nome: 'Certolizumabe Pegol 200mg — Cimzia® (SC)', pos: 'Indução: 400mg SC nas semanas 0, 2 e 4 — Manutenção: 200mg SC a cada 2 semanas', dur: 'uso contínuo' },
-      { nome: 'Golimumabe 50mg — Simponi® (SC)', pos: 'Aplicar 50mg por via subcutânea 1x/mês (mesmo dia todo mês)', dur: 'uso contínuo' },
-      { nome: 'Infliximabe — Remicade® (IV)', pos: 'Infusão IV conforme protocolo (dose mg/kg — semanas 0, 2, 6, depois a cada 8 semanas)', dur: 'uso contínuo' },
-      { nome: 'Tocilizumabe 162mg — Actemra® (SC)', pos: 'Aplicar 162mg por via subcutânea 1x/semana', dur: 'uso contínuo' },
-      { nome: 'Tocilizumabe — Actemra® (IV)', pos: 'Infusão IV 8mg/kg a cada 4 semanas (máx. 800mg/dose)', dur: 'uso contínuo' },
-      { nome: 'Sarilumabe 200mg — Kevzara® (SC)', pos: 'Aplicar 200mg por via subcutânea a cada 2 semanas', dur: 'uso contínuo' },
-      { nome: 'Abatacepte 125mg — Orencia® (SC)', pos: 'Aplicar 125mg por via subcutânea 1x/semana', dur: 'uso contínuo' },
-      { nome: 'Abatacepte — Orencia® (IV)', pos: 'Infusão IV conforme peso (500mg / 750mg / 1000mg) nas semanas 0, 2 e 4, depois a cada 4 semanas', dur: 'uso contínuo' },
-      { nome: 'Rituximabe 1000mg — MabThera® (IV)', pos: 'Infusão IV de 1000mg — 2 doses com intervalo de 2 semanas — repetir em 6 meses se necessário', dur: 'uso contínuo' },
-      { nome: 'Belimumabe 200mg — Benlysta® (SC)', pos: 'Aplicar 200mg por via subcutânea 1x/semana', dur: 'uso contínuo' },
-      { nome: 'Belimumabe — Benlysta® (IV)', pos: 'Infusão IV 10mg/kg nas semanas 0, 2 e 4, depois a cada 4 semanas', dur: 'uso contínuo' },
-      { nome: 'Anifrolumabe 300mg — Saphnelo® (IV)', pos: 'Infusão IV 300mg a cada 4 semanas', dur: 'uso contínuo' },
-      { nome: 'Secuquinumabe 150mg — Cosentyx® (SC)', pos: 'Indução: 150mg SC nas semanas 0, 1, 2, 3 e 4 — Manutenção: 150mg SC 1x/mês', dur: 'uso contínuo' },
-      { nome: 'Ixequizumabe 80mg — Taltz® (SC)', pos: 'Indução: 160mg SC na semana 0 — Manutenção: 80mg SC a cada 4 semanas', dur: 'uso contínuo' },
-      { nome: 'Ustecinumabe 45mg — Stelara® (SC)', pos: 'Dose inicial IV conforme peso; manutenção: 45mg SC nas semanas 4 e 16, depois a cada 12 semanas', dur: 'uso contínuo' },
-      { nome: 'Guselcumabe 100mg — Tremfya® (SC)', pos: 'Aplicar 100mg SC nas semanas 0 e 4, depois a cada 8 semanas', dur: 'uso contínuo' },
-      { nome: 'Risanquizumabe 150mg — Skyrizi® (SC)', pos: 'Aplicar 150mg SC nas semanas 0 e 4, depois a cada 12 semanas', dur: 'uso contínuo' },
-      { nome: 'Canacinumabe 150mg — Ilaris® (SC)', pos: 'Aplicar 150mg por via subcutânea — intervalo conforme indicação', dur: 'uso contínuo' },
-      { nome: 'Anacinra 100mg — Kineret® (SC)', pos: 'Aplicar 100mg por via subcutânea 1x/dia', dur: 'uso contínuo' },
+      { nome: 'Adalimumabe 40mg — Humira® (SC)', pos: 'Aplicar 40mg por via subcutânea a cada 2 semanas', dur: 'uso contínuo',
+        info: '<b>Classe:</b> Anti-TNFα (IgG1 humano).<br><b>Indicações:</b> AR, APs, EA, artrite idiopática juvenil, Doença de Crohn, RCU, psoríase em placas, uveíte não infecciosa.<br><b>Dose:</b> 40 mg SC a cada 2 semanas. Em Crohn: 160→80→40 mg (semanas 0, 2 e 4).<br><b>Triagem:</b> TBC (PPD/IGRA), hepatite B e C, hemograma antes de iniciar. Reativar profilaxia se IGRA+.<br><b>Cuidado:</b> Infecções graves, ICC classe III-IV, desmielinização, neoplasia recente.' },
+      { nome: 'Etanercepte 50mg — Enbrel® (SC)', pos: 'Aplicar 50mg por via subcutânea 1x/semana', dur: 'uso contínuo',
+        info: '<b>Classe:</b> Anti-TNFα (proteína de fusão TNFR2-Fc).<br><b>Indicações:</b> AR, APs, EA, psoríase em placas, artrite idiopática juvenil poliarticular.<br><b>Dose:</b> 50 mg SC/semana (ou 25 mg 2x/semana).<br><b>Importante:</b> NÃO usar em Doença de Crohn ou RCU (pode piorar). Menor risco de reativação de TBC comparado a outros anti-TNF (não capta granuloma).<br><b>Triagem:</b> TBC, hepatites, hemograma.' },
+      { nome: 'Certolizumabe Pegol 200mg — Cimzia® (SC)', pos: 'Indução: 400mg SC nas semanas 0, 2 e 4 — Manutenção: 200mg SC a cada 2 semanas', dur: 'uso contínuo',
+        info: '<b>Classe:</b> Anti-TNFα peguilado (fragmento Fab\' sem porção Fc).<br><b>Indicações:</b> AR, APs, EA, Doença de Crohn, psoríase.<br><b>Vantagem única:</b> Sem porção Fc → transferência placentária mínima → <b>seguro na gestação</b> e amamentação.<br><b>Dose:</b> Indução 400 mg SC (2 inj × 200 mg) nas semanas 0, 2 e 4. Manutenção: 200 mg a cada 2 semanas ou 400 mg/mês.<br><b>Triagem:</b> TBC, hepatites B e C.' },
+      { nome: 'Golimumabe 50mg — Simponi® (SC)', pos: 'Aplicar 50mg por via subcutânea 1x/mês (mesmo dia todo mês)', dur: 'uso contínuo',
+        info: '<b>Classe:</b> Anti-TNFα (IgG1k humano).<br><b>Indicações:</b> AR (+ MTX), APs, EA, RCU (forma IV: AR, APs, EA).<br><b>Dose SC:</b> 50 mg 1x/mês. Em RCU: 200→100→50 mg (semanas 0, 2 e depois mensal).<br><b>Forma IV:</b> Simponi Aria® 2 mg/kg IV nas semanas 0 e 4, depois a cada 8 semanas.<br><b>Triagem:</b> TBC, hepatites, hemograma. Rastrear herpes zoster antes do início.' },
+      { nome: 'Infliximabe — Remicade® (IV)', pos: 'Infusão IV conforme protocolo (dose mg/kg — semanas 0, 2, 6, depois a cada 8 semanas)', dur: 'uso contínuo',
+        info: '<b>Classe:</b> Anti-TNFα quimérico (IgG1k murino-humano).<br><b>Indicações:</b> AR (+ MTX), Crohn, RCU, APs, EA, psoríase em placas, artrite idiopática juvenil.<br><b>Dose:</b> AR: 3 mg/kg IV; Crohn: 5 mg/kg IV; EA/APs: 5 mg/kg IV. Sempre nas semanas 0, 2 e 6, depois a cada 8 semanas.<br><b>Atenção:</b> Maior risco de reações infusionais e imunogenicidade (usar sempre com MTX para reduzir anticorpos anti-infliximabe).<br><b>Triagem:</b> TBC (IGRA), hepatite B e C, hemograma.' },
+      { nome: 'Tocilizumabe 162mg — Actemra® (SC)', pos: 'Aplicar 162mg por via subcutânea 1x/semana', dur: 'uso contínuo',
+        info: '<b>Classe:</b> Anti-IL-6R (receptor de IL-6 — IgG1 humanizado).<br><b>Indicações:</b> AR moderada-grave (monoterapia ou + MTX), AIJ sistêmica e poliarticular, Arterite de Células Gigantes (ACV), síndrome de liberação de citocinas (SRC).<br><b>Dose SC:</b> 162 mg/semana (AR) ou a cada 2 semanas (ACV).<br><b>Monitorar:</b> Neutrófilos, plaquetas, enzimas hepáticas, lipídios. Pode mascarar febre — atenção a infecções.<br><b>Cuidado:</b> Perfuração intestinal (esp. em uso de corticoide + diverticulite).' },
+      { nome: 'Tocilizumabe — Actemra® (IV)', pos: 'Infusão IV 8mg/kg a cada 4 semanas (máx. 800mg/dose)', dur: 'uso contínuo',
+        info: '<b>Classe:</b> Anti-IL-6R (receptor de IL-6).<br><b>Indicações:</b> AR moderada-grave, AIJ sistêmica, ACV, SRC.<br><b>Dose IV:</b> 8 mg/kg IV a cada 4 semanas (máx 800 mg/dose). AIJ sistêmica: 8–12 mg/kg a cada 2 semanas.<br><b>Vantagem:</b> Eficaz em monoterapia (sem necessidade de MTX associado).<br><b>Monitorar:</b> Neutrófilos, plaquetas, TGO/TGP, lipídios a cada 4–8 semanas.' },
+      { nome: 'Sarilumabe 200mg — Kevzara® (SC)', pos: 'Aplicar 200mg por via subcutânea a cada 2 semanas', dur: 'uso contínuo',
+        info: '<b>Classe:</b> Anti-IL-6R (IgG1 humano).<br><b>Indicações:</b> AR moderada-grave com falha ou intolerância a DMARDs convencionais.<br><b>Dose:</b> 200 mg SC a cada 2 semanas. Reduzir para 150 mg em neutropenia, plaquetopenia ou elevação de enzimas.<br><b>Vantagem sobre TCZ:</b> Maior afinidade pelo receptor IL-6; eficaz em monoterapia.<br><b>Monitorar:</b> Neutrófilos, plaquetas, TGO/TGP, lipídios mensalmente nos primeiros 6 meses.' },
+      { nome: 'Abatacepte 125mg — Orencia® (SC)', pos: 'Aplicar 125mg por via subcutânea 1x/semana', dur: 'uso contínuo',
+        info: '<b>Classe:</b> Inibidor de co-estimulação de células T (CTLA4-Ig, fusão IgG1).<br><b>Indicações:</b> AR moderada-grave (falha a MTX ou anti-TNF), APs.<br><b>Dose SC:</b> 125 mg/semana (independente do peso). Iniciar com ou sem dose IV de ataque.<br><b>Vantagem:</b> Boa opção em AR soropositiva (FR+ / anti-CCP+). Perfil de segurança favorável — menor risco de infecções graves vs. anti-TNF. Pode ser usado em DPOC.<br><b>Triagem:</b> TBC, hepatites. Vacinar antes de iniciar.' },
+      { nome: 'Abatacepte — Orencia® (IV)', pos: 'Infusão IV conforme peso (500mg / 750mg / 1000mg) nas semanas 0, 2 e 4, depois a cada 4 semanas', dur: 'uso contínuo',
+        info: '<b>Classe:</b> Inibidor de co-estimulação de células T.<br><b>Indicações:</b> AR moderada-grave, APs.<br><b>Dose IV:</b> < 60 kg → 500 mg; 60–100 kg → 750 mg; > 100 kg → 1000 mg. Infusão em 30 min nas semanas 0, 2 e 4, depois a cada 4 semanas.<br><b>Perfil:</b> Não usar concomitantemente com anti-TNF (maior risco de infecção sem benefício adicional).<br><b>Triagem:</b> TBC, hepatites B e C, hemograma.' },
+      { nome: 'Rituximabe 1000mg — MabThera® (IV)', pos: 'Infusão IV de 1000mg — 2 doses com intervalo de 2 semanas — repetir em 6 meses se necessário', dur: 'uso contínuo',
+        info: '<b>Classe:</b> Anti-CD20 (depleção de linfócitos B — IgG1 quimérico).<br><b>Indicações:</b> AR refratária a anti-TNF, vasculites ANCA+ (PAM, GPA — 1ª linha + ciclofosfamida), LES grave/refratário, Síndrome de Sjögren, crioglobulinemia, miopatias inflamatórias (dermatomiosite com anticorpo anti-MDA5, MJ).<br><b>Dose:</b> 1000 mg IV × 2 doses (intervalo 2 semanas). Repetir em 6 meses ou conforme atividade.<br><b>Pré-medicação:</b> Metilprednisolona 100 mg IV + paracetamol + anti-histamínico antes de cada infusão.<br><b>Monitorar:</b> Imunoglobulinas, CD19. Risco de hipogamaglobulinemia em uso prolongado. Triagem rigorosa para TBC e hepatite B (risco de reativação fulminante — profilaxia obrigatória em HBsAg+).' },
+      { nome: 'Belimumabe 200mg — Benlysta® (SC)', pos: 'Aplicar 200mg por via subcutânea 1x/semana', dur: 'uso contínuo',
+        info: '<b>Classe:</b> Anti-BLyS/BAFF (inibidor do fator de ativação de linfócitos B).<br><b>Indicações:</b> LES ativo com autoanticorpos positivos (ANA/anti-DNA) apesar do tratamento padrão (HCQ + imunossupressor).<br><b>Dose SC:</b> 200 mg 1x/semana.<br><b>Atenção:</b> Não aprovado em nefrite lúpica ativa grave (a via IV tem aprovação para nefrite lúpica). Não usar em LES do SNC ativo grave.<br><b>Monitorar:</b> Contagem de linfócitos B, IgG. Pode reduzir doses de corticoide.' },
+      { nome: 'Belimumabe — Benlysta® (IV)', pos: 'Infusão IV 10mg/kg nas semanas 0, 2 e 4, depois a cada 4 semanas', dur: 'uso contínuo',
+        info: '<b>Classe:</b> Anti-BLyS/BAFF.<br><b>Indicações:</b> LES ativo (soropositivo) e <b>nefrite lúpica</b> (classes III, IV, V — em combinação com indução com ciclofosfamida ou micofenolato).<br><b>Dose IV:</b> 10 mg/kg nas semanas 0, 2 e 4, depois a cada 4 semanas. Infusão em 1 hora.<br><b>Diferencial:</b> Única indicação aprovada para nefrite lúpica dentre os anti-BLyS.<br><b>Monitorar:</b> Função renal, proteinúria, complemento, anti-DNA.' },
+      { nome: 'Anifrolumabe 300mg — Saphnelo® (IV)', pos: 'Infusão IV 300mg a cada 4 semanas', dur: 'uso contínuo',
+        info: '<b>Classe:</b> Anti-receptor de interferon tipo I (IFNAR1 — IgG1k humano).<br><b>Indicações:</b> LES moderado-grave com atividade sorologicamente ativa (ANA+, anti-DNA+, complemento baixo) apesar de tratamento padrão otimizado. Especialmente eficaz em manifestações cutâneas e articulares.<br><b>Dose:</b> 300 mg IV a cada 4 semanas (infusão em 30 minutos).<br><b>Diferencial:</b> Reduz significativamente a dose de corticoide. Alta eficácia em LES com assinatura de interferon elevada.<br><b>Cuidado:</b> Não usar em lúpus com infecção ativa por herpes zoster. Vacinar antes do início.' },
+      { nome: 'Secuquinumabe 150mg — Cosentyx® (SC)', pos: 'Indução: 150mg SC nas semanas 0, 1, 2, 3 e 4 — Manutenção: 150mg SC 1x/mês', dur: 'uso contínuo',
+        info: '<b>Classe:</b> Anti-IL-17A (IgG1κ humano).<br><b>Indicações:</b> EA (espondilite anquilosante e não radiográfica), APs, psoríase em placas moderada-grave. Considerar em AR axial se falha a anti-TNF.<br><b>Dose:</b> 150 mg/semana × 5 semanas (indução), depois 150 mg/mês. Em psoríase grave: 300 mg/mês.<br><b>Cuidado importante:</b> Risco de exacerbação de DII — evitar em pacientes com Crohn ativo. Monitorar sintomas intestinais.<br><b>Triagem:</b> TBC, hemograma.' },
+      { nome: 'Ixequizumabe 80mg — Taltz® (SC)', pos: 'Indução: 160mg SC na semana 0 — Manutenção: 80mg SC a cada 4 semanas', dur: 'uso contínuo',
+        info: '<b>Classe:</b> Anti-IL-17A (IgG4 humanizado).<br><b>Indicações:</b> APs ativa, EA, espondilite não radiográfica, psoríase em placas moderada-grave.<br><b>Dose:</b> 160 mg SC na semana 0 (2 injeções × 80 mg), depois 80 mg a cada 4 semanas.<br><b>Eficácia:</b> Alta resposta na psoríase (PASI 90/100). Bom perfil em APs com ou sem MTX.<br><b>Cuidado:</b> DII — monitorar sintomas intestinais. Não usar em Crohn ativo.<br><b>Triagem:</b> TBC, hemograma.' },
+      { nome: 'Ustecinumabe 45mg — Stelara® (SC)', pos: 'Dose inicial IV conforme peso; manutenção: 45mg SC nas semanas 4 e 16, depois a cada 12 semanas', dur: 'uso contínuo',
+        info: '<b>Classe:</b> Anti-IL-12/23 (subunidade p40 — IgG1κ humano).<br><b>Indicações:</b> APs ativa (com ou sem psoríase), psoríase em placas moderada-grave, Doença de Crohn, RCU.<br><b>Dose:</b> Dose IV única de ataque (≤55 kg: 260 mg; 56–85 kg: 390 mg; >85 kg: 520 mg), depois 45 mg SC nas semanas 4 e 16, e a cada 12 semanas.<br><b>Vantagem:</b> Intervalo longo de manutenção (a cada 3 meses). Pode ser usado em pacientes com DII associada.<br><b>Triagem:</b> TBC, hepatites.' },
+      { nome: 'Guselcumabe 100mg — Tremfya® (SC)', pos: 'Aplicar 100mg SC nas semanas 0 e 4, depois a cada 8 semanas', dur: 'uso contínuo',
+        info: '<b>Classe:</b> Anti-IL-23 seletivo (subunidade p19 — IgG1λ humano).<br><b>Indicações:</b> APs ativa, psoríase em placas moderada-grave.<br><b>Dose:</b> 100 mg SC nas semanas 0 e 4, depois a cada 8 semanas.<br><b>Vantagem:</b> Maior seletividade (anti-p19 não bloqueia IL-12, preservando resposta Th1). Intervalo mais curto de manutenção que ustecinumabe em psoríase.<br><b>Atenção:</b> Ainda não aprovado para EA axial.<br><b>Triagem:</b> TBC, hemograma.' },
+      { nome: 'Risanquizumabe 150mg — Skyrizi® (SC)', pos: 'Aplicar 150mg SC nas semanas 0 e 4, depois a cada 12 semanas', dur: 'uso contínuo',
+        info: '<b>Classe:</b> Anti-IL-23 seletivo (subunidade p19 — IgG1 humanizado).<br><b>Indicações:</b> APs ativa, psoríase em placas moderada-grave, Doença de Crohn (IV), RCU.<br><b>Dose:</b> 150 mg SC nas semanas 0 e 4, depois 150 mg SC a cada 12 semanas.<br><b>Destaque:</b> Um dos maiores índices de remissão em psoríase (PASI 100 em ~40%). Intervalo trimestral de manutenção.<br><b>Crohn:</b> Indução IV (600 mg nas semanas 0, 4 e 8), depois SC.<br><b>Triagem:</b> TBC, hepatites.' },
+      { nome: 'Canacinumabe 150mg — Ilaris® (SC)', pos: 'Aplicar 150mg por via subcutânea — intervalo conforme indicação', dur: 'uso contínuo',
+        info: '<b>Classe:</b> Anti-IL-1β (IgG1/κ humano).<br><b>Indicações:</b> Artrite gotosa aguda refratária (dose única 150 mg SC), Síndromes periódicas associadas à criopirina (CAPS), Doença de Still do adulto/AIJ sistêmica (150 mg SC a cada 4–8 semanas), Febre Mediterrânea Familiar.<br><b>Dose gota:</b> 150 mg SC dose única → aguardar 12 semanas antes de repetir.<br><b>Dose Still/AIJ:</b> 4 mg/kg SC (máx 300 mg) a cada 4 semanas.<br><b>Atenção:</b> Alto custo. Indicado em casos refratários a colchicina, AINE e corticoide.<br><b>Triagem:</b> TBC, infecções ativas.' },
+      { nome: 'Anacinra 100mg — Kineret® (SC)', pos: 'Aplicar 100mg por via subcutânea 1x/dia', dur: 'uso contínuo',
+        info: '<b>Classe:</b> Antagonista do receptor de IL-1 (IL-1Ra recombinante).<br><b>Indicações:</b> AR (aprovação original; pouco usada por necessidade de injeção diária), AIJ sistêmica, Doença de Still do adulto, Síndrome de Ativação de Macrófagos (SAM), Síndrome de Schnitzler, DIRA, pericardite recorrente refratária.<br><b>Dose:</b> 100 mg SC 1x/dia (mesma hora). Em SAM: doses maiores (2–8 mg/kg/dia IV em casos graves).<br><b>Vantagem:</b> Início de ação rápido (horas). Útil em emergências inflamatórias.<br><b>Triagem:</b> TBC, hemograma. Risco de neutropenia — monitorar mensalmente.' },
     ]},
   };
 
@@ -886,7 +918,7 @@
   function addMedClasse(classe) {
     const cat = MED_CATALOG[classe];
     const opts = cat.meds.map((m, i) =>
-      `<option value="${i}" data-pos="${m.pos.replace(/"/g,'&quot;')}" data-dur="${m.dur}" ${m.especial?'data-especial="1"':''}>
+      `<option value="${i}" data-pos="${m.pos.replace(/"/g,'&quot;')}" data-dur="${m.dur}" ${m.especial?'data-especial="1"':''} ${m.info?`data-info="${m.info.replace(/"/g,'&quot;')}"`:''}
         ${m.nome}${m.especial ? ' ⚠️' : ''}
       </option>`
     ).join('');
@@ -903,6 +935,10 @@
         <select class="med-select" onchange="onMedSelect(this)" style="font-size:13px;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);font-family:'Inter',sans-serif;width:100%">
           <option value="">— selecionar medicamento —</option>${opts}
         </select>
+      </div>
+      <div class="med-info-panel" style="display:none;background:#eaf6f1;border:1px solid #a8d8c4;border-radius:6px;padding:9px 12px;font-size:11.5px;color:#1a3a2a;line-height:1.65;margin-top:2px">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#1a6b5a;letter-spacing:0.06em;margin-bottom:5px">ℹ Indicações &amp; Notas — apenas visível aqui</div>
+        <div class="med-info-text"></div>
       </div>
       <div class="med-card-grid">
         <div class="field">
@@ -940,16 +976,32 @@
   function onMedSelect(sel) {
     const card = sel.closest('.med-card');
     const opt  = sel.options[sel.selectedIndex];
-    if (!opt.value) return;
-    const pos     = opt.dataset.pos || '';
-    const dur     = opt.dataset.dur || '30 dias';
+    const posInput  = card.querySelector('.med-pos');
+    const durSel    = card.querySelector('.med-dur');
+    const infoPanel = card.querySelector('.med-info-panel');
+    const infoText  = card.querySelector('.med-info-text');
+
+    if (!opt.value) {
+      if (infoPanel) infoPanel.style.display = 'none';
+      return;
+    }
+    const pos      = opt.dataset.pos || '';
+    const dur      = opt.dataset.dur || '30 dias';
     const especial = opt.dataset.especial === '1';
-    const posInput = card.querySelector('.med-pos');
-    const durSel   = card.querySelector('.med-dur');
+    const info     = opt.dataset.info || '';
+
     if (posInput) posInput.value = pos;
     if (durSel) {
       const match = [...durSel.options].find(o => o.value === dur);
       if (match) durSel.value = dur;
+    }
+    if (infoPanel && infoText) {
+      if (info) {
+        infoText.innerHTML = info;
+        infoPanel.style.display = 'block';
+      } else {
+        infoPanel.style.display = 'none';
+      }
     }
     if (especial) {
       document.getElementById('receita-especial-check').checked = true;
