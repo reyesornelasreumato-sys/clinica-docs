@@ -1014,10 +1014,22 @@
   const DUR_OPTS = ['se necessário','7 dias','14 dias','30 dias','60 dias','90 dias','uso contínuo','conforme avaliação médica'];
 
   function durSelect(selected) {
-    return `<select class="med-dur" style="font-size:13px;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);font-family:'Inter',sans-serif;width:100%">
-      ${DUR_OPTS.map(d => `<option value="${d}" ${d===selected?'selected':''}>${d}</option>`).join('')}
-      <option value="personalizado" ${!DUR_OPTS.includes(selected)?'selected':''}>personalizado...</option>
-    </select>`;
+    const isCustom = selected && !DUR_OPTS.includes(selected) && selected !== 'personalizado';
+    return `
+      <select class="med-dur" onchange="onDurChange(this)" style="font-size:13px;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);font-family:'Inter',sans-serif;width:100%">
+        ${DUR_OPTS.map(d => `<option value="${d}" ${d===selected?'selected':''}>${d}</option>`).join('')}
+        <option value="personalizado" ${(!DUR_OPTS.includes(selected))?'selected':''}>personalizado...</option>
+      </select>
+      <input class="med-dur-custom" placeholder="Ex: 6 semanas, 3 meses, até retorno…"
+        style="display:${isCustom?'block':'none'};margin-top:6px;font-size:13px;width:100%"
+        value="${isCustom ? selected : ''}"/>`;
+  }
+
+  function onDurChange(sel) {
+    const field = sel.closest('.field') || sel.parentElement;
+    const custom = field ? field.querySelector('.med-dur-custom') : null;
+    if (custom) custom.style.display = sel.value === 'personalizado' ? 'block' : 'none';
+    if (sel.value === 'personalizado' && custom) { custom.value = ''; custom.focus(); }
   }
 
   function addMedClasse(classe) {
@@ -1730,7 +1742,7 @@
     { grupo: 'Radiografia', exames: [
       'Radiografia de tórax PA e perfil','Radiografia de mãos bilateral AP',
       'Radiografia de pés bilateral AP','Radiografia de coluna cervical AP e perfil',
-      'Radiografia de coluna lombar AP e perfil','Radiografia de pelve AP',
+      'Radiografia de coluna torácica AP e perfil','Radiografia de coluna lombar AP e perfil','Radiografia de pelve AP',
       'Radiografia de sacroilíacas AP','Radiografia de ombros bilateral AP',
       'Radiografia de joelhos bilateral AP e perfil','Radiografia de tornozelos bilateral AP',
       'Radiografia de quadris bilateral AP',
@@ -1741,6 +1753,9 @@
       'Ultrassonografia de joelho direito','Ultrassonografia de joelho esquerdo',
       'Ultrassonografia de tornozelo direito','Ultrassonografia de tornozelo esquerdo',
       'Ultrassonografia de quadril direito','Ultrassonografia de quadril esquerdo',
+      'Ultrassonografia de rins e vias urinárias',
+      'Ultrassonografia Power Doppler articular — mãos e punhos',
+      'Ultrassonografia Power Doppler articular — pés e tornozelos',
       'Ultrassonografia de tireoide','Ultrassonografia de partes moles',
       'Ultrassonografia com Doppler vascular',
     ]},
@@ -1758,7 +1773,7 @@
       'RM de ombro direito','RM de ombro esquerdo',
       'RM de joelho direito','RM de joelho esquerdo',
       'RM de quadril direito','RM de quadril esquerdo',
-      'RM de mãos','RM de pés',
+      'RM de mãos e punhos','RM de mãos','RM de pés',
       'RM de corpo inteiro (whole body MRI)',
     ]},
     { grupo: 'Medicina nuclear e densitometria', exames: [
@@ -1874,7 +1889,7 @@
           pos = card.querySelector('.med-pos')?.value.trim() || '';
         }
         dur = card.querySelector('.med-dur')?.value || '';
-        if (dur === 'personalizado') dur = '';
+        if (dur === 'personalizado') dur = card.querySelector('.med-dur-custom')?.value.trim() || '';
         if (!nome) return '';
         idx++;
         return `<div class="med-item">
