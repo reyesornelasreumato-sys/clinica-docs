@@ -500,13 +500,92 @@
       <button class="med-class-btn" data-key="gepa"   onclick="selecionarDoencaRel('gepa')">GEPA</button>
       <button class="med-class-btn" data-key="aij"    onclick="selecionarDoencaRel('aij')">AIJ</button>
     </div>
-    <div id="rel-editor-wrap" style="display:none;margin-top:1rem">
-      <div id="rel-doenca-banner" style="background:var(--brand);color:#fff;border-radius:8px;padding:9px 14px;font-weight:700;font-size:14px;margin-bottom:10px"></div>
+
+    <!-- FORMULÁRIO ESTRUTURADO (aparece após selecionar doença) -->
+    <div id="rel-form-wrap" style="display:none">
+      <div id="rel-doenca-banner" style="background:var(--brand);color:#fff;border-radius:8px;padding:9px 14px;font-weight:700;font-size:14px;margin:1rem 0 1.2rem"></div>
+
+      <p class="section-label">Dados do diagnóstico</p>
+      <div class="form-grid cols-3">
+        <div class="field"><label>Tempo de diagnóstico</label><input id="rel-tempo" placeholder="Ex: 4 anos e 6 meses"/></div>
+        <div class="field"><label>Classificação / Gravidade</label>
+          <select id="rel-gravidade" style="font-size:13px;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);width:100%">
+            <option>Leve</option><option>Moderada</option><option selected>Grave</option>
+            <option>Moderada a grave</option><option>Refratária</option>
+          </select>
+        </div>
+        <div class="field"><label>Subtipo / forma clínica (opcional)</label><input id="rel-subtipo" placeholder="Ex: nefrite lúpica, difusa…"/></div>
+      </div>
+
+      <p class="section-label">Manifestações clínicas presentes</p>
+      <div id="rel-manifestacoes" class="form-grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:4px 16px"></div>
+      <div class="field" style="margin-top:8px">
+        <label>Outras manifestações (texto livre)</label>
+        <textarea id="rel-outras-manif" placeholder="Descreva manifestações adicionais…" style="min-height:50px"></textarea>
+      </div>
+
+      <p class="section-label">Histórico de tratamentos realizados</p>
+      <div id="rel-trat-list" style="display:flex;flex-direction:column;gap:6px"></div>
+      <button class="btn" style="margin-top:8px;font-size:13px" onclick="addRelTratRow()">+ Adicionar medicação</button>
+
+      <p class="section-label">Avaliação clínica atual</p>
       <div class="field">
-        <label style="font-size:12px;color:var(--text-secondary)">Edite o relatório abaixo — o texto digitado aqui será impresso</label>
-        <textarea id="rel-texto" style="min-height:520px;font-family:'Courier New',monospace;font-size:12.5px;line-height:1.8;border:1px solid var(--border);border-radius:8px;padding:14px;width:100%;resize:vertical"></textarea>
+        <label>Descrição dos sintomas atuais</label>
+        <textarea id="rel-sintomas-atuais" placeholder="Descreva o quadro clínico atual do paciente…" style="min-height:80px"></textarea>
+      </div>
+      <div class="form-grid cols-2" style="margin-top:8px">
+        <div class="field"><label>Avaliação global do médico (0–10)</label><input id="rel-aval-med" type="number" min="0" max="10" placeholder="0–10"/></div>
+        <div class="field"><label>Avaliação global do paciente (0–10)</label><input id="rel-aval-pac" type="number" min="0" max="10" placeholder="0–10"/></div>
+      </div>
+
+      <p class="section-label">Escores de atividade e gravidade</p>
+      <div id="rel-escores" class="form-grid cols-3"></div>
+
+      <!-- DUT-65 -->
+      <div id="rel-dut-wrap" style="background:#e8f4f1;border:1px solid #a8d8c4;border-radius:8px;padding:14px 16px;margin-top:1.5rem;display:none">
+        <label style="display:flex;align-items:center;gap:10px;font-weight:600;font-size:13px;cursor:pointer">
+          <input type="checkbox" id="rel-solicita-bio" onchange="toggleRelBioSection()" style="width:16px;height:16px">
+          Solicitar imunobiológico conforme DUT-65 / PCDT do Ministério da Saúde
+        </label>
+        <div id="rel-bio-section" style="display:none;margin-top:12px">
+          <div class="form-grid cols-2">
+            <div class="field"><label>Imunobiológico solicitado</label>
+              <select id="rel-bio-select" style="font-size:13px;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);width:100%">
+                <option value="">— selecionar —</option>
+              </select>
+            </div>
+            <div class="field"><label>Número de falhas a DMARDs</label>
+              <select id="rel-falhas" style="font-size:13px;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);width:100%">
+                <option>1 falha</option><option>2 falhas</option><option>3 ou mais falhas</option>
+                <option>Intolerância / contraindicação</option>
+              </select>
+            </div>
+          </div>
+          <div class="field" style="margin-top:8px">
+            <label>Justificativa complementar</label>
+            <textarea id="rel-justificativa" placeholder="Ex: paciente com nefrite lúpica refratária a ciclofosfamida e micofenolato…" style="min-height:60px"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botão gerar prévia -->
+      <div style="margin-top:1.4rem;padding:12px 0;border-top:1px solid var(--border);text-align:center">
+        <button class="btn btn-primary" style="font-size:14px;padding:11px 28px;gap:8px" onclick="gerarPreviaRelatorio()">
+          <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          Visualizar prévia editável
+        </button>
       </div>
     </div>
+
+    <!-- PRÉVIA EDITÁVEL (aparece após clicar "Visualizar") -->
+    <div id="rel-editor-wrap" style="display:none;margin-top:1.5rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+        <span style="font-weight:700;font-size:13px;color:var(--brand)">Prévia — edite livremente antes de imprimir</span>
+        <button class="btn" style="font-size:12px;padding:5px 14px" onclick="gerarPreviaRelatorio()">↺ Atualizar a partir do formulário</button>
+      </div>
+      <textarea id="rel-texto" style="min-height:500px;font-family:'Courier New',monospace;font-size:12.5px;line-height:1.8;border:1.5px solid var(--border);border-radius:8px;padding:14px;width:100%;resize:vertical"></textarea>
+    </div>
+
     <div class="form-actions">
       <button class="btn btn-primary" onclick="gerarUm('relatorio')">
         <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Gerar PDF
@@ -2516,9 +2595,16 @@ ${html}
       renderImgCatalog(); renderImgTags();
     }
     if (tipo === 'relatorio') {
-      const ta = document.getElementById('rel-texto'); if (ta) ta.value = '';
-      const wrap = document.getElementById('rel-editor-wrap'); if (wrap) wrap.style.display = 'none';
+      relDoencaKey = null;
       document.querySelectorAll('#rel-doenca-btns .med-class-btn').forEach(b => b.classList.remove('active'));
+      const fw = document.getElementById('rel-form-wrap'); if (fw) fw.style.display = 'none';
+      const ew = document.getElementById('rel-editor-wrap'); if (ew) ew.style.display = 'none';
+      const ta = document.getElementById('rel-texto'); if (ta) ta.value = '';
+      ['rel-tempo','rel-subtipo','rel-outras-manif','rel-sintomas-atuais','rel-aval-med','rel-aval-pac','rel-justificativa']
+        .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+      const tl = document.getElementById('rel-trat-list'); if (tl) tl.innerHTML = '';
+      const sb = document.getElementById('rel-solicita-bio'); if (sb) sb.checked = false;
+      const bs = document.getElementById('rel-bio-section'); if (bs) bs.style.display = 'none';
     }
     if (tipo === 'encaminhamento') {
       const esp = document.getElementById('enc-especialidade'); if (esp) esp.selectedIndex = 0;
@@ -2526,60 +2612,163 @@ ${html}
     }
   }
 
-  /* ── RELATÓRIO — SELECIONAR DOENÇA E GERAR TEMPLATE ── */
+  /* ── RELATÓRIO — FORMULÁRIO ESTRUTURADO + PRÉVIA EDITÁVEL ── */
   let relDoencaKey = null;
 
   function selecionarDoencaRel(key) {
     relDoencaKey = key;
     const d = MODELO_DOENCAS[key];
-    const p = getPaciente();
-    document.getElementById('rel-texto').value = buildTemplateRelatorio(d, p);
+
     document.getElementById('rel-doenca-banner').textContent = d.label + ' — CID-10: ' + d.cid;
-    document.getElementById('rel-editor-wrap').style.display = 'block';
+    document.getElementById('rel-form-wrap').style.display = 'block';
+    document.getElementById('rel-editor-wrap').style.display = 'none';
+    document.getElementById('rel-texto').value = '';
+
+    // Manifestações (checkboxes)
+    document.getElementById('rel-manifestacoes').innerHTML = d.manifestacoes.map(m =>
+      `<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:3px 0;user-select:none">
+        <input type="checkbox" value="${m.replace(/"/g,'&quot;')}" style="width:14px;height:14px"> ${m}
+      </label>`
+    ).join('');
+
+    // Escores
+    document.getElementById('rel-escores').innerHTML = d.escores.map(e =>
+      `<div class="field">
+        <label style="font-size:12px">${e.label}${e.faixa?' ('+e.faixa+')':''}</label>
+        <input class="rel-escore-input" data-label="${e.label.replace(/"/g,'&quot;')}"
+          placeholder="${e.ref||'Valor'}" style="font-size:13px"/>
+      </div>`
+    ).join('');
+
+    // DUT-65
+    const dutWrap = document.getElementById('rel-dut-wrap');
+    if (d.biologicos && d.biologicos.length > 0) {
+      dutWrap.style.display = 'block';
+      document.getElementById('rel-bio-select').innerHTML =
+        '<option value="">— selecionar —</option>' +
+        d.biologicos.map(b => `<option value="${b}">${b}</option>`).join('');
+    } else {
+      dutWrap.style.display = 'none';
+    }
+
+    // Reset form fields
+    ['rel-tempo','rel-subtipo','rel-outras-manif','rel-sintomas-atuais','rel-aval-med','rel-aval-pac','rel-justificativa']
+      .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    const gv = document.getElementById('rel-gravidade'); if (gv) gv.selectedIndex = 2;
+    const sb = document.getElementById('rel-solicita-bio'); if (sb) sb.checked = false;
+    const bs = document.getElementById('rel-bio-section'); if (bs) bs.style.display = 'none';
+
+    // Tratamentos — começa com uma linha em branco
+    document.getElementById('rel-trat-list').innerHTML = '';
+    addRelTratRow();
+
     document.querySelectorAll('#rel-doenca-btns .med-class-btn').forEach(b =>
       b.classList.toggle('active', b.dataset.key === key)
     );
   }
 
-  function buildTemplateRelatorio(d, p) {
+  function addRelTratRow() {
+    const list = document.getElementById('rel-trat-list');
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:6px;align-items:center';
+    row.innerHTML =
+      `<input placeholder="Medicamento" style="flex:2;font-size:12.5px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface)"/>
+       <input placeholder="Dose" style="flex:1;font-size:12.5px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface)"/>
+       <input placeholder="Duração" style="flex:1;font-size:12.5px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface)"/>
+       <select style="flex:1.5;font-size:12px;padding:6px 6px;border:1px solid var(--border);border-radius:6px;background:var(--surface)">
+         <option>Boa resposta</option><option>Falha terapêutica</option>
+         <option>Intolerância</option><option>Em uso</option><option>Suspenso</option>
+       </select>
+       <button onclick="this.closest('div').remove()" style="background:none;border:none;color:#c0392b;font-size:16px;cursor:pointer;padding:2px 6px;flex-shrink:0">✕</button>`;
+    list.appendChild(row);
+  }
+
+  function toggleRelBioSection() {
+    const chk = document.getElementById('rel-solicita-bio');
+    const sec = document.getElementById('rel-bio-section');
+    if (sec) sec.style.display = chk?.checked ? 'block' : 'none';
+  }
+
+  function gerarPreviaRelatorio() {
+    if (!relDoencaKey) { alert('Selecione uma doença primeiro.'); return; }
+    const d = MODELO_DOENCAS[relDoencaKey];
+    const p = getPaciente();
     const nome = p.nome || '[NOME DO PACIENTE]';
     const L = '─'.repeat(58);
+
+    const tempo      = document.getElementById('rel-tempo')?.value.trim() || '[PREENCHER]';
+    const gravidade  = document.getElementById('rel-gravidade')?.value || '';
+    const subtipo    = document.getElementById('rel-subtipo')?.value.trim() || '';
+    const outrasManif= document.getElementById('rel-outras-manif')?.value.trim() || '';
+    const sintAtual  = document.getElementById('rel-sintomas-atuais')?.value.trim() || '[DESCREVER O QUADRO CLÍNICO ATUAL]';
+    const avalMed    = document.getElementById('rel-aval-med')?.value || '';
+    const avalPac    = document.getElementById('rel-aval-pac')?.value || '';
+    const justif     = document.getElementById('rel-justificativa')?.value.trim() || '';
+    const solicita   = document.getElementById('rel-solicita-bio')?.checked;
+    const bioSel     = document.getElementById('rel-bio-select')?.value || '';
+    const falhas     = document.getElementById('rel-falhas')?.value || '';
+
+    const manifSel = [...document.querySelectorAll('#rel-manifestacoes input[type=checkbox]:checked')].map(c => c.value);
+
+    const tratamentos = [...document.querySelectorAll('#rel-trat-list > div')].map(row => {
+      const ins = row.querySelectorAll('input');
+      return { med: ins[0]?.value.trim()||'', dose: ins[1]?.value.trim()||'', dur: ins[2]?.value.trim()||'', result: row.querySelector('select')?.value||'' };
+    }).filter(t => t.med);
+
     let t = '';
-    t += 'DIAGNÓSTICO: ' + d.label + ' (CID-10: ' + d.cid + ')\n';
-    t += 'PACIENTE: ' + nome;
-    if (p.nasc) t += ' | DN: ' + p.nasc;
-    if (p.sexo) t += ' | ' + p.sexo;
-    t += '\nTEMPO DE DIAGNÓSTICO: [PREENCHER]\n\n';
+    t += 'DIAGNÓSTICO: ' + d.label + (subtipo ? ' — ' + subtipo : '') + ' (CID-10: ' + d.cid + ')\n';
+    t += 'PACIENTE: ' + nome + (p.nasc ? ' | DN: ' + p.nasc : '') + (p.sexo ? ' | ' + p.sexo : '') + '\n';
+    t += 'TEMPO DE DIAGNÓSTICO: ' + tempo + '\n';
+    if (gravidade) t += 'CLASSIFICAÇÃO: ' + gravidade + '\n';
+    t += '\n';
+
     t += L + '\nHISTÓRICO CLÍNICO\n\n';
-    t += 'O(a) paciente é portador(a) de ' + d.label + ', com diagnóstico estabelecido há [PREENCHER]. Apresenta as seguintes manifestações clínicas:\n\n';
-    d.manifestacoes.slice(0, 6).forEach(m => { t += '• ' + m + '\n'; });
-    t += '• [OUTRAS MANIFESTAÇÕES / ACRESCENTAR CONFORME O CASO]\n\n';
+    t += 'O(a) paciente é portador(a) de ' + d.label + ', com diagnóstico estabelecido há ' + tempo + '. Apresenta as seguintes manifestações clínicas:\n\n';
+    manifSel.forEach(m => { t += '• ' + m + '\n'; });
+    if (outrasManif) outrasManif.split('\n').forEach(l => { if (l.trim()) t += '• ' + l.trim() + '\n'; });
+    if (!manifSel.length && !outrasManif) t += '• [DESCREVER MANIFESTAÇÕES]\n';
+    t += '\n';
+
     t += L + '\nHISTÓRICO DE TRATAMENTOS\n\n';
-    t += '• [MEDICAMENTO 1] [DOSE] — [DURAÇÃO] — [RESULTADO: boa resposta / falha / intolerância]\n';
-    t += '• [MEDICAMENTO 2] [DOSE] — [DURAÇÃO] — [RESULTADO]\n';
-    t += '• [ACRESCENTAR OUTROS TRATAMENTOS]\n\n';
+    if (tratamentos.length) {
+      tratamentos.forEach(tr => { t += '• ' + [tr.med, tr.dose, tr.dur, tr.result].filter(Boolean).join(' — ') + '\n'; });
+    } else {
+      t += '• [MEDICAMENTO] — [DOSE] — [DURAÇÃO] — [RESULTADO]\n';
+    }
+    t += '\n';
+
     t += L + '\nAVALIAÇÃO CLÍNICA ATUAL\n\n';
-    t += '[DESCREVER O QUADRO CLÍNICO ATUAL DO PACIENTE]\n\n';
+    t += sintAtual + '\n\n';
     t += 'Escores de atividade e gravidade:\n';
-    d.escores.slice(0, 5).forEach(e => {
-      t += '• ' + e.label + ': [PREENCHER]';
-      if (e.ref) t += ' (Ref: ' + e.ref.split('·')[0].trim() + ')';
+    document.querySelectorAll('#rel-escores .rel-escore-input').forEach(inp => {
+      const e = d.escores.find(e => e.label === inp.dataset.label);
+      t += '• ' + inp.dataset.label + ': ' + (inp.value || '[PREENCHER]');
+      if (e?.ref && !inp.value) t += ' (Ref: ' + e.ref.split('·')[0].trim() + ')';
       t += '\n';
     });
-    t += '• Avaliação global do médico (0–10): [PREENCHER]\n';
-    t += '• Avaliação global do paciente (0–10): [PREENCHER]\n\n';
-    t += L + '\nCONDUTA TERAPÊUTICA\n\n';
-    t += '[DESCREVER CONDUTA ATUAL E PROPOSTA TERAPÊUTICA]\n\n';
-    if (d.biologicos && d.biologicos.length > 0) {
+    if (avalMed) t += '• Avaliação global do médico (0–10): ' + avalMed + '\n';
+    if (avalPac) t += '• Avaliação global do paciente (0–10): ' + avalPac + '\n';
+    t += '\n';
+
+    t += L + '\nCONDUTA TERAPÊUTICA\n\n[DESCREVER CONDUTA ATUAL E PROPOSTA TERAPÊUTICA]\n\n';
+
+    if (solicita && d.biologicos?.length) {
       t += L + '\nSOLICITAÇÃO DE IMUNOBIOLÓGICO — ' + d.dut + '\n\n';
-      t += 'O(a) paciente ' + nome + ', portador(a) de ' + d.label + ' (CID-10: ' + d.cid + '), com diagnóstico há [PREENCHER], apresenta doença de caráter [GRAVE / MODERADA / REFRATÁRIA], com [N] falhas terapêuticas documentadas a DMARDs convencionais, conforme detalhado acima.\n\n';
-      t += 'Medicamentos tentados e resultados:\n';
-      t += '• [DMARD 1]: [DOSE] por [DURAÇÃO] — [RESULTADO]\n';
-      t += '• [DMARD 2]: [DOSE] por [DURAÇÃO] — [RESULTADO]\n\n';
-      t += 'Solicito autorização para uso de: [' + d.biologicos[0] + ']\n\n';
-      t += 'Justificativa complementar: [PREENCHER]\n\n';
+      t += 'O(a) paciente ' + nome + ', portador(a) de ' + d.label + ' (CID-10: ' + d.cid + '), ';
+      t += 'com diagnóstico há ' + tempo + ', apresenta doença de caráter ' + (gravidade||'[PREENCHER]') + ', com ' + (falhas||'[N falhas]') + ' a DMARDs convencionais.\n\n';
+      const falhasTrat = tratamentos.filter(tr => tr.result === 'Falha terapêutica' || tr.result === 'Intolerância' || tr.result === 'Suspenso');
+      if (falhasTrat.length) {
+        t += 'DMARDs utilizados:\n';
+        falhasTrat.forEach(tr => { t += '• ' + [tr.med, tr.dose, tr.dur, tr.result].filter(Boolean).join(' — ') + '\n'; });
+        t += '\n';
+      }
+      t += 'Solicito autorização para uso de: ' + (bioSel||'[IMUNOBIOLÓGICO]') + '\n\n';
+      if (justif) t += 'Justificativa complementar: ' + justif + '\n\n';
     }
-    return t;
+
+    document.getElementById('rel-texto').value = t;
+    document.getElementById('rel-editor-wrap').style.display = 'block';
+    document.getElementById('rel-editor-wrap').scrollIntoView({ behavior:'smooth', block:'start' });
   }
 
   /* ── ENCAMINHAMENTO — TOGGLE OUTRA ESP ── */
