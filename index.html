@@ -459,9 +459,9 @@
       <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
       Atestado médico
     </button>
-    <button class="tab-btn" id="btn-modelos" onclick="toggleModelos(this)">
-      <svg viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-      Modelos de relatório
+    <button class="tab-btn" data-tab="encaminhamento" onclick="toggleTab(this)">
+      <svg viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
+      Encaminhamento
     </button>
   </div>
 
@@ -485,12 +485,27 @@
         <span class="date-req-err" id="err-data-relatorio">Selecione</span>
       </div>
     </div>
-    <p class="section-label">Conteúdo</p>
-    <div class="form-grid cols-1">
-      <div class="field"><label>Diagnóstico principal (CID opcional)</label><input id="r-diag" placeholder="Ex: Artrite Reumatoide — M05" /></div>
-      <div class="field"><label>Anamnese / História clínica</label><textarea id="r-anamnese" placeholder="Paciente relata..."></textarea></div>
-      <div class="field"><label>Exame físico</label><textarea id="r-exame" placeholder="PA: 120/80 mmHg, FC: 72 bpm..."></textarea></div>
-      <div class="field"><label>Conduta / Conclusão</label><textarea id="r-conduta" placeholder="Inicia-se tratamento com..."></textarea></div>
+    <p class="section-label">Selecione o modelo de doença</p>
+    <div class="med-class-btns" id="rel-doenca-btns" style="flex-wrap:wrap">
+      <button class="med-class-btn" data-key="lupus"  onclick="selecionarDoencaRel('lupus')">LES</button>
+      <button class="med-class-btn" data-key="ar"     onclick="selecionarDoencaRel('ar')">Artrite Reumatoide</button>
+      <button class="med-class-btn" data-key="dm"     onclick="selecionarDoencaRel('dm')">Dermatomiosite</button>
+      <button class="med-class-btn" data-key="fm"     onclick="selecionarDoencaRel('fm')">Fibromialgia</button>
+      <button class="med-class-btn" data-key="op"     onclick="selecionarDoencaRel('op')">Osteoporose</button>
+      <button class="med-class-btn" data-key="es"     onclick="selecionarDoencaRel('es')">Esclerose Sistêmica</button>
+      <button class="med-class-btn" data-key="ss"     onclick="selecionarDoencaRel('ss')">Síndrome de Sjögren</button>
+      <button class="med-class-btn" data-key="gpa"    onclick="selecionarDoencaRel('gpa')">GPA</button>
+      <button class="med-class-btn" data-key="pam"    onclick="selecionarDoencaRel('pam')">PAM</button>
+      <button class="med-class-btn" data-key="pan"    onclick="selecionarDoencaRel('pan')">PAN</button>
+      <button class="med-class-btn" data-key="gepa"   onclick="selecionarDoencaRel('gepa')">GEPA</button>
+      <button class="med-class-btn" data-key="aij"    onclick="selecionarDoencaRel('aij')">AIJ</button>
+    </div>
+    <div id="rel-editor-wrap" style="display:none;margin-top:1rem">
+      <div id="rel-doenca-banner" style="background:var(--brand);color:#fff;border-radius:8px;padding:9px 14px;font-weight:700;font-size:14px;margin-bottom:10px"></div>
+      <div class="field">
+        <label style="font-size:12px;color:var(--text-secondary)">Edite o relatório abaixo — o texto digitado aqui será impresso</label>
+        <textarea id="rel-texto" style="min-height:520px;font-family:'Courier New',monospace;font-size:12.5px;line-height:1.8;border:1px solid var(--border);border-radius:8px;padding:14px;width:100%;resize:vertical"></textarea>
+      </div>
     </div>
     <div class="form-actions">
       <button class="btn btn-primary" onclick="gerarUm('relatorio')">
@@ -664,104 +679,75 @@
     </div>
   </div>
 
-  <!-- ══ MODELOS DE RELATÓRIO ══ -->
-  <div id="tab-modelos" class="card doc-card" style="display:none">
+  <!-- ══ ENCAMINHAMENTO ══ -->
+  <div id="tab-encaminhamento" class="card doc-card" style="display:none">
     <div class="doc-card-header">
-      <span class="doc-card-title">Modelos de relatório por doença</span>
+      <span class="doc-card-title">Encaminhamento médico</span>
+      <div class="date-toggle-inline">
+        <span class="date-toggle-label">Data:</span>
+        <button class="dtb" data-doc="encaminhamento" data-val="com" onclick="setDocData(this)">Com data</button>
+        <button class="dtb" data-doc="encaminhamento" data-val="sem" onclick="setDocData(this)">Sem data</button>
+        <input type="hidden" class="doc-data-val" id="data-encaminhamento" value="">
+        <span class="date-req-err" id="err-data-encaminhamento">Selecione</span>
+      </div>
     </div>
-
-    <p class="section-label">Selecione a doença</p>
-    <div class="med-class-btns" id="doenca-btns" style="flex-wrap:wrap">
-      <button class="med-class-btn" data-key="lupus"   onclick="selecionarDoenca('lupus')">LES</button>
-      <button class="med-class-btn" data-key="ar"      onclick="selecionarDoenca('ar')">Artrite Reumatoide</button>
-      <button class="med-class-btn" data-key="dm"      onclick="selecionarDoenca('dm')">Dermatomiosite</button>
-      <button class="med-class-btn" data-key="fm"      onclick="selecionarDoenca('fm')">Fibromialgia</button>
-      <button class="med-class-btn" data-key="op"      onclick="selecionarDoenca('op')">Osteoporose</button>
-      <button class="med-class-btn" data-key="es"      onclick="selecionarDoenca('es')">Esclerose Sistêmica</button>
-      <button class="med-class-btn" data-key="ss"      onclick="selecionarDoenca('ss')">Síndrome de Sjögren</button>
-      <button class="med-class-btn" data-key="gpa"     onclick="selecionarDoenca('gpa')">GPA</button>
-      <button class="med-class-btn" data-key="pam"     onclick="selecionarDoenca('pam')">PAM</button>
-      <button class="med-class-btn" data-key="pan"     onclick="selecionarDoenca('pan')">PAN</button>
-      <button class="med-class-btn" data-key="gepa"    onclick="selecionarDoenca('gepa')">GEPA</button>
-      <button class="med-class-btn" data-key="aij"     onclick="selecionarDoenca('aij')">AIJ</button>
+    <p class="section-label">Destino</p>
+    <div class="form-grid cols-2">
+      <div class="field">
+        <label>Especialidade de destino</label>
+        <select id="enc-especialidade" onchange="toggleOutraEsp()" style="font-size:13px;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);width:100%">
+          <option>Cardiologia</option>
+          <option>Pneumologia</option>
+          <option>Nefrologia</option>
+          <option>Neurologia</option>
+          <option>Oftalmologia</option>
+          <option>Dermatologia</option>
+          <option>Ortopedia</option>
+          <option>Hematologia</option>
+          <option>Endocrinologia</option>
+          <option>Gastroenterologia</option>
+          <option>Ginecologia</option>
+          <option>Urologia</option>
+          <option>Psiquiatria</option>
+          <option>Fisiatria / Reabilitação</option>
+          <option>Cirurgia Vascular</option>
+          <option>Cirurgia de Mão</option>
+          <option>Reumatologia</option>
+          <option>Infectologia</option>
+          <option>Geriatria</option>
+          <option>Otorrinolaringologia</option>
+          <option>Medicina do Sono</option>
+          <option>Outra especialidade</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Médico / Clínica (opcional)</label>
+        <input id="enc-medico" placeholder="Dr. Nome ou Nome da Clínica"/>
+      </div>
     </div>
-
-    <div id="modelo-form" style="display:none;margin-top:1.5rem">
-
-      <div id="modelo-doenca-banner" style="background:var(--brand);color:#fff;border-radius:8px;padding:10px 16px;font-weight:700;font-size:15px;margin-bottom:1.2rem"></div>
-
-      <!-- Dados gerais -->
-      <p class="section-label">Dados do diagnóstico</p>
-      <div class="form-grid cols-3">
-        <div class="field"><label>Tempo de diagnóstico</label><input id="mod-tempo" placeholder="Ex: 4 anos e 6 meses"/></div>
-        <div class="field"><label>Classificação / Gravidade</label>
-          <select id="mod-gravidade" style="font-size:13px;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);width:100%">
-            <option>Leve</option><option>Moderada</option><option selected>Grave</option>
-            <option>Moderada a grave</option><option>Refratária</option>
-          </select>
-        </div>
-        <div class="field"><label>Subtipo / forma clínica (opcional)</label><input id="mod-subtipo" placeholder="Ex: nefrite lúpica, difusa…"/></div>
+    <div class="form-grid cols-1">
+      <div class="field" id="enc-outra-esp-wrap" style="display:none">
+        <label>Descreva a especialidade</label>
+        <input id="enc-outra-esp" placeholder="Ex: Medicina do Trabalho, Genética Médica…"/>
       </div>
-
-      <!-- Manifestações -->
-      <p class="section-label">Manifestações clínicas presentes</p>
-      <div id="mod-manifestacoes" class="form-grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px 16px"></div>
-      <div class="field" style="margin-top:10px"><label>Outras manifestações (texto livre)</label>
-        <textarea id="mod-outras-manif" placeholder="Descreva manifestações adicionais…" style="min-height:60px"></textarea>
+      <div class="field">
+        <label>Diagnóstico / CID (opcional)</label>
+        <input id="enc-diag" placeholder="Ex: Síndrome de Sjögren — M35.0"/>
       </div>
-
-      <!-- Histórico de tratamentos -->
-      <p class="section-label">Histórico de tratamentos realizados</p>
-      <div id="mod-trat-list" style="display:flex;flex-direction:column;gap:8px"></div>
-      <button class="btn" style="margin-top:8px;font-size:13px" onclick="addTratRow()">+ Adicionar medicação</button>
-
-      <!-- Avaliação atual -->
-      <p class="section-label">Avaliação clínica atual</p>
-      <div class="field"><label>Descrição dos sintomas atuais</label>
-        <textarea id="mod-sintomas-atuais" placeholder="Descreva o quadro clínico atual do paciente…" style="min-height:80px"></textarea>
+      <div class="field">
+        <label>Motivo do encaminhamento</label>
+        <textarea id="enc-motivo" placeholder="Descreva o motivo clínico do encaminhamento…" style="min-height:100px"></textarea>
       </div>
-      <div class="form-grid cols-2" style="margin-top:10px">
-        <div class="field"><label>Avaliação global do médico (0–10)</label><input id="mod-aval-med" type="number" min="0" max="10" placeholder="0–10"/></div>
-        <div class="field"><label>Avaliação global do paciente (0–10)</label><input id="mod-aval-pac" type="number" min="0" max="10" placeholder="0–10"/></div>
+      <div class="field">
+        <label>Informações clínicas relevantes (medicações em uso, exames recentes, alergias…)</label>
+        <textarea id="enc-obs" placeholder="Ex: Em uso de Metotrexato 15mg/semana. VHS: 45 mm/h. Alérgica a sulfa."></textarea>
       </div>
-
-      <!-- Escores -->
-      <p class="section-label">Escores de atividade e gravidade</p>
-      <div id="mod-escores" class="form-grid cols-3"></div>
-
-      <!-- DUT-65 -->
-      <div style="background:#e8f4f1;border:1px solid #a8d8c4;border-radius:8px;padding:14px 16px;margin-top:1.5rem">
-        <label style="display:flex;align-items:center;gap:10px;font-weight:600;font-size:13px;cursor:pointer">
-          <input type="checkbox" id="mod-solicita-bio" onchange="toggleBioSection()" style="width:16px;height:16px">
-          Solicitar imunobiológico conforme DUT-65 / PCDT do Ministério da Saúde
-        </label>
-        <div id="mod-bio-section" style="display:none;margin-top:12px">
-          <div class="form-grid cols-2">
-            <div class="field"><label>Imunobiológico solicitado</label>
-              <select id="mod-bio-select" style="font-size:13px;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);width:100%">
-                <option value="">— selecionar —</option>
-              </select>
-            </div>
-            <div class="field"><label>Número de falhas a DMARDs convencionais</label>
-              <select id="mod-falhas" style="font-size:13px;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);width:100%">
-                <option>1 falha</option><option>2 falhas</option><option>3 ou mais falhas</option>
-                <option>Intolerância / contraindicação</option>
-              </select>
-            </div>
-          </div>
-          <div class="field" style="margin-top:8px"><label>Justificativa complementar</label>
-            <textarea id="mod-justificativa" placeholder="Ex: paciente com nefrite lúpica refratária a ciclofosfamida e micofenolato…" style="min-height:70px"></textarea>
-          </div>
-        </div>
-      </div>
-
-      <div class="form-actions" style="margin-top:1.5rem">
-        <button class="btn btn-primary" onclick="gerarRelatorioModelo()">
-          <svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          Gerar Relatório PDF
-        </button>
-        <button class="btn" onclick="limparModelo()">Limpar</button>
-      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" onclick="gerarUm('encaminhamento')">
+        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Gerar PDF
+      </button>
+      <button class="btn" onclick="limpar('encaminhamento')">Limpar</button>
     </div>
   </div>
 
@@ -832,7 +818,7 @@
   }
 
   /* ── TABS (multi-select) ── */
-  const ALL_TABS = ['relatorio','receita','exames','imagem','atestado'];
+  const ALL_TABS = ['relatorio','receita','exames','imagem','atestado','encaminhamento'];
   const activeTabs = new Set(['relatorio']);
 
   function toggleTab(btn) {
@@ -1906,13 +1892,22 @@
   function buildHtml(tipo) {
     const p = getPaciente();
     if (tipo === 'relatorio') {
-      const diag = v('r-diag'), anamnese = v('r-anamnese'), exFis = v('r-exame'), conduta = v('r-conduta');
+      const texto = (document.getElementById('rel-texto')?.value || '').trim();
+      if (!texto) { alert('Selecione uma doença e edite o relatório antes de gerar o PDF.'); return null; }
+      const linhasHtml = texto.split('\n').map(linha => {
+        if (!linha.trim()) return '<div style="height:4px"></div>';
+        if (/^─{4,}$/.test(linha.trim())) return '<hr class="doc-divider" style="margin:7px 0"/>';
+        if (/^[A-ZÁÀÂÃÉÊÍÓÔÕÚÜÇÑ][A-ZÁÀÂÃÉÊÍÓÔÕÚÜÇÑ\s\/]+:/.test(linha) && linha.length < 100 && !linha.startsWith('•')) {
+          const ci = linha.indexOf(':');
+          return `<p style="font-size:12.5px;line-height:1.8"><strong>${linha.slice(0,ci+1)}</strong>${linha.slice(ci+1)}</p>`;
+        }
+        if (linha.startsWith('•') || linha.startsWith('- '))
+          return `<p style="font-size:12.5px;line-height:1.8;padding-left:14px">${linha}</p>`;
+        return `<p style="font-size:12.5px;line-height:1.8;text-align:justify">${linha}</p>`;
+      }).join('');
       return `${letterhead('Relatório Médico')}
         ${docSec('Paciente', pacienteHtml(p))}
-        ${docSec('Diagnóstico', `<p>${diag}</p>`)}
-        ${docSec('Anamnese / História clínica', `<p>${nl2br(anamnese)}</p>`)}
-        ${docSec('Exame físico', `<p>${nl2br(exFis)}</p>`)}
-        ${docSec('Conduta / Conclusão', `<p>${nl2br(conduta)}</p>`)}
+        <div class="doc-section" style="padding:12px 20px">${linhasHtml}</div>
         ${assinatura('relatorio')}`;
     }
     if (tipo === 'receita') {
@@ -1999,6 +1994,23 @@
         ${obs ? docSec('Observações', `<p>${nl2br(obs)}</p>`) : ''}
         ${assinatura('atestado')}`;
     }
+    if (tipo === 'encaminhamento') {
+      const espSel = document.getElementById('enc-especialidade')?.value || '';
+      const outraEsp = v('enc-outra-esp');
+      const esp = espSel === 'Outra especialidade' ? (outraEsp || 'Outra especialidade') : espSel;
+      const medico = v('enc-medico');
+      const diag = v('enc-diag');
+      const motivo = v('enc-motivo');
+      const obs = v('enc-obs');
+      const paraLine = [esp, medico].filter(Boolean).join(' — ');
+      return `${letterhead('Encaminhamento Médico')}
+        ${docSec('Paciente', pacienteHtml(p))}
+        ${paraLine ? docSec('Encaminhado para', `<p style="font-size:14px"><strong>${paraLine}</strong></p>`) : ''}
+        ${diag ? docSec('Diagnóstico / CID', `<p>${diag}</p>`) : ''}
+        ${motivo ? docSec('Motivo do Encaminhamento', `<p style="text-align:justify;line-height:1.85">${nl2br(motivo)}</p>`) : ''}
+        ${obs ? docSec('Informações Clínicas Relevantes', `<p style="text-align:justify;line-height:1.85">${nl2br(obs)}</p>`) : ''}
+        ${assinatura('encaminhamento')}`;
+    }
     return '';
   }
 
@@ -2006,7 +2018,8 @@
   function gerarUm(tipo) {
     if (!validarPaciente()) return;
     if (!validarData(tipo)) return;
-    abrirPDF(buildHtml(tipo));
+    const html = buildHtml(tipo);
+    if (html) abrirPDF(html);
   }
 
   /* ── GERAR TODOS ── */
@@ -2477,11 +2490,12 @@ ${html}
   /* ── LIMPAR ── */
   function limpar(tipo) {
     const ids = {
-      relatorio: ['r-diag','r-anamnese','r-exame','r-conduta'],
+      relatorio: [],
       receita:   ['rc-obs'],
       exames:    ['ex-hip','ex-obs'],
       imagem:    ['img-hip','img-obs'],
       atestado:  ['at-cpf','at-dias','at-inicio','at-cid','at-obs'],
+      encaminhamento: ['enc-medico','enc-diag','enc-motivo','enc-obs','enc-outra-esp'],
     };
     (ids[tipo]||[]).forEach(id => { const el=document.getElementById(id); if(el) el.value=el.type==='number'?'1':''; });
     if (tipo === 'receita') {
@@ -2501,6 +2515,78 @@ ${html}
       const inp = document.getElementById('img-input'); if(inp) inp.value='';
       renderImgCatalog(); renderImgTags();
     }
+    if (tipo === 'relatorio') {
+      const ta = document.getElementById('rel-texto'); if (ta) ta.value = '';
+      const wrap = document.getElementById('rel-editor-wrap'); if (wrap) wrap.style.display = 'none';
+      document.querySelectorAll('#rel-doenca-btns .med-class-btn').forEach(b => b.classList.remove('active'));
+    }
+    if (tipo === 'encaminhamento') {
+      const esp = document.getElementById('enc-especialidade'); if (esp) esp.selectedIndex = 0;
+      toggleOutraEsp();
+    }
+  }
+
+  /* ── RELATÓRIO — SELECIONAR DOENÇA E GERAR TEMPLATE ── */
+  let relDoencaKey = null;
+
+  function selecionarDoencaRel(key) {
+    relDoencaKey = key;
+    const d = MODELO_DOENCAS[key];
+    const p = getPaciente();
+    document.getElementById('rel-texto').value = buildTemplateRelatorio(d, p);
+    document.getElementById('rel-doenca-banner').textContent = d.label + ' — CID-10: ' + d.cid;
+    document.getElementById('rel-editor-wrap').style.display = 'block';
+    document.querySelectorAll('#rel-doenca-btns .med-class-btn').forEach(b =>
+      b.classList.toggle('active', b.dataset.key === key)
+    );
+  }
+
+  function buildTemplateRelatorio(d, p) {
+    const nome = p.nome || '[NOME DO PACIENTE]';
+    const L = '─'.repeat(58);
+    let t = '';
+    t += 'DIAGNÓSTICO: ' + d.label + ' (CID-10: ' + d.cid + ')\n';
+    t += 'PACIENTE: ' + nome;
+    if (p.nasc) t += ' | DN: ' + p.nasc;
+    if (p.sexo) t += ' | ' + p.sexo;
+    t += '\nTEMPO DE DIAGNÓSTICO: [PREENCHER]\n\n';
+    t += L + '\nHISTÓRICO CLÍNICO\n\n';
+    t += 'O(a) paciente é portador(a) de ' + d.label + ', com diagnóstico estabelecido há [PREENCHER]. Apresenta as seguintes manifestações clínicas:\n\n';
+    d.manifestacoes.slice(0, 6).forEach(m => { t += '• ' + m + '\n'; });
+    t += '• [OUTRAS MANIFESTAÇÕES / ACRESCENTAR CONFORME O CASO]\n\n';
+    t += L + '\nHISTÓRICO DE TRATAMENTOS\n\n';
+    t += '• [MEDICAMENTO 1] [DOSE] — [DURAÇÃO] — [RESULTADO: boa resposta / falha / intolerância]\n';
+    t += '• [MEDICAMENTO 2] [DOSE] — [DURAÇÃO] — [RESULTADO]\n';
+    t += '• [ACRESCENTAR OUTROS TRATAMENTOS]\n\n';
+    t += L + '\nAVALIAÇÃO CLÍNICA ATUAL\n\n';
+    t += '[DESCREVER O QUADRO CLÍNICO ATUAL DO PACIENTE]\n\n';
+    t += 'Escores de atividade e gravidade:\n';
+    d.escores.slice(0, 5).forEach(e => {
+      t += '• ' + e.label + ': [PREENCHER]';
+      if (e.ref) t += ' (Ref: ' + e.ref.split('·')[0].trim() + ')';
+      t += '\n';
+    });
+    t += '• Avaliação global do médico (0–10): [PREENCHER]\n';
+    t += '• Avaliação global do paciente (0–10): [PREENCHER]\n\n';
+    t += L + '\nCONDUTA TERAPÊUTICA\n\n';
+    t += '[DESCREVER CONDUTA ATUAL E PROPOSTA TERAPÊUTICA]\n\n';
+    if (d.biologicos && d.biologicos.length > 0) {
+      t += L + '\nSOLICITAÇÃO DE IMUNOBIOLÓGICO — ' + d.dut + '\n\n';
+      t += 'O(a) paciente ' + nome + ', portador(a) de ' + d.label + ' (CID-10: ' + d.cid + '), com diagnóstico há [PREENCHER], apresenta doença de caráter [GRAVE / MODERADA / REFRATÁRIA], com [N] falhas terapêuticas documentadas a DMARDs convencionais, conforme detalhado acima.\n\n';
+      t += 'Medicamentos tentados e resultados:\n';
+      t += '• [DMARD 1]: [DOSE] por [DURAÇÃO] — [RESULTADO]\n';
+      t += '• [DMARD 2]: [DOSE] por [DURAÇÃO] — [RESULTADO]\n\n';
+      t += 'Solicito autorização para uso de: [' + d.biologicos[0] + ']\n\n';
+      t += 'Justificativa complementar: [PREENCHER]\n\n';
+    }
+    return t;
+  }
+
+  /* ── ENCAMINHAMENTO — TOGGLE OUTRA ESP ── */
+  function toggleOutraEsp() {
+    const sel = document.getElementById('enc-especialidade');
+    const wrap = document.getElementById('enc-outra-esp-wrap');
+    if (wrap && sel) wrap.style.display = sel.value === 'Outra especialidade' ? 'block' : 'none';
   }
 </script>
 </body>
