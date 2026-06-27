@@ -1152,6 +1152,10 @@
           <label style="font-size:12px;font-weight:600;color:var(--text-secondary)">Por quanto tempo</label>
           ${durSelect('30 dias')}
         </div>
+      </div>
+      <div class="field" style="margin-top:8px">
+        <label style="font-size:11.5px;font-weight:600;color:var(--text-secondary)">Observação (opcional)</label>
+        <input class="med-obs" placeholder="Ex: tomar com alimento, evitar exposição solar, monitorar PA…" style="font-size:12.5px;color:#444"/>
       </div>`;
     document.getElementById('meds-list').appendChild(card);
   }
@@ -1172,6 +1176,10 @@
       <div class="field" style="margin-top:8px">
         <label style="font-size:12px;font-weight:600;color:var(--text-secondary)">Por quanto tempo</label>
         ${durSelect('30 dias')}
+      </div>
+      <div class="field" style="margin-top:8px">
+        <label style="font-size:11.5px;font-weight:600;color:var(--text-secondary)">Observação (opcional)</label>
+        <input class="med-obs" placeholder="Ex: tomar com alimento, evitar exposição solar, monitorar PA…" style="font-size:12.5px;color:#444"/>
       </div>`;
     document.getElementById('meds-list').appendChild(card);
   }
@@ -2025,12 +2033,14 @@
         }
         dur = card.querySelector('.med-dur')?.value || '';
         if (dur === 'personalizado') dur = card.querySelector('.med-dur-custom')?.value.trim() || '';
+        const medObs = card.querySelector('.med-obs')?.value.trim() || '';
         if (!nome) return '';
         idx++;
         return `<div class="med-item">
           <strong>${idx}. ${nome}</strong>
           ${pos ? `<span>${pos}</span>` : ''}
           ${dur ? `<span style="color:#1a6b5a;font-size:12px;font-weight:600;display:block;margin-top:2px">Duração: ${dur}</span>` : ''}
+          ${medObs ? `<span style="font-size:12px;color:#444;display:block;margin-top:2px;font-style:italic">Obs.: ${medObs}</span>` : ''}
         </div>`;
       }).filter(Boolean).join('');
 
