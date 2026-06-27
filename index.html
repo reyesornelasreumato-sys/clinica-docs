@@ -2689,11 +2689,20 @@ ${html}
     if (sec) sec.style.display = chk?.checked ? 'block' : 'none';
   }
 
+  function pronomes(sexo) {
+    const m = sexo === 'Masculino', f = sexo === 'Feminino';
+    return {
+      o_a:      m ? 'O'         : f ? 'A'          : 'O(a)',
+      portador: m ? 'portador'  : f ? 'portadora'  : 'portador(a)',
+    };
+  }
+
   function gerarPreviaRelatorio() {
     if (!relDoencaKey) { alert('Selecione uma doença primeiro.'); return; }
     const d = MODELO_DOENCAS[relDoencaKey];
     const p = getPaciente();
     const nome = p.nome || '[NOME DO PACIENTE]';
+    const pr = pronomes(p.sexo || '');
     const L = '─'.repeat(58);
 
     const tempo      = document.getElementById('rel-tempo')?.value.trim() || '[PREENCHER]';
@@ -2723,7 +2732,7 @@ ${html}
     t += '\n';
 
     t += L + '\nHISTÓRICO CLÍNICO\n\n';
-    t += 'O(a) paciente é portador(a) de ' + d.label + ', com diagnóstico estabelecido há ' + tempo + '. Apresenta as seguintes manifestações clínicas:\n\n';
+    t += pr.o_a + ' paciente é ' + pr.portador + ' de ' + d.label + ', com diagnóstico estabelecido há ' + tempo + '. Apresenta as seguintes manifestações clínicas:\n\n';
     manifSel.forEach(m => { t += '• ' + m + '\n'; });
     if (outrasManif) outrasManif.split('\n').forEach(l => { if (l.trim()) t += '• ' + l.trim() + '\n'; });
     if (!manifSel.length && !outrasManif) t += '• [DESCREVER MANIFESTAÇÕES]\n';
@@ -2754,7 +2763,7 @@ ${html}
 
     if (solicita && d.biologicos?.length) {
       t += L + '\nSOLICITAÇÃO DE IMUNOBIOLÓGICO — ' + d.dut + '\n\n';
-      t += 'O(a) paciente ' + nome + ', portador(a) de ' + d.label + ' (CID-10: ' + d.cid + '), ';
+      t += pr.o_a + ' paciente ' + nome + ', ' + pr.portador + ' de ' + d.label + ' (CID-10: ' + d.cid + '), ';
       t += 'com diagnóstico há ' + tempo + ', apresenta doença de caráter ' + (gravidade||'[PREENCHER]') + ', com ' + (falhas||'[N falhas]') + ' a DMARDs convencionais.\n\n';
       const falhasTrat = tratamentos.filter(tr => tr.result === 'Falha terapêutica' || tr.result === 'Intolerância' || tr.result === 'Suspenso');
       if (falhasTrat.length) {
