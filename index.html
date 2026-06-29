@@ -2039,7 +2039,7 @@
         return `<div class="med-item">
           <strong>${idx}. ${nome}</strong>
           ${pos ? `<span>${pos}</span>` : ''}
-          ${dur ? `<span style="color:#1a6b5a;font-size:12px;font-weight:600;display:block;margin-top:2px">Duração: ${dur}</span>` : ''}
+          ${dur ? `<span style="color:#111;font-size:12px;font-weight:600;display:block;margin-top:2px">Duração: ${dur}</span>` : ''}
           ${medObs ? `<span style="font-size:12px;color:#444;display:block;margin-top:2px;font-style:italic">Obs.: ${medObs}</span>` : ''}
         </div>`;
       }).filter(Boolean).join('');
@@ -2053,8 +2053,8 @@
 
       if (isEspecial) {
         const footer = footerEspecial();
-        const via1 = `<div style="font-size:10px;color:#1a6b5a;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">1ª Via — Farmácia</div>${corpo}${footer}`;
-        const via2 = `<div style="font-size:10px;color:#1a6b5a;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">2ª Via — Paciente</div>${corpo}${footer}`;
+        const via1 = `<div style="font-size:10px;color:#222;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">1ª Via — Farmácia</div>${corpo}${footer}`;
+        const via2 = `<div style="font-size:10px;color:#222;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">2ª Via — Paciente</div>${corpo}${footer}`;
         const sep  = `<div style="border-top:1px dashed #aaa;margin:2.5rem 0;page-break-after:always"></div>`;
         return via1 + sep + via2;
       }
@@ -2427,7 +2427,7 @@
           `<tr>
             <td style="padding:6px 8px;border:1px solid #ddd">${r.med}</td>
             <td style="padding:6px 8px;border:1px solid #ddd">${r.dur}</td>
-            <td style="padding:6px 8px;border:1px solid #ddd;${r.resp==='Falha terapêutica'||r.resp==='Intolerância / efeito adverso'?'color:#c0392b;font-weight:600':''}">${r.resp}</td>
+            <td style="padding:6px 8px;border:1px solid #bbb;${r.resp==='Falha terapêutica'||r.resp==='Intolerância / efeito adverso'?'color:#000;font-weight:700':''}">${r.resp}</td>
            </tr>`
         ).join('')}</tbody>
       </table>` : '<p style="color:#888;font-style:italic">Nenhum tratamento registrado.</p>';
@@ -2436,17 +2436,17 @@
     const escoresHtml = escoresPreench.length ? `
       <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px">
         ${escoresPreench.map(e => `
-          <div style="background:#f5f9f7;border:1px solid #c8e6d9;border-radius:6px;padding:8px 14px;min-width:130px">
-            <div style="font-size:10px;color:#555;font-weight:600;text-transform:uppercase;letter-spacing:0.03em">${e.label}</div>
-            <div style="font-size:22px;font-weight:700;color:#1a6b5a;margin:2px 0">${e.val}</div>
+          <div style="background:#f0f0f0;border:1px solid #aaa;border-radius:6px;padding:8px 14px;min-width:130px">
+            <div style="font-size:10px;color:#444;font-weight:600;text-transform:uppercase;letter-spacing:0.03em">${e.label}</div>
+            <div style="font-size:22px;font-weight:700;color:#111;margin:2px 0">${e.val}</div>
             ${e.ref ? `<div style="font-size:9.5px;color:#777;margin-top:2px">${e.ref}</div>` : ''}
           </div>`).join('')}
       </div>` : '';
 
     // Bloco DUT-65
     const dutHtml = (solBio && bioSel) ? `
-      <div style="border:2px solid #1a6b5a;border-radius:8px;padding:16px 18px;margin-top:1rem;page-break-inside:avoid">
-        <div style="font-size:12px;font-weight:700;color:#1a6b5a;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px">
+      <div style="border:2px solid #111;border-radius:8px;padding:16px 18px;margin-top:1rem;page-break-inside:avoid">
+        <div style="font-size:12px;font-weight:700;color:#111;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px">
           ▸ Solicitação de Imunobiológico — ${d.dut}
         </div>
         <p style="text-align:justify;font-size:12.5px;line-height:1.85;margin-bottom:8px">
@@ -2533,34 +2533,34 @@
     const CSS = `
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:'Inter',sans-serif;font-size:13px;line-height:1.7;color:#1a1f1e;background:#fff;padding:2.5cm 2cm}
-  .doc-letterhead{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;padding-bottom:1.2rem;border-bottom:2px solid #1a6b5a;gap:1rem}
+  .doc-letterhead{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem;padding-bottom:1.2rem;border-bottom:2px solid #111;gap:1rem}
   .doc-letterhead-logo{flex-shrink:0}
-  .doc-logo-placeholder{width:68px;height:68px;border:1px dashed #dce5e2;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#8a9e99;text-align:center;padding:4px}
+  .doc-logo-placeholder{width:68px;height:68px;border:1px dashed #bbb;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:9px;color:#555;text-align:center;padding:4px}
   .doc-letterhead-center{flex:1;text-align:center}
-  .doc-letterhead-center h2{font-family:'Lora',serif;font-size:16px;font-weight:600;color:#1a6b5a;margin-bottom:3px}
-  .doc-specialty{font-size:12px;color:#4a5650;margin-bottom:2px}
-  .doc-crm{font-size:11px;color:#8a9e99}
-  .doc-letterhead-right{flex-shrink:0;text-align:right;font-size:11px;color:#8a9e99;line-height:1.6;max-width:190px}
-  .doc-letterhead-right strong{display:block;color:#4a5650;font-size:11px;margin-bottom:2px}
+  .doc-letterhead-center h2{font-family:'Lora',serif;font-size:16px;font-weight:600;color:#111;margin-bottom:3px}
+  .doc-specialty{font-size:12px;color:#333;margin-bottom:2px}
+  .doc-crm{font-size:11px;color:#555}
+  .doc-letterhead-right{flex-shrink:0;text-align:right;font-size:11px;color:#555;line-height:1.6;max-width:190px}
+  .doc-letterhead-right strong{display:block;color:#333;font-size:11px;margin-bottom:2px}
   .doc-title-banner{text-align:center;margin-bottom:1.5rem}
-  .doc-title-banner h3{font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#4a5650;background:#e8f4f1;display:inline-block;padding:5px 18px;border-radius:999px}
+  .doc-title-banner h3{font-size:12px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#111;background:#e0e0e0;display:inline-block;padding:5px 18px;border-radius:999px}
   .doc-section{margin-bottom:1rem;font-size:13px;line-height:1.7}
-  .doc-section-label{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#1a6b5a;margin-bottom:3px}
-  .doc-divider{border:none;border-top:1px solid #edf1ef;margin:0.9rem 0}
-  .doc-footer-row{display:flex;align-items:flex-end;justify-content:space-between;margin-top:2.5rem;padding-top:1rem;border-top:1px solid #edf1ef}
-  .doc-date-place{font-size:11px;color:#8a9e99}
+  .doc-section-label{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#222;margin-bottom:3px}
+  .doc-divider{border:none;border-top:1px solid #ccc;margin:0.9rem 0}
+  .doc-footer-row{display:flex;align-items:flex-end;justify-content:space-between;margin-top:2.5rem;padding-top:1rem;border-top:1px solid #ccc}
+  .doc-date-place{font-size:11px;color:#555}
   .doc-signature{text-align:center}
-  .sig-line{width:200px;border-top:1px solid #1a1f1e;margin:0 auto 6px}
-  .sig-name{font-size:12px;font-weight:600;color:#1a1f1e;margin-bottom:1px}
-  .doc-signature p{font-size:11px;color:#4a5650;margin-bottom:1px}
-  .med-item{padding:6px 0;border-bottom:1px solid #edf1ef}
+  .sig-line{width:200px;border-top:1px solid #111;margin:0 auto 6px}
+  .sig-name{font-size:12px;font-weight:600;color:#111;margin-bottom:1px}
+  .doc-signature p{font-size:11px;color:#333;margin-bottom:1px}
+  .med-item{padding:6px 0;border-bottom:1px solid #ccc}
   .med-item:last-child{border-bottom:none}
   .med-item strong{font-size:13px;display:block}
-  .med-item span{font-size:12px;color:#4a5650}
+  .med-item span{font-size:12px;color:#333}
   .exam-list-doc{padding:0;list-style:none}
-  .exam-list-doc li{padding:4px 0;border-bottom:1px solid #edf1ef;font-size:13px;display:flex;align-items:center;gap:8px}
+  .exam-list-doc li{padding:4px 0;border-bottom:1px solid #ccc;font-size:13px;display:flex;align-items:center;gap:8px}
   .exam-list-doc li:last-child{border-bottom:none}
-  .exam-bullet{width:5px;height:5px;border-radius:50%;background:#1a6b5a;flex-shrink:0}
+  .exam-bullet{width:5px;height:5px;border-radius:50%;background:#333;flex-shrink:0}
   .exam-list-2col{column-count:2;column-gap:2rem}
   .exam-list-2col li{break-inside:avoid}
   @page { margin: 2.5cm 2cm; size: A4; }
