@@ -855,6 +855,18 @@
   let localSelecionado = null;
   const tabs = ['relatorio','receita','exames','atestado'];
 
+  // Injecta logos nas cards de local que possuem logo definido
+  document.querySelectorAll('.local-card').forEach((card, i) => {
+    const local = LOCAIS[i];
+    if (local && local.logo) {
+      const img = document.createElement('img');
+      img.src = local.logo;
+      img.alt = '';
+      img.style.cssText = 'max-height:40px;max-width:100%;object-fit:contain;display:block;margin-bottom:7px';
+      card.insertBefore(img, card.firstChild);
+    }
+  });
+
   /* ── LOCAL ── */
   function selectLocal(idx) {
     localSelecionado = idx;
