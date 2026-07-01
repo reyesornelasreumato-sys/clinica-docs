@@ -463,6 +463,10 @@
       <svg viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
       Encaminhamento
     </button>
+    <button class="tab-btn" data-tab="tcle" onclick="toggleTab(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+      TCLE
+    </button>
   </div>
 
   <!-- BOTÃO GERAR TUDO -->
@@ -830,6 +834,74 @@
     </div>
   </div>
 
+
+  <!-- ══ TCLE ══ -->
+  <div id="tab-tcle" class="card doc-card" style="display:none">
+    <div class="doc-card-header">
+      <span class="doc-card-title">TCLE — Consentimento para Procedimento</span>
+    </div>
+
+    <div class="form-grid cols-2">
+      <div class="field">
+        <label>Procedimento</label>
+        <input id="tcle-proc" value="Infiltração Articular" oninput="tclePreview()"/>
+      </div>
+      <div class="field">
+        <label>Articulação / Local</label>
+        <input id="tcle-joint" placeholder="Ex: joelho direito, ombro esquerdo…" oninput="tclePreview()"/>
+      </div>
+    </div>
+    <div class="form-grid cols-1">
+      <div class="field">
+        <label>Medicamento utilizado (opcional)</label>
+        <input id="tcle-med" placeholder="Ex: Triancinolona 40 mg + Lidocaína 2%" oninput="tclePreview()"/>
+      </div>
+    </div>
+
+    <p class="section-label">Riscos do procedimento</p>
+    <div class="form-grid cols-1">
+      <div class="field">
+        <textarea id="tcle-riscos" rows="6" style="font-size:13px" oninput="tclePreview()">Dor temporária no local da aplicação
+Sangramento ou hematoma local
+Infecção (risco estimado &lt; 1:10.000 com técnica asséptica)
+Reação inflamatória pós-infiltração (flare, dura 24–48 h)
+Reação alérgica ao medicamento utilizado
+Ruptura tendínea (em infiltrações próximas a tendões)
+Alteração transitória da coloração da pele no local
+Alteração glicêmica temporária (especialmente em diabéticos)</textarea>
+      </div>
+    </div>
+
+    <p class="section-label">Benefícios esperados</p>
+    <div class="form-grid cols-1">
+      <div class="field">
+        <textarea id="tcle-benef" rows="5" style="font-size:13px" oninput="tclePreview()">Redução significativa da dor articular
+Melhora da mobilidade e função articular
+Controle da inflamação local
+Alívio dos sintomas sem necessidade de procedimento cirúrgico
+Início de efeito esperado em 24 a 72 horas</textarea>
+      </div>
+    </div>
+
+    <div class="form-grid cols-2" style="margin-top:4px">
+      <div class="field">
+        <label>Data de assinatura</label>
+        <input id="tcle-data" type="date" oninput="tclePreview()"/>
+      </div>
+    </div>
+
+    <p class="section-label" style="margin-top:1.4rem">Prévia do documento</p>
+    <div id="tcle-preview-box" style="border:1px solid var(--border);border-radius:var(--radius-md);padding:1.25rem 1.5rem;background:var(--surface);font-size:13px;line-height:1.8;max-height:520px;overflow-y:auto;color:var(--text)">
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-primary" onclick="gerarTcle()">
+        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Gerar PDF
+      </button>
+      <button class="btn" onclick="limpar('tcle')">Limpar</button>
+    </div>
+  </div>
+
   <!-- preview removido — PDF abre em nova aba -->
 
 </div>
@@ -853,6 +925,7 @@
   ];
 
   let localSelecionado = null;
+  document.addEventListener('DOMContentLoaded', tclePreview);
   const tabs = ['relatorio','receita','exames','atestado'];
 
   // Injecta logos nas cards de local que possuem logo definido
@@ -1802,14 +1875,12 @@
       : `<h2>${local.nome}</h2>`;
 
     const rightContent = local
-      ? isConsultorio
-        ? `<strong>${local.nome}</strong>${local.end}<br>${local.tel}`
-        : `${local.end}<br>${local.tel}`
-      : `<strong>Consultório Particular</strong>São Paulo - SP`;
+      ? `${local.end}<br>${local.tel}`
+      : `São Paulo - SP`;
 
     return `
       <div class="doc-letterhead">
-        <div class="doc-letterhead-logo">${logoBox}</div>
+        ${logoBox ? `<div class="doc-letterhead-logo">${logoBox}</div>` : ''}
         <div class="doc-letterhead-center">${centerContent}</div>
         <div class="doc-letterhead-right">${rightContent}</div>
       </div>
@@ -2131,6 +2202,9 @@
         ${motivo ? docSec('Motivo do Encaminhamento', `<p style="text-align:justify;line-height:1.85">${nl2br(motivo)}</p>`) : ''}
         ${obs ? docSec('Informações Clínicas Relevantes', `<p style="text-align:justify;line-height:1.85">${nl2br(obs)}</p>`) : ''}
         ${assinatura('encaminhamento')}`;
+    }
+    if (tipo === 'tcle') {
+      return `${letterhead('Termo de Consentimento Livre e Esclarecido')}${tcleContent(true)}`;
     }
     return '';
   }
@@ -2828,6 +2902,86 @@ ${html}
     const wrap = document.getElementById('enc-outra-esp-wrap');
     if (wrap && sel) wrap.style.display = sel.value === 'Outra especialidade' ? 'block' : 'none';
   }
+
+  /* ══ TCLE ══ */
+  function tcleItems(raw) {
+    return raw.split('\n').filter(l => l.trim()).map(l => `<li>${l.replace(/^[-•]\s*/,'')}</li>`).join('');
+  }
+
+  function tcleContent() {
+    const p = getPaciente();
+    const proc  = (document.getElementById('tcle-proc')?.value || 'Infiltração Articular').trim();
+    const joint = (document.getElementById('tcle-joint')?.value || '').trim();
+    const med   = (document.getElementById('tcle-med')?.value || '').trim();
+    const riscos = document.getElementById('tcle-riscos')?.value || '';
+    const benef  = document.getElementById('tcle-benef')?.value || '';
+    const dataRaw = document.getElementById('tcle-data')?.value || '';
+    const local = localSelecionado !== null ? LOCAIS[localSelecionado] : null;
+    const cidade = local ? local.cidade : 'São Paulo';
+    const dataFmt = dataRaw
+      ? new Date(dataRaw + 'T12:00:00').toLocaleDateString('pt-BR', {day:'2-digit',month:'long',year:'numeric'})
+      : '';
+
+    const tituloProc = proc + (joint ? ` — ${joint}` : '');
+    const medLine = med ? `<p style="margin:2px 0 0;font-size:12px;color:#555">Medicamento: ${med}</p>` : '';
+    const sigDate = dataFmt ? `${cidade} — ${dataFmt}` : cidade;
+    const cpfLine = p.cpf ? ` &middot; CPF: ${p.cpf}` : '';
+
+    const pacHtml = `<p style="margin:0"><strong>${p.nome || '___________________________'}</strong>${p.nasc ? `<br><span style="font-size:12px">Nascimento: ${p.nasc}</span>` : ''}${p.cpf ? `<br><span style="font-size:12px">CPF: ${p.cpf}</span>` : ''}</p>`;
+
+    return `
+      <div class="doc-section"><div class="doc-section-label">Paciente</div>${pacHtml}</div><hr class="doc-divider"/>
+      <div class="doc-section"><div class="doc-section-label">Procedimento</div>
+        <p style="margin:0;font-size:14px"><strong>${tituloProc}</strong></p>${medLine}
+      </div><hr class="doc-divider"/>
+      <div class="doc-section"><div class="doc-section-label">Descrição do Procedimento</div>
+        <p style="text-align:justify;line-height:1.85">A infiltração articular consiste na aplicação de medicamento(s) diretamente na cavidade articular ou em estruturas periarticulares, com finalidade terapêutica. O procedimento é realizado com técnica asséptica rigorosa, podendo ser guiado por imagem quando indicado.</p>
+      </div><hr class="doc-divider"/>
+      <div class="doc-section"><div class="doc-section-label">Riscos do Procedimento</div>
+        <ul style="margin:4px 0 0 1.2rem;padding:0;line-height:1.9">${tcleItems(riscos)}</ul>
+      </div><hr class="doc-divider"/>
+      <div class="doc-section"><div class="doc-section-label">Benefícios Esperados</div>
+        <ul style="margin:4px 0 0 1.2rem;padding:0;line-height:1.9">${tcleItems(benef)}</ul>
+      </div><hr class="doc-divider"/>
+      <div class="doc-section"><div class="doc-section-label">Direitos do Paciente</div>
+        <p style="text-align:justify;line-height:1.85">O paciente tem plena liberdade para recusar ou interromper o procedimento a qualquer momento, sem qualquer prejuízo ao seu atendimento ou vínculo com o profissional.</p>
+      </div><hr class="doc-divider"/>
+      <div class="doc-section"><div class="doc-section-label">Declaração de Consentimento</div>
+        <p style="text-align:justify;line-height:1.85">Declaro que fui devidamente informado(a) sobre o procedimento descrito acima, seus possíveis riscos e benefícios esperados, e que tive todas as minhas dúvidas esclarecidas de forma satisfatória. Consinto livremente com a realização do procedimento e autorizo o profissional responsável a executá-lo.</p>
+      </div>
+      <div style="margin-top:2.5rem;display:grid;grid-template-columns:1fr 1fr;gap:2rem">
+        <div>
+          <div class="sig-line"></div>
+          <p class="sig-name" style="margin-bottom:2px">${p.nome || 'Paciente'}</p>
+          <p style="margin:0;font-size:11px;color:#555">Assinatura do Paciente${cpfLine}</p>
+        </div>
+        <div>
+          <div class="sig-line"></div>
+          <p style="margin:0;font-size:11px;color:#555">Responsável legal (se menor ou incapaz)</p>
+        </div>
+      </div>
+      <p style="margin-top:1rem;font-size:12px;color:#555">${sigDate}</p>
+      <div style="margin-top:2.5rem">
+        <div class="sig-line" style="max-width:280px"></div>
+        <p class="sig-name" style="margin-bottom:2px">${MEDICO.nome}</p>
+        <p style="margin:0;font-size:11px;color:#555">${MEDICO.crm} &middot; ${MEDICO.specialty}</p>
+      </div>`;
+  }
+
+  function tclePreview() {
+    const box = document.getElementById('tcle-preview-box');
+    if (!box) return;
+    box.innerHTML = tcleContent();
+  }
+
+  function gerarTcle() {
+    if (!validarPaciente()) return;
+    const proc = (document.getElementById('tcle-proc')?.value || '').trim();
+    if (!proc) { alert('Informe o nome do procedimento.'); return; }
+    const html = buildHtml('tcle');
+    if (html) abrirPDF(html);
+  }
+
 </script>
 </body>
 </html>
