@@ -2203,7 +2203,7 @@ Início de efeito esperado em 24 a 72 horas</textarea>
     return `${d}/${m}/${y}`;
   }
 
-  function hoje() { return new Date().toLocaleDateString('pt-BR', {day:'2-digit', month:'long', year:'numeric'}); }
+  function hoje() { return new Date().toLocaleDateString(docLang==='es'?'es-ES':'pt-BR', {day:'2-digit', month:'long', year:'numeric'}); }
   function nl2br(s) { return s.replace(/\n/g,'<br>'); }
 
   function docSec(label, content) {
