@@ -475,8 +475,8 @@
   </div>
 
   <!-- ══ TÍTULO + ABAS (multi-seleção) ══ -->
-  <div class="page-title">
-    <h1>Documentos</h1>
+  <div class="page-title" style="position:relative">
+    <h1>Documentos <span id="ver-badge" style="font-size:11px;font-weight:400;color:var(--text-secondary);vertical-align:middle;font-family:monospace">v2.3</span></h1>
     <p>Selecione um ou mais documentos, preencha e gere tudo de uma vez.</p>
   </div>
 
@@ -2183,6 +2183,9 @@ Início de efeito esperado em 24 a 72 horas</textarea>
     if (tipo === 'receita') {
       const isEspecial = document.getElementById('receita-especial-check')?.checked;
       const obs = v('rc-obs');
+      const _durLabel = docLang==='es'?'Duración:':'Duração:';
+      const _obsLabel = docLang==='es'?'Obs.':'Obs.';
+      const _vazioMsg = docLang==='es'?'Ningún medicamento prescrito.':'Nenhum medicamento prescrito.';
       const cards = [...document.querySelectorAll('#meds-list .med-card')];
       let idx = 0;
       const medsHtml = cards.map(card => {
@@ -2208,9 +2211,6 @@ Início de efeito esperado em 24 a 72 horas</textarea>
       }).filter(Boolean).join('');
 
       const titulo = isEspecial ? t('Receita de Controle Especial') : t('Receita Médica');
-      const _durLabel = docLang==='es'?'Duración:':'Duração:';
-      const _obsLabel = docLang==='es'?'Obs.':'Obs.';
-      const _vazioMsg = docLang==='es'?'Ningún medicamento prescrito.':'Nenhum medicamento prescrito.';
       const corpo = `${letterhead(titulo)}
         ${docSec(t('Paciente'), pacienteHtml(p))}
         <div class="doc-section"><div class="doc-section-label">${t('Prescrição')}</div>${medsHtml || `<p style="color:#8a9e99">${_vazioMsg}</p>`}</div><hr class="doc-divider"/>
