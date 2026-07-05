@@ -994,6 +994,20 @@ Início de efeito esperado em 24 a 72 horas</textarea>
       'Benefícios Esperados'                   : 'Beneficios Esperados',
       'Direitos do Paciente'                   : 'Derechos del Paciente',
       'Declaração de Consentimento'            : 'Declaración de Consentimiento',
+      /* receita especial – footer */
+      'Identificação do Emitente'             : 'Identificación del Emisor',
+      'Identificação do Comprador'            : 'Identificación del Comprador',
+      'Identificação do Fornecedor'           : 'Identificación del Proveedor',
+      'Assinatura do Farmacêutico'            : 'Firma del Farmacéutico',
+      'Fone:'                                 : 'Tel.:',
+      'NOME:'                                 : 'NOMBRE:',
+      'END.:'                                 : 'DIR.:',
+      'CIDADE:'                               : 'CIUDAD:',
+      'UF:'                                   : 'PROV.:',
+      'FONE:'                                 : 'TEL.:',
+      'DATA'                                  : 'FECHA',
+      /* paciente */
+      'Nascimento'                            : 'Nacimiento',
     })[k] ?? k;
   }
 
@@ -1974,7 +1988,7 @@ Início de efeito esperado em 24 a 72 horas</textarea>
     const p = getPaciente();
 
     const emitNome = isConsultorio ? MEDICO.nome : (local ? local.nome : MEDICO.nome);
-    const emitInfo = isConsultorio ? `<span style="font-size:9px;color:#555;display:block">${MEDICO.crm} — ${MEDICO.specialty}</span>` : '';
+    const emitInfo = isConsultorio ? `<span style="font-size:9px;color:#555;display:block">${MEDICO.crm ? MEDICO.crm + ' — ' : ''}${MEDICO.specialty}</span>` : '';
     const emitEnd  = local ? local.end : 'R. Pais Leme, 215 — sala 710, Pinheiros, São Paulo - SP';
     const emitTel  = local ? local.tel : '(11) 98828-2545';
 
@@ -1985,36 +1999,36 @@ Início de efeito esperado em 24 a 72 horas</textarea>
     <table style="width:100%;border-collapse:collapse;border:1.5px solid #333;margin-top:2.5rem;font-size:10px;font-family:'Inter',sans-serif">
       <tr>
         <td style="width:33%;border-right:1.5px solid #333;padding:0;vertical-align:top">
-          <div style="font-size:9px;font-weight:700;text-transform:uppercase;text-align:center;background:#f0f0f0;border-bottom:1px solid #333;padding:4px">Identificação do Emitente</div>
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;text-align:center;background:#f0f0f0;border-bottom:1px solid #333;padding:4px">${t('Identificação do Emitente')}</div>
           <div style="padding:8px;line-height:1.7">
             <strong style="font-size:11px;display:block;margin-bottom:3px">${emitNome}</strong>
             ${emitInfo}
             <span style="font-size:10px">${emitEnd}</span><br>
-            <span style="font-size:10px">Fone: ${emitTel}</span>
+            <span style="font-size:10px">${t('Fone:')} ${emitTel}</span>
           </div>
         </td>
         <td style="width:33%;border-right:1.5px solid #333;padding:0;vertical-align:top">
-          <div style="font-size:9px;font-weight:700;text-transform:uppercase;text-align:center;background:#f0f0f0;border-bottom:1px solid #333;padding:4px">Identificação do Comprador</div>
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;text-align:center;background:#f0f0f0;border-bottom:1px solid #333;padding:4px">${t('Identificação do Comprador')}</div>
           <div style="padding:8px">
-            ${linha('NOME:')}
+            ${linha(t('NOME:'))}
             <div style="display:flex;gap:6px;margin-bottom:7px;font-size:10px">
               <span>IDENT.: <span style="border-bottom:1px solid #333;display:inline-block;width:65px">&nbsp;</span></span>
               <span>ORG.: <span style="border-bottom:1px solid #333;display:inline-block;width:30px">&nbsp;</span></span>
             </div>
-            ${linha('END.:')}
+            ${linha(t('END.:'))}
             <div style="display:flex;gap:6px;margin-bottom:7px;font-size:10px">
-              <span>CIDADE: <span style="border-bottom:1px solid #333;display:inline-block;width:65px">&nbsp;</span></span>
-              <span>UF: <span style="border-bottom:1px solid #333;display:inline-block;width:20px">&nbsp;</span></span>
+              <span>${t('CIDADE:')} <span style="border-bottom:1px solid #333;display:inline-block;width:65px">&nbsp;</span></span>
+              <span>${t('UF:')} <span style="border-bottom:1px solid #333;display:inline-block;width:20px">&nbsp;</span></span>
             </div>
-            <div style="font-size:10px">FONE: <span style="border-bottom:1px solid #333;display:inline-block;width:110px">&nbsp;</span></div>
+            <div style="font-size:10px">${t('FONE:')} <span style="border-bottom:1px solid #333;display:inline-block;width:110px">&nbsp;</span></div>
           </div>
         </td>
         <td style="width:34%;padding:0;vertical-align:top">
-          <div style="font-size:9px;font-weight:700;text-transform:uppercase;text-align:center;background:#f0f0f0;border-bottom:1px solid #333;padding:4px">Identificação do Fornecedor</div>
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;text-align:center;background:#f0f0f0;border-bottom:1px solid #333;padding:4px">${t('Identificação do Fornecedor')}</div>
           <div style="padding:8px">
-            <div style="text-align:right;font-size:10px;margin-bottom:4px">___/___/______&nbsp;<span style="font-size:9px">DATA</span></div>
-            <div style="border-top:1px solid #333;margin-top:32px;padding-top:4px;font-size:9px;text-align:center">Assinatura do Farmacêutico</div>
-            <div style="margin-top:10px;font-size:10px">Fone: <span style="border-bottom:1px solid #333;display:inline-block;width:110px">&nbsp;</span></div>
+            <div style="text-align:right;font-size:10px;margin-bottom:4px">___/___/______&nbsp;<span style="font-size:9px">${t('DATA')}</span></div>
+            <div style="border-top:1px solid #333;margin-top:32px;padding-top:4px;font-size:9px;text-align:center">${t('Assinatura do Farmacêutico')}</div>
+            <div style="margin-top:10px;font-size:10px">${t('Fone:')} <span style="border-bottom:1px solid #333;display:inline-block;width:110px">&nbsp;</span></div>
           </div>
         </td>
       </tr>
@@ -2231,7 +2245,7 @@ Início de efeito esperado em 24 a 72 horas</textarea>
       const all = getAllExams();
       const examList = all.length
         ? `<ul class="exam-list-doc exam-list-2col">${all.map(e=>`<li><span class="exam-bullet"></span>${e}</li>`).join('')}</ul>`
-        : '<p style="color:#8a9e99">Nenhum exame selecionado.</p>';
+        : `<p style="color:#8a9e99">${docLang==='es'?'Ningún análisis seleccionado.':'Nenhum exame selecionado.'}</p>`;
       return `${letterhead(t('Solicitação de Exames Laboratoriais'))}
         ${docSec(t('Paciente'), pacienteHtml(p))}
         <div class="doc-section"><div class="doc-section-label">${t('Exames solicitados')}</div>${examList}</div><hr class="doc-divider"/>
@@ -2244,7 +2258,7 @@ Início de efeito esperado em 24 a 72 horas</textarea>
       const all = getAllImgs();
       const examList = all.length
         ? `<ul class="exam-list-doc">${all.map(e=>`<li><span class="exam-bullet"></span>${e}</li>`).join('')}</ul>`
-        : '<p style="color:#8a9e99">Nenhum exame selecionado.</p>';
+        : `<p style="color:#8a9e99">${docLang==='es'?'Ningún estudio seleccionado.':'Nenhum exame selecionado.'}</p>`;
       return `${letterhead(t('Solicitação de Exames de Imagem'))}
         ${docSec(t('Paciente'), pacienteHtml(p))}
         <div class="doc-section"><div class="doc-section-label">${t('Exames solicitados')}</div>${examList}</div><hr class="doc-divider"/>
@@ -2763,7 +2777,7 @@ ${html}
   function pacienteHtml(p) {
     const partes = [
       `<strong>${p.nome || '__________'}</strong>`,
-      p.nasc ? `Nascimento: ${p.nasc}` : '',
+      p.nasc ? `${t('Nascimento')}: ${p.nasc}` : '',
       p.sexo || '',
     ].filter(Boolean).join(' &nbsp;·&nbsp; ');
     return `<p>${partes}</p>${p.end ? `<p style="font-size:13px;color:var(--text-secondary)">${p.end}</p>` : ''}`;
@@ -3026,7 +3040,7 @@ ${html}
     const local = localSelecionado !== null ? LOCAIS[localSelecionado] : null;
     const cidade = local ? local.cidade : 'São Paulo';
     const dataFmt = dataRaw
-      ? new Date(dataRaw + 'T12:00:00').toLocaleDateString('pt-BR', {day:'2-digit',month:'long',year:'numeric'})
+      ? new Date(dataRaw + 'T12:00:00').toLocaleDateString(docLang==='es'?'es-ES':'pt-BR', {day:'2-digit',month:'long',year:'numeric'})
       : '';
 
     const tituloProc = proc + (joint ? ` — ${joint}` : '');
@@ -3034,7 +3048,7 @@ ${html}
     const sigDate = dataFmt ? `${cidade} — ${dataFmt}` : cidade;
     const cpfLine = p.cpf ? ` &middot; CPF: ${p.cpf}` : '';
 
-    const pacHtml = `<p style="margin:0"><strong>${p.nome || '___________________________'}</strong>${p.nasc ? `<br><span style="font-size:12px">Nascimento: ${p.nasc}</span>` : ''}${p.cpf ? `<br><span style="font-size:12px">CPF: ${p.cpf}</span>` : ''}</p>`;
+    const pacHtml = `<p style="margin:0"><strong>${p.nome || '___________________________'}</strong>${p.nasc ? `<br><span style="font-size:12px">${t('Nascimento')}: ${p.nasc}</span>` : ''}${p.cpf ? `<br><span style="font-size:12px">CPF: ${p.cpf}</span>` : ''}</p>`;
 
     const es = docLang === 'es';
     return `
