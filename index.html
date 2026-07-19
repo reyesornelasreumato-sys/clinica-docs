@@ -653,6 +653,14 @@
         <span style="font-weight:700;font-size:13px;color:var(--brand)">Prévia — edite livremente antes de imprimir</span>
         <button class="btn" style="font-size:12px;padding:5px 14px" onclick="gerarPreviaRelatorio()">↺ Atualizar a partir do formulário</button>
       </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+        <span style="font-size:12px;color:var(--text-secondary);font-weight:600">Meus modelos:</span>
+        <select id="rel-modelos-sel" onchange="carregarModeloRelatorio()" style="font-size:12.5px;padding:5px 8px;border-radius:6px;border:1px solid var(--border);background:var(--surface);min-width:170px">
+          <option value="">— meus modelos —</option>
+        </select>
+        <button class="btn" style="font-size:12px;padding:5px 12px" onclick="salvarModeloRelatorio()">Salvar como modelo</button>
+        <button class="btn" style="font-size:12px;padding:5px 12px" onclick="excluirModeloRelatorio()">Excluir</button>
+      </div>
       <textarea id="rel-texto" style="min-height:500px;font-family:'Courier New',monospace;font-size:12.5px;line-height:1.8;border:1.5px solid var(--border);border-radius:8px;padding:14px;width:100%;resize:vertical"></textarea>
       <div class="field" style="margin-top:14px">
         <label style="display:flex;align-items:center;gap:8px;justify-content:space-between;flex-wrap:wrap">Meu texto padrão
@@ -742,6 +750,13 @@
       <button class="preset-btn" data-key="ost" onclick="togglePreset(this)"><div class="preset-btn-top"><span class="preset-icon">🦷</span><span class="preset-check"><svg viewBox="0 0 12 12" style="width:10px;height:10px;stroke:#fff;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round"><polyline points="2 6 5 9 10 3"/></svg></span></div><div class="preset-name">Osteoporose</div></button>
       <button class="preset-btn" data-key="imb" onclick="togglePreset(this)"><div class="preset-btn-top"><span class="preset-icon">💉</span><span class="preset-check"><svg viewBox="0 0 12 12" style="width:10px;height:10px;stroke:#fff;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round"><polyline points="2 6 5 9 10 3"/></svg></span></div><div class="preset-name">Rastreio ImBio</div></button>
       <button class="preset-btn" data-key="gota" onclick="togglePreset(this)"><div class="preset-btn-top"><span class="preset-icon">🔬</span><span class="preset-check"><svg viewBox="0 0 12 12" style="width:10px;height:10px;stroke:#fff;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round"><polyline points="2 6 5 9 10 3"/></svg></span></div><div class="preset-name">Microcristalinas / Gota</div></button>
+    </div>
+    <div id="meus-paineis-wrap" style="margin-top:10px">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px">
+        <span class="section-label" id="meus-paineis-label" style="margin:0;display:none">Meus painéis (salvos neste navegador)</span>
+        <button class="btn" style="font-size:12px;padding:5px 12px;margin-left:auto" onclick="salvarPainelAtual()">★ Salvar seleção como painel</button>
+      </div>
+      <div class="preset-grid" id="meus-paineis-grid"></div>
     </div>
     <div id="ex-lista-painel" style="display:none;margin-top:1.25rem"><div id="ex-lista-inner"></div></div>
     <p class="section-label" style="margin-top:1.25rem">Adicionar exame manualmente</p>
@@ -2214,6 +2229,52 @@ Início de efeito esperado em 24 a 72 horas</textarea>
     renderTags();
   }
 
+  /* ── MEUS PAINÉIS (personalizados, salvos no navegador) ── */
+  const MEUS_PAINEIS_KEY = 'meus_paineis_exames';
+  function carregarMeusPaineis() { try { return JSON.parse(localStorage.getItem(MEUS_PAINEIS_KEY) || '{}'); } catch(e) { return {}; } }
+  function salvarMeusPaineis(obj) { try { localStorage.setItem(MEUS_PAINEIS_KEY, JSON.stringify(obj)); } catch(e) {} }
+  function renderMeusPaineis() {
+    const grid = document.getElementById('meus-paineis-grid');
+    const label = document.getElementById('meus-paineis-label');
+    if (!grid) return;
+    const paineis = carregarMeusPaineis();
+    const ids = Object.keys(paineis);
+    if (label) label.style.display = ids.length ? 'inline' : 'none';
+    grid.innerHTML = ids.map(id => {
+      const p = paineis[id];
+      PRESETS['my_' + id] = { label: p.label, exames: p.exames };   // reusa a lógica de preset
+      const active = activePresets.has('my_' + id) ? ' active' : '';
+      return `<button class="preset-btn${active}" data-key="my_${id}" onclick="togglePreset(this)" style="position:relative">
+        <div class="preset-btn-top"><span class="preset-icon">★</span>
+          <span class="preset-check"><svg viewBox="0 0 12 12" style="width:10px;height:10px;stroke:#fff;fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round"><polyline points="2 6 5 9 10 3"/></svg></span></div>
+        <div class="preset-name">${p.label}</div>
+        <span title="Excluir painel" onclick="event.stopPropagation();excluirMeuPainel('${id}')" style="position:absolute;top:1px;right:6px;color:var(--text-muted);cursor:pointer;font-size:16px;line-height:1">×</span>
+      </button>`;
+    }).join('');
+  }
+  function salvarPainelAtual() {
+    const sel = getAllExams();
+    if (!sel.length) { alert('Selecione ou adicione exames antes de salvar um painel.'); return; }
+    const nome = prompt('Nome do painel (ex.: Meu rastreio inicial):');
+    if (!nome || !nome.trim()) return;
+    const paineis = carregarMeusPaineis();
+    paineis['p' + Date.now()] = { label: nome.trim(), exames: sel.slice() };
+    salvarMeusPaineis(paineis);
+    renderMeusPaineis();
+  }
+  function excluirMeuPainel(id) {
+    if (!confirm('Excluir este painel salvo?')) return;
+    const paineis = carregarMeusPaineis();
+    delete paineis[id];
+    salvarMeusPaineis(paineis);
+    if (activePresets.has('my_' + id)) { activePresets.delete('my_' + id); }
+    delete PRESETS['my_' + id];
+    renderMeusPaineis();
+    renderListaPainel();
+    renderTags();
+  }
+  document.addEventListener('DOMContentLoaded', renderMeusPaineis);
+
   function renderListaPainel() {
     const wrap  = document.getElementById('ex-lista-painel');
     const inner = document.getElementById('ex-lista-inner');
@@ -3455,6 +3516,44 @@ ${timbrado ? `<div class="timbrado-bg"></div><table class="timbrado-table"><thea
     document.getElementById('rel-editor-wrap').style.display = 'block';
     document.getElementById('rel-editor-wrap').scrollIntoView({ behavior:'smooth', block:'start' });
   }
+
+  /* ── MEUS MODELOS DE RELATÓRIO (salvos no navegador) ── */
+  const MODELOS_REL_KEY = 'meus_modelos_relatorio';
+  function carregarModelosRel() { try { return JSON.parse(localStorage.getItem(MODELOS_REL_KEY) || '{}'); } catch(e) { return {}; } }
+  function salvarModelosRel(o) { try { localStorage.setItem(MODELOS_REL_KEY, JSON.stringify(o)); } catch(e) {} }
+  function renderModelosRelSelect() {
+    const sel = document.getElementById('rel-modelos-sel'); if (!sel) return;
+    const m = carregarModelosRel();
+    sel.innerHTML = '<option value="">— meus modelos —</option>' +
+      Object.keys(m).map(id => `<option value="${id}">${m[id].label}</option>`).join('');
+  }
+  function salvarModeloRelatorio() {
+    const txt = document.getElementById('rel-texto')?.value || '';
+    if (!txt.trim()) { alert('Gere ou escreva um relatório antes de salvar como modelo.'); return; }
+    const nome = prompt('Nome do modelo (ex.: Relatório AR — meu padrão):');
+    if (!nome || !nome.trim()) return;
+    const m = carregarModelosRel();
+    m['m' + Date.now()] = { label: nome.trim(), texto: txt };
+    salvarModelosRel(m);
+    renderModelosRelSelect();
+    alert('Modelo salvo.');
+  }
+  function carregarModeloRelatorio() {
+    const sel = document.getElementById('rel-modelos-sel'); if (!sel || !sel.value) return;
+    const mod = carregarModelosRel()[sel.value]; if (!mod) return;
+    const ta = document.getElementById('rel-texto');
+    if (ta.value.trim() && ta.value !== _relLastGen && !confirm('Substituir o texto atual pelo modelo salvo?')) { sel.value = ''; return; }
+    ta.value = mod.texto; _relLastGen = mod.texto;
+    document.getElementById('rel-editor-wrap').style.display = 'block';
+  }
+  function excluirModeloRelatorio() {
+    const sel = document.getElementById('rel-modelos-sel');
+    if (!sel || !sel.value) { alert('Selecione um modelo salvo para excluir.'); return; }
+    if (!confirm('Excluir este modelo salvo?')) return;
+    const m = carregarModelosRel(); delete m[sel.value]; salvarModelosRel(m);
+    renderModelosRelSelect();
+  }
+  document.addEventListener('DOMContentLoaded', renderModelosRelSelect);
 
   /* ── ENCAMINHAMENTO — TOGGLE OUTRA ESP ── */
   function toggleOutraEsp() {
