@@ -279,6 +279,8 @@
     .med-class-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: var(--radius-sm); border: 1.5px solid var(--border); background: var(--surface); color: var(--text-secondary); font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s; }
     .med-class-btn:hover { border-color: var(--brand); color: var(--brand); background: var(--brand-light); }
     .med-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 10px; }
+    .med-card.dragging { opacity: .4; }
+    .med-drag:active { cursor: grabbing; }
     .med-card-top { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
     .med-class-badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 999px; background: var(--brand-light); color: var(--brand); flex-shrink: 0; }
     .med-card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
@@ -473,6 +475,20 @@
         <select id="pac-sexo"><option value="">Selecionar</option><option>Feminino</option><option>Masculino</option><option>Outro</option></select>
       </div>
     </div>
+    <div class="form-grid cols-3" style="margin-top:14px">
+      <div class="field">
+        <label>Peso (kg)</label>
+        <input id="pac-peso" type="number" min="0" step="0.1" placeholder="Ex: 68" inputmode="decimal" oninput="onPacienteChange()" />
+      </div>
+      <div class="field">
+        <label>Altura (cm)</label>
+        <input id="pac-altura" type="number" min="0" step="1" placeholder="Ex: 165" inputmode="numeric" oninput="onPacienteChange()" />
+      </div>
+      <div class="field">
+        <label>IMC</label>
+        <input id="pac-imc" readonly placeholder="—" style="background:var(--bg);color:var(--text-secondary)" />
+      </div>
+    </div>
     <div class="form-grid cols-1" style="margin-top:14px">
       <div class="field">
         <label>Endereço completo <span class="required-star">*</span></label>
@@ -638,6 +654,12 @@
         <button class="btn" style="font-size:12px;padding:5px 14px" onclick="gerarPreviaRelatorio()">↺ Atualizar a partir do formulário</button>
       </div>
       <textarea id="rel-texto" style="min-height:500px;font-family:'Courier New',monospace;font-size:12.5px;line-height:1.8;border:1.5px solid var(--border);border-radius:8px;padding:14px;width:100%;resize:vertical"></textarea>
+      <div class="field" style="margin-top:14px">
+        <label style="display:flex;align-items:center;gap:8px;justify-content:space-between;flex-wrap:wrap">Meu texto padrão
+          <span style="font-weight:400;color:var(--text-muted);font-size:11.5px">salvo neste navegador · incluído no fim de todo relatório</span>
+        </label>
+        <textarea id="rel-texto-padrao" placeholder="Ex: Permaneço à disposição para esclarecimentos que se façam necessários. Atenciosamente," oninput="salvarTextoPadrao()" style="min-height:70px;font-size:12.5px"></textarea>
+      </div>
     </div>
 
     <div class="form-actions">
@@ -868,7 +890,9 @@
         <input id="enc-diag" placeholder="Ex: Síndrome de Sjögren — M35.0"/>
       </div>
       <div class="field">
-        <label>Motivo do encaminhamento</label>
+        <label style="display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap">Motivo do encaminhamento
+          <button type="button" class="btn" style="padding:3px 11px;font-size:11.5px;font-weight:500" onclick="inserirModeloEnc()">↳ Inserir modelo da especialidade</button>
+        </label>
         <textarea id="enc-motivo" placeholder="Descreva o motivo clínico do encaminhamento…" style="min-height:100px"></textarea>
       </div>
       <div class="field">
@@ -1330,14 +1354,26 @@ Início de efeito esperado em 24 a 72 horas</textarea>
     const nasc = document.getElementById('pac-nasc').value;
     const end  = document.getElementById('pac-end').value.trim();
     document.getElementById('patient-badge').classList.toggle('visible', !!(nome && nasc && end));
+    // IMC automático
+    const peso = parseFloat(document.getElementById('pac-peso')?.value);
+    const alt  = parseFloat(document.getElementById('pac-altura')?.value);
+    const imcEl = document.getElementById('pac-imc');
+    if (imcEl) {
+      if (peso > 0 && alt > 0) {
+        const imc = peso / Math.pow(alt / 100, 2);
+        imcEl.value = imc.toFixed(1) + ' kg/m²';
+      } else imcEl.value = '';
+    }
   }
 
   function getPaciente() {
     return {
-      nome: document.getElementById('pac-nome').value.trim(),
-      nasc: fDateById('pac-nasc'),
-      sexo: document.getElementById('pac-sexo').value,
-      end:  document.getElementById('pac-end').value.trim(),
+      nome:   document.getElementById('pac-nome').value.trim(),
+      nasc:   fDateById('pac-nasc'),
+      sexo:   document.getElementById('pac-sexo').value,
+      end:    document.getElementById('pac-end').value.trim(),
+      peso:   document.getElementById('pac-peso')?.value.trim() || '',
+      altura: document.getElementById('pac-altura')?.value.trim() || '',
     };
   }
 
@@ -1581,6 +1617,63 @@ Início de efeito esperado em 24 a 72 horas</textarea>
     if (sel.value === 'personalizado' && custom) { custom.value = ''; custom.focus(); }
   }
 
+  /* ── VIA / TIPO / DOSE por peso / DRAG (medicações) ── */
+  const VIA_OPTS = ['Oral (VO)','Intramuscular (IM)','Subcutânea (SC)','Intravenosa (IV)','Sublingual (SL)','Tópica','Inalatória','Retal','Oftálmica','Intra-articular'];
+  const _selCss = "font-size:13px;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);font-family:'Inter',sans-serif;width:100%";
+  function medExtras() {
+    return `
+      <div class="med-card-grid" style="margin-top:8px">
+        <div class="field">
+          <label style="font-size:11.5px;font-weight:600;color:var(--text-secondary)">Via de administração</label>
+          <select class="med-via" style="${_selCss}"><option value="">—</option>${VIA_OPTS.map(v=>`<option>${v}</option>`).join('')}</select>
+        </div>
+        <div class="field">
+          <label style="font-size:11.5px;font-weight:600;color:var(--text-secondary)">Tipo</label>
+          <select class="med-tipo" style="${_selCss}"><option value="">—</option><option>Genérico</option><option>Similar</option><option>Referência</option></select>
+        </div>
+      </div>
+      <div style="margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:var(--text-secondary)">
+        <span style="font-weight:600">Dose por peso:</span>
+        <input class="med-mgkg" type="number" min="0" step="0.1" placeholder="mg/kg" inputmode="decimal" style="width:82px;font-size:12.5px" oninput="calcDose(this)"/>
+        <span>× peso =</span>
+        <strong class="med-dose-res" style="color:var(--brand)">—</strong>
+        <button type="button" class="btn" style="padding:3px 10px;font-size:11.5px" onclick="usarDose(this)">usar na posologia</button>
+      </div>`;
+  }
+  function calcDose(inp) {
+    const card = inp.closest('.med-card');
+    const peso = parseFloat(document.getElementById('pac-peso')?.value);
+    const mgkg = parseFloat(inp.value);
+    const res = card.querySelector('.med-dose-res');
+    if (peso > 0 && mgkg > 0) res.textContent = (peso * mgkg).toFixed(1).replace(/\.0$/,'') + ' mg';
+    else res.textContent = peso > 0 ? '—' : '(informe o peso do paciente)';
+  }
+  function usarDose(btn) {
+    const card = btn.closest('.med-card');
+    const res = card.querySelector('.med-dose-res').textContent;
+    if (!/\d\s*mg/.test(res)) { alert('Informe o peso do paciente (bloco Dados do paciente) e a dose em mg/kg.'); return; }
+    const pos = card.querySelector('.med-pos') || card.querySelector('.med-nome');
+    if (pos) pos.value = (pos.value ? pos.value.trim() + ' — ' : '') + res + '/dia';
+  }
+  const dragHandle = `<span class="med-drag" title="Arraste para reordenar" onmousedown="this.closest('.med-card').draggable=true" style="cursor:grab;color:var(--text-muted);font-size:17px;line-height:1;user-select:none;padding:0 6px 0 0">⠿</span>`;
+
+  let _dragMed = null;
+  function initMedDnD() {
+    const list = document.getElementById('meds-list');
+    if (!list || list.dataset.dnd) return;
+    list.dataset.dnd = '1';
+    list.addEventListener('dragstart', e => { const c = e.target.closest('.med-card'); if (c) { _dragMed = c; c.classList.add('dragging'); } });
+    list.addEventListener('dragend',   () => { if (_dragMed) { _dragMed.classList.remove('dragging'); _dragMed.draggable = false; _dragMed = null; } });
+    list.addEventListener('dragover',  e => {
+      if (!_dragMed) return;
+      e.preventDefault();
+      const after = [...list.querySelectorAll('.med-card:not(.dragging)')]
+        .find(c => e.clientY < c.getBoundingClientRect().top + c.offsetHeight / 2);
+      if (after) list.insertBefore(_dragMed, after); else list.appendChild(_dragMed);
+    });
+  }
+  document.addEventListener('DOMContentLoaded', initMedDnD);
+
   function addMedClasse(classe) {
     const cat = MED_CATALOG[classe];
     const opts = cat.meds.map((m, i) =>
@@ -1593,7 +1686,7 @@ Início de efeito esperado em 24 a 72 horas</textarea>
     card.dataset.tipo = 'classe';
     card.innerHTML = `
       <div class="med-card-top">
-        <span class="med-class-badge">${cat.icon} ${cat.label}</span>
+        ${dragHandle}<span class="med-class-badge">${cat.icon} ${cat.label}</span>
         <button class="btn btn-danger" style="margin-left:auto;padding:4px 10px;font-size:12px" onclick="this.closest('.med-card').remove()">✕</button>
       </div>
       <div class="field">
@@ -1619,7 +1712,8 @@ Início de efeito esperado em 24 a 72 horas</textarea>
       <div class="field" style="margin-top:8px">
         <label style="font-size:11.5px;font-weight:600;color:var(--text-secondary)">Observação (opcional)</label>
         <input class="med-obs" placeholder="Ex: tomar com alimento, evitar exposição solar, monitorar PA…" style="font-size:12.5px;color:#444"/>
-      </div>`;
+      </div>
+      ${medExtras()}`;
     document.getElementById('meds-list').appendChild(card);
   }
 
@@ -1629,7 +1723,7 @@ Início de efeito esperado em 24 a 72 horas</textarea>
     card.dataset.tipo = 'livre';
     card.innerHTML = `
       <div class="med-card-top">
-        <span class="med-class-badge">✏️ Livre</span>
+        ${dragHandle}<span class="med-class-badge">✏️ Livre</span>
         <button class="btn btn-danger" style="margin-left:auto;padding:4px 10px;font-size:12px" onclick="this.closest('.med-card').remove()">✕</button>
       </div>
       <div class="field">
@@ -1643,7 +1737,8 @@ Início de efeito esperado em 24 a 72 horas</textarea>
       <div class="field" style="margin-top:8px">
         <label style="font-size:11.5px;font-weight:600;color:var(--text-secondary)">Observação (opcional)</label>
         <input class="med-obs" placeholder="Ex: tomar com alimento, evitar exposição solar, monitorar PA…" style="font-size:12.5px;color:#444"/>
-      </div>`;
+      </div>
+      ${medExtras()}`;
     document.getElementById('meds-list').appendChild(card);
   }
 
@@ -2505,16 +2600,21 @@ Início de efeito esperado em 24 a 72 horas</textarea>
         dur = card.querySelector('.med-dur')?.value || '';
         if (dur === 'personalizado') dur = card.querySelector('.med-dur-custom')?.value.trim() || '';
         const medObs = card.querySelector('.med-obs')?.value.trim() || '';
+        const via  = card.querySelector('.med-via')?.value || '';
+        const tipo = card.querySelector('.med-tipo')?.value || '';
+        const viaTipo = [via, tipo].filter(Boolean).join(' · ');
         if (!nome) return null;
         idx++;
         // altura estimada (mm) para paginação da receita especial
         let h = 3.6 + 6.2 * Math.max(1, Math.ceil((nome.length + 4) / _cpl));
-        if (pos)    h += 5.4 * Math.max(1, Math.ceil(pos.length / _cpl));
-        if (dur)    h += 5.4;
-        if (medObs) h += 5.4 * Math.max(1, Math.ceil(medObs.length / _cpl));
+        if (pos)     h += 5.4 * Math.max(1, Math.ceil(pos.length / _cpl));
+        if (dur)     h += 5.4;
+        if (viaTipo) h += 5.4;
+        if (medObs)  h += 5.4 * Math.max(1, Math.ceil(medObs.length / _cpl));
         const html = `<div class="med-item">
           <strong>${idx}. ${nome}</strong>
           ${pos ? `<span>${pos}</span>` : ''}
+          ${viaTipo ? `<span style="font-size:12px;color:#333;display:block;margin-top:2px">${viaTipo}</span>` : ''}
           ${dur ? `<span style="color:#111;font-size:12px;font-weight:600;display:block;margin-top:2px">${_durLabel} ${dur}</span>` : ''}
           ${medObs ? `<span style="font-size:12px;color:#444;display:block;margin-top:2px;font-style:italic">${_obsLabel}: ${medObs}</span>` : ''}
         </div>`;
@@ -3257,8 +3357,20 @@ ${timbrado ? `<div class="timbrado-bg"></div><table class="timbrado-table"><thea
     };
   }
 
+  let _relLastGen = '';
+  function salvarTextoPadrao() {
+    try { localStorage.setItem('rel_texto_padrao', document.getElementById('rel-texto-padrao').value); } catch(e) {}
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    try { const v = localStorage.getItem('rel_texto_padrao'); const el = document.getElementById('rel-texto-padrao'); if (v != null && el) el.value = v; } catch(e) {}
+  });
+
   function gerarPreviaRelatorio() {
     if (!relDoencaKey) { alert('Selecione uma doença primeiro.'); return; }
+    const taPrev = document.getElementById('rel-texto');
+    if (taPrev && taPrev.value.trim() && _relLastGen && taPrev.value !== _relLastGen) {
+      if (!confirm('Você editou o relatório manualmente. Atualizar a partir do formulário vai substituir suas edições. Continuar?')) return;
+    }
     const d = MODELO_DOENCAS[relDoencaKey];
     const p = getPaciente();
     const nome = p.nome || '[NOME DO PACIENTE]';
@@ -3335,7 +3447,11 @@ ${timbrado ? `<div class="timbrado-bg"></div><table class="timbrado-table"><thea
       if (justif) t += 'Justificativa complementar: ' + justif + '\n\n';
     }
 
+    const padrao = (document.getElementById('rel-texto-padrao')?.value || '').trim();
+    if (padrao) t += padrao + '\n';
+
     document.getElementById('rel-texto').value = t;
+    _relLastGen = t;
     document.getElementById('rel-editor-wrap').style.display = 'block';
     document.getElementById('rel-editor-wrap').scrollIntoView({ behavior:'smooth', block:'start' });
   }
@@ -3345,6 +3461,37 @@ ${timbrado ? `<div class="timbrado-bg"></div><table class="timbrado-table"><thea
     const sel = document.getElementById('enc-especialidade');
     const wrap = document.getElementById('enc-outra-esp-wrap');
     if (wrap && sel) wrap.style.display = sel.value === 'Outra especialidade' ? 'block' : 'none';
+  }
+
+  /* modelos de motivo por especialidade (reumatologia → destino) */
+  const ENC_TEMPLATES = {
+    'Oftalmologia': 'Solicito avaliação oftalmológica com fundoscopia e campo visual para rastreio de toxicidade retiniana (maculopatia) em paciente em uso de hidroxicloroquina.',
+    'Ortopedia': 'Encaminho para avaliação ortopédica de dano articular estrutural, para discussão de conduta cirúrgica.',
+    'Cirurgia de Mão': 'Encaminho para avaliação de deformidades e/ou síndrome compressiva em mãos e punhos secundárias à doença reumatológica.',
+    'Nefrologia': 'Encaminho para avaliação nefrológica por alteração de função renal / proteinúria, possivelmente relacionada à doença de base ou à terapêutica em uso.',
+    'Pneumologia': 'Encaminho para avaliação pneumológica por suspeita de acometimento pulmonar intersticial associado à doença reumatológica.',
+    'Cardiologia': 'Encaminho para estratificação de risco cardiovascular e avaliação de acometimento cardíaco associado à doença reumatológica.',
+    'Dermatologia': 'Encaminho para avaliação dermatológica de manifestação cutânea associada à doença de base.',
+    'Fisiatria / Reabilitação': 'Encaminho para reabilitação funcional visando preservação da amplitude de movimento, ganho de força e controle da dor.',
+    'Psiquiatria': 'Encaminho para avaliação psiquiátrica por sintomas de humor/ansiedade que impactam o manejo da doença crônica.',
+    'Neurologia': 'Encaminho para avaliação neurológica por manifestação neurológica (neuropatia periférica / cefaleia / outra) a esclarecer.',
+    'Endocrinologia': 'Encaminho para avaliação endocrinológica (osteoporose induzida por corticoide / metabolismo ósseo / tireoide).',
+    'Gastroenterologia': 'Encaminho para avaliação gastroenterológica (hepatotoxicidade por DMARD / doença inflamatória intestinal associada) a esclarecer.',
+    'Hematologia': 'Encaminho para avaliação hematológica por citopenia(s) a esclarecer.',
+    'Infectologia': 'Encaminho para rastreio e avaliação infectológica pré-imunobiológico (tuberculose latente, hepatites B e C).',
+    'Cirurgia Vascular': 'Encaminho para avaliação vascular por fenômeno de Raynaud grave / úlceras digitais.',
+    'Otorrinolaringologia': 'Encaminho para avaliação otorrinolaringológica de manifestações de síndrome de Sjögren (xerostomia/xeroftalmia, sintomas nasais).',
+    'Geriatria': 'Encaminho para avaliação geriátrica global e manejo compartilhado de comorbidades.',
+  };
+  function inserirModeloEnc() {
+    const sel = document.getElementById('enc-especialidade');
+    const ta  = document.getElementById('enc-motivo');
+    if (!sel || !ta) return;
+    let esp = sel.value === 'Outra especialidade' ? (document.getElementById('enc-outra-esp')?.value || '').trim() : sel.value;
+    const tpl = ENC_TEMPLATES[sel.value] || `Encaminho para avaliação especializada em ${esp || '[especialidade]'} pelos motivos clínicos descritos abaixo.`;
+    if (ta.value.trim() && !confirm('Substituir o motivo já preenchido pelo modelo?')) return;
+    ta.value = tpl;
+    ta.focus();
   }
 
 
@@ -3389,9 +3536,8 @@ ${timbrado ? `<div class="timbrado-bg"></div><table class="timbrado-table"><thea
     const tituloProc = proc + (joint ? ` — ${joint}` : '');
     const medLine = med ? `<p style="margin:2px 0 0;font-size:12px;color:#555">Medicamento: ${med}</p>` : '';
     const sigDate = dataFmt ? `${cidade} — ${dataFmt}` : cidade;
-    const cpfLine = p.cpf ? ` &middot; CPF: ${p.cpf}` : '';
 
-    const pacHtml = `<p style="margin:0"><strong>${p.nome || '___________________________'}</strong>${p.nasc ? `<br><span style="font-size:12px">${t('Nascimento')}: ${p.nasc}</span>` : ''}${p.cpf ? `<br><span style="font-size:12px">CPF: ${p.cpf}</span>` : ''}</p>`;
+    const pacHtml = `<p style="margin:0"><strong>${p.nome || '___________________________'}</strong>${p.nasc ? `<br><span style="font-size:12px">${t('Nascimento')}: ${p.nasc}</span>` : ''}</p>`;
 
     const es = docLang === 'es';
     return `
@@ -3424,7 +3570,7 @@ ${timbrado ? `<div class="timbrado-bg"></div><table class="timbrado-table"><thea
         <div>
           <div class="sig-line"></div>
           <p class="sig-name" style="margin-bottom:2px">${p.nome || (es?'Paciente':'Paciente')}</p>
-          <p style="margin:0;font-size:11px;color:#555">${es?'Firma del Paciente':'Assinatura do Paciente'}${cpfLine}</p>
+          <p style="margin:0;font-size:11px;color:#555">${es?'Firma del Paciente':'Assinatura do Paciente'}</p>
         </div>
         <div>
           <div class="sig-line"></div>
