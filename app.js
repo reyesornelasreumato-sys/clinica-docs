@@ -2650,21 +2650,87 @@ ${timbrado ? `<div class="timbrado-bg"></div><table class="timbrado-table"><thea
     document.body.appendChild(dl);
   }
 
+  const TRAT_MOTIVOS = ['Falha primária (sem resposta inicial)','Falha secundária (perda de resposta)',
+    'Intolerância / efeito adverso','Infecção','Gestação / planejamento','Contraindicação',
+    'Falta de acesso / custo','Outro'];
+
   function addRelTratRow() {
     ensureMedDatalist();
     const list = document.getElementById('rel-trat-list');
     const row = document.createElement('div');
-    row.style.cssText = 'display:flex;gap:6px;align-items:center';
+    row.className = 'trat-row';
     row.innerHTML =
-      `<input list="dl-meds" placeholder="Medicamento — digite ou escolha" style="flex:2;font-size:12.5px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface)"/>
-       <input placeholder="Dose" style="flex:1;font-size:12.5px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface)"/>
-       <input placeholder="Duração" style="flex:1;font-size:12.5px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface)"/>
-       <select style="flex:1.5;font-size:12px;padding:6px 6px;border:1px solid var(--border);border-radius:6px;background:var(--surface)">
+      `<input list="dl-meds" class="trat-med" placeholder="Medicamento — digite ou escolha"/>
+       <input class="trat-dose" placeholder="Dose"/>
+       <label class="trat-dt">início<input type="date" class="trat-ini" oninput="onTratChange(this)"/></label>
+       <label class="trat-dt">fim<input type="date" class="trat-fim" oninput="onTratChange(this)"/></label>
+       <select class="trat-res" onchange="onTratChange(this)">
          <option>Boa resposta</option><option>Falha terapêutica</option>
          <option>Intolerância</option><option>Em uso</option><option>Suspenso</option>
        </select>
-       <button onclick="this.closest('div').remove()" style="background:none;border:none;color:#c0392b;font-size:16px;cursor:pointer;padding:2px 6px;flex-shrink:0">✕</button>`;
+       <select class="trat-motivo" style="display:none">
+         <option value="">— motivo —</option>${TRAT_MOTIVOS.map(m=>`<option>${m}</option>`).join('')}
+       </select>
+       <span class="trat-dur"></span>
+       <button class="trat-x" onclick="this.closest('.trat-row').remove();atualizarFalhasAuto()" title="Remover">✕</button>`;
     list.appendChild(row);
+    onTratChange(row.querySelector('.trat-res'));
+  }
+
+  /* duração em meses entre duas datas (fim vazio = hoje, se "Em uso") */
+  function _mesesEntre(ini, fim, emUso) {
+    if (!ini) return null;
+    const a = new Date(ini + 'T12:00:00');
+    const b = fim ? new Date(fim + 'T12:00:00') : (emUso ? new Date() : null);
+    if (!b || isNaN(a) || isNaN(b)) return null;
+    return Math.max(0, (b.getFullYear()-a.getFullYear())*12 + (b.getMonth()-a.getMonth()) + (b.getDate()>=a.getDate()?0:-1));
+  }
+  function _durTexto(m) {
+    if (m == null) return '';
+    if (m < 1) return '< 1 mês';
+    if (m < 12) return m + (m === 1 ? ' mês' : ' meses');
+    const anos = Math.floor(m/12), resto = m%12;
+    return anos + (anos===1?' ano':' anos') + (resto ? ' e ' + resto + (resto===1?' mês':' meses') : '');
+  }
+  const _FALHA_RES = ['Falha terapêutica','Intolerância','Suspenso'];
+
+  function onTratChange(el) {
+    const row = el.closest('.trat-row'); if (!row) return;
+    const res = row.querySelector('.trat-res').value;
+    const mot = row.querySelector('.trat-motivo');
+    mot.style.display = _FALHA_RES.includes(res) ? '' : 'none';
+    if (!_FALHA_RES.includes(res)) mot.value = '';
+    const m = _mesesEntre(row.querySelector('.trat-ini').value, row.querySelector('.trat-fim').value, res === 'Em uso');
+    const dur = row.querySelector('.trat-dur');
+    if (m == null) { dur.textContent = ''; dur.className = 'trat-dur'; }
+    else {
+      const conta = _FALHA_RES.includes(res) && m >= 3;
+      dur.textContent = _durTexto(m) + (_FALHA_RES.includes(res) ? (m >= 3 ? ' · conta p/ DUT' : ' · < 3 meses') : '');
+      dur.className = 'trat-dur' + (_FALHA_RES.includes(res) ? (conta ? ' ok' : ' warn') : '');
+    }
+    atualizarFalhasAuto();
+  }
+
+  /* (22) conta automaticamente os DMARDs falhados válidos para a DUT (>= 3 meses) */
+  function contarFalhasDMARD() {
+    let validas = 0, total = 0;
+    document.querySelectorAll('#rel-trat-list .trat-row').forEach(row => {
+      if (!row.querySelector('.trat-med')?.value.trim()) return;
+      const res = row.querySelector('.trat-res').value;
+      if (!_FALHA_RES.includes(res)) return;
+      total++;
+      const m = _mesesEntre(row.querySelector('.trat-ini').value, row.querySelector('.trat-fim').value, false);
+      if (m == null || m >= 3) validas++;   // sem data informada, conta (não penaliza)
+    });
+    return { validas, total };
+  }
+  function atualizarFalhasAuto() {
+    const info = document.getElementById('rel-falhas-auto');
+    const { validas, total } = contarFalhasDMARD();
+    if (info) info.textContent = total
+      ? `${validas} de ${total} falha(s) com ≥ 3 meses — contabilizadas para a DUT`
+      : 'nenhuma falha registrada no histórico';
+    if (typeof atualizarAutoCriterios === 'function') atualizarAutoCriterios();
   }
 
   /* ══ ELEGIBILIDADE PARA IMUNOBIOLÓGICO (DUT-65) ══ */
@@ -2746,6 +2812,11 @@ ${timbrado ? `<div class="timbrado-bg"></div><table class="timbrado-table"><thea
     return null;
   }
   function _falhasNum() {
+    // (22) prioriza a contagem automática do histórico de tratamentos
+    if (typeof contarFalhasDMARD === 'function') {
+      const { validas, total } = contarFalhasDMARD();
+      if (total > 0) return validas;
+    }
     const s = document.getElementById('rel-falhas')?.value || '';
     const m = s.match(/(\d+)/); if (m) return parseInt(m[1]);
     if (/intoler/i.test(s)) return 99;
@@ -2891,9 +2962,19 @@ ${timbrado ? `<div class="timbrado-bg"></div><table class="timbrado-table"><thea
 
     const manifSel = [...document.querySelectorAll('#rel-manifestacoes input[type=checkbox]:checked')].map(c => c.value);
 
-    const tratamentos = [...document.querySelectorAll('#rel-trat-list > div')].map(row => {
-      const ins = row.querySelectorAll('input');
-      return { med: ins[0]?.value.trim()||'', dose: ins[1]?.value.trim()||'', dur: ins[2]?.value.trim()||'', result: row.querySelector('select')?.value||'' };
+    const tratamentos = [...document.querySelectorAll('#rel-trat-list .trat-row')].map(row => {
+      const res = row.querySelector('.trat-res')?.value || '';
+      const ini = row.querySelector('.trat-ini')?.value || '';
+      const fim = row.querySelector('.trat-fim')?.value || '';
+      const m = _mesesEntre(ini, fim, res === 'Em uso');
+      const per = ini ? (ini.split('-').reverse().join('/') + (fim ? ' a ' + fim.split('-').reverse().join('/') : ' até o momento')) : '';
+      return {
+        med: row.querySelector('.trat-med')?.value.trim() || '',
+        dose: row.querySelector('.trat-dose')?.value.trim() || '',
+        dur: [per, _durTexto(m)].filter(Boolean).join(' — '),
+        result: res,
+        motivo: row.querySelector('.trat-motivo')?.value || '',
+      };
     }).filter(t => t.med);
 
     let t = '';
@@ -2912,7 +2993,7 @@ ${timbrado ? `<div class="timbrado-bg"></div><table class="timbrado-table"><thea
 
     t += L + '\nHISTÓRICO DE TRATAMENTOS\n\n';
     if (tratamentos.length) {
-      tratamentos.forEach(tr => { t += '• ' + [tr.med, tr.dose, tr.dur, tr.result].filter(Boolean).join(' — ') + '\n'; });
+      tratamentos.forEach(tr => { t += '• ' + [tr.med, tr.dose, tr.dur, tr.result, tr.motivo].filter(Boolean).join(' — ') + '\n'; });
     } else {
       t += '• [MEDICAMENTO] — [DOSE] — [DURAÇÃO] — [RESULTADO]\n';
     }
@@ -2943,7 +3024,7 @@ ${timbrado ? `<div class="timbrado-bg"></div><table class="timbrado-table"><thea
       const falhasTrat = tratamentos.filter(tr => tr.result === 'Falha terapêutica' || tr.result === 'Intolerância' || tr.result === 'Suspenso');
       if (falhasTrat.length) {
         t += 'DMARDs utilizados:\n';
-        falhasTrat.forEach(tr => { t += '• ' + [tr.med, tr.dose, tr.dur, tr.result].filter(Boolean).join(' — ') + '\n'; });
+        falhasTrat.forEach(tr => { t += '• ' + [tr.med, tr.dose, tr.dur, tr.result, tr.motivo].filter(Boolean).join(' — ') + '\n'; });
         t += '\n';
       }
       t += 'Solicito autorização para uso de: ' + (bioSel||'[IMUNOBIOLÓGICO]') + '\n\n';
