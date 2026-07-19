@@ -2583,6 +2583,12 @@ ${timbrado ? `<div class="timbrado-bg"></div><table class="timbrado-table"><thea
     document.getElementById('rel-editor-wrap').style.display = 'none';
     document.getElementById('rel-texto').value = '';
 
+    ensureCidDatalist();
+    renderSubtipos(key);
+    const campoCid = document.getElementById('rel-cid');
+    if (campoCid) { const achado = CID10_REUMATO.find(c => c.startsWith(d.cid + ' ')); campoCid.value = achado || d.cid; }
+    const ul = document.getElementById('rel-uso-list'); if (ul) ul.innerHTML = '';
+
     // Manifestações (checkboxes)
     document.getElementById('rel-manifestacoes').innerHTML = d.manifestacoes.map(m =>
       `<label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;padding:3px 0;user-select:none">
@@ -3005,7 +3011,9 @@ ${timbrado ? `<div class="timbrado-bg"></div><table class="timbrado-table"><thea
     }).filter(t => t.med);
 
     let t = '';
-    t += 'DIAGNÓSTICO: ' + d.label + (subtipo ? ' — ' + subtipo : '') + ' (CID-10: ' + d.cid + ')\n';
+    const subSel = document.getElementById('rel-subtipo-sel')?.value || '';
+    const subFinal = [subSel, subtipo].filter(Boolean).join(' · ');
+    t += 'DIAGNÓSTICO: ' + d.label + (subFinal ? ' — ' + subFinal : '') + ' (CID-10: ' + cidDoLaudo(d) + ')\n';
     t += 'PACIENTE: ' + nome + (p.nasc ? ' | DN: ' + p.nasc : '') + (p.sexo ? ' | ' + p.sexo : '') + '\n';
     t += 'TEMPO DE DIAGNÓSTICO: ' + tempo + '\n';
     if (gravidade) t += 'CLASSIFICAÇÃO: ' + gravidade + '\n';
@@ -3017,6 +3025,13 @@ ${timbrado ? `<div class="timbrado-bg"></div><table class="timbrado-table"><thea
     if (outrasManif) outrasManif.split('\n').forEach(l => { if (l.trim()) t += '• ' + l.trim() + '\n'; });
     if (!manifSel.length && !outrasManif) t += '• [DESCREVER MANIFESTAÇÕES]\n';
     t += '\n';
+
+    const emUso = lerMedsEmUso();
+    if (emUso.length) {
+      t += L + '\nMEDICAÇÕES EM USO ATUALMENTE\n\n';
+      emUso.forEach(m => { t += '• ' + m.txt + '\n'; });
+      t += '\n';
+    }
 
     t += L + '\nHISTÓRICO DE TRATAMENTOS\n\n';
     if (tratamentos.length) {
@@ -3046,7 +3061,7 @@ ${timbrado ? `<div class="timbrado-bg"></div><table class="timbrado-table"><thea
 
     if (solicita && d.biologicos?.length) {
       t += L + '\nSOLICITAÇÃO DE IMUNOBIOLÓGICO — ' + d.dut + '\n\n';
-      t += pr.o_a + ' paciente ' + nome + ', ' + pr.portador + ' de ' + d.label + ' (CID-10: ' + d.cid + '), ';
+      t += pr.o_a + ' paciente ' + nome + ', ' + pr.portador + ' de ' + d.label + ' (CID-10: ' + cidDoLaudo(d) + '), ';
       t += 'com diagnóstico há ' + tempo + ', apresenta doença de caráter ' + (gravidade||'[PREENCHER]') + ', com ' + (falhas||'[N falhas]') + ' a DMARDs convencionais.\n\n';
       const falhasTrat = tratamentos.filter(tr => tr.result === 'Falha terapêutica' || tr.result === 'Intolerância' || tr.result === 'Suspenso');
       if (falhasTrat.length) {
@@ -3117,6 +3132,140 @@ ${timbrado ? `<div class="timbrado-bg"></div><table class="timbrado-table"><thea
     }
     return true;
   }
+
+
+  /* ══ (97) CID-10 pesquisável (reumatologia) ══ */
+  const CID10_REUMATO = [
+    'M05.0 — Síndrome de Felty','M05.8 — Artrite reumatoide soropositiva, outras','M05.9 — Artrite reumatoide soropositiva NE',
+    'M06.0 — Artrite reumatoide soronegativa','M06.1 — Doença de Still do adulto','M06.9 — Artrite reumatoide NE',
+    'M07.3 — Artrite psoriásica','M08.0 — Artrite idiopática juvenil','M02.9 — Artrite reativa',
+    'M45 — Espondilite anquilosante','M46.1 — Sacroiliíte NE','M46.8 — Outras espondilopatias inflamatórias',
+    'M32.1 — LES com comprometimento de órgãos','M32.8 — LES, outras formas','M32.9 — LES NE',
+    'M33.0 — Dermatomiosite juvenil','M33.1 — Dermatomiosite, outras','M33.2 — Polimiosite','M33.9 — Miopatia inflamatória NE',
+    'M34.0 — Esclerose sistêmica progressiva','M34.1 — Síndrome CREST','M34.9 — Esclerose sistêmica NE',
+    'M35.0 — Síndrome de Sjögren','M35.1 — Doença mista do tecido conjuntivo','M35.2 — Doença de Behçet',
+    'M35.3 — Polimialgia reumática','M35.9 — Doença sistêmica do tecido conjuntivo NE',
+    'M30.0 — Poliarterite nodosa','M30.1 — Granulomatose eosinofílica com poliangiite (GEPA)',
+    'M31.3 — Granulomatose com poliangiite (GPA)','M31.6 — Arterite de células gigantes','M31.7 — Poliangiite microscópica',
+    'M10.0 — Gota idiopática','M10.9 — Gota NE','M11.2 — Condrocalcinose (pseudogota)',
+    'M15.0 — Osteoartrose primária generalizada','M16 — Coxartrose','M17 — Gonartrose','M19.9 — Artrose NE',
+    'M79.7 — Fibromialgia','M80.0 — Osteoporose com fratura patológica','M81.0 — Osteoporose pós-menopáusica','M81.9 — Osteoporose NE',
+    'M94.1 — Policondrite recidivante','D68.6 — Síndrome antifosfolípide','M13.0 — Poliartrite NE','M25.5 — Dor articular',
+  ];
+  function ensureCidDatalist() {
+    if (document.getElementById('dl-cid')) return;
+    const dl = document.createElement('datalist'); dl.id = 'dl-cid';
+    dl.innerHTML = CID10_REUMATO.map(c => `<option value="${c.replace(/"/g,'&quot;')}"></option>`).join('');
+    document.body.appendChild(dl);
+  }
+  function cidDoLaudo(d) {
+    const v = (document.getElementById('rel-cid')?.value || '').trim();
+    if (!v) return d.cid;
+    return v.split('—')[0].trim();   // usa só o código quando vier "M45 — Espondilite..."
+  }
+
+  /* ══ (8) Subtipos com CID próprio ══ */
+  const SUBTIPOS = {
+    lupus: [['','—'],['Nefrite lúpica classe III','M32.1'],['Nefrite lúpica classe IV','M32.1'],
+            ['Nefrite lúpica classe V','M32.1'],['LES neuropsiquiátrico','M32.1'],
+            ['LES cutâneo predominante','M32.8'],['LES articular predominante','M32.9']],
+    ar:    [['','—'],['AR soropositiva (FR/anti-CCP +)','M05.9'],['AR soronegativa','M06.0'],
+            ['AR com doença pulmonar intersticial','M05.1'],['Síndrome de Felty','M05.0'],['AR erosiva estabelecida','M05.8']],
+    ea:    [['','—'],['EA axial pura','M45'],['EA com acometimento periférico','M45'],
+            ['Espondiloartrite axial não radiográfica','M46.8'],['EA com uveíte recorrente','M45']],
+    aps:   [['','—'],['APs periférica poliarticular','M07.3'],['APs oligoarticular','M07.3'],
+            ['APs axial','M07.3'],['APs com dactilite/entesite predominante','M07.3'],['Artrite mutilante','M07.3']],
+    es:    [['','—'],['Esclerose sistêmica difusa','M34.0'],['Esclerose sistêmica limitada (CREST)','M34.1'],
+            ['Com doença pulmonar intersticial','M34.8'],['Com hipertensão arterial pulmonar','M34.8']],
+    dm:    [['','—'],['Dermatomiosite clássica','M33.1'],['Dermatomiosite amiopática','M33.1'],
+            ['Polimiosite','M33.2'],['Síndrome antissintetase','M33.1'],['Associada a neoplasia','M33.1']],
+    gota:  [['','—'],['Gota tofácea crônica','M10.0'],['Gota intercrítica','M10.9'],['Pseudogota (condrocalcinose)','M11.2']],
+  };
+  function renderSubtipos(key) {
+    const wrap = document.getElementById('rel-subtipo-wrap'); if (!wrap) return;
+    const lista = SUBTIPOS[key];
+    if (!lista) { wrap.style.display = 'none'; wrap.innerHTML = ''; return; }
+    wrap.style.display = '';
+    wrap.innerHTML = `<label>Subtipo / forma clínica</label>
+      <select id="rel-subtipo-sel" onchange="onSubtipoChange()" style="font-size:13px;padding:8px 10px;border-radius:6px;border:1px solid var(--border);background:var(--surface);width:100%">
+        ${lista.map(([lab,cid]) => `<option value="${lab}" data-cid="${cid}">${lab || '— selecionar —'}</option>`).join('')}
+      </select>`;
+  }
+  function onSubtipoChange() {
+    const sel = document.getElementById('rel-subtipo-sel'); if (!sel) return;
+    const cid = sel.options[sel.selectedIndex]?.dataset.cid || '';
+    const campoCid = document.getElementById('rel-cid');
+    if (campoCid && cid && cid !== '—') {
+      const achado = CID10_REUMATO.find(c => c.startsWith(cid + ' '));
+      campoCid.value = achado || cid;
+    }
+  }
+
+  /* ══ (60) Medicações em uso atualmente ══ */
+  function addRelUsoRow(med, dose, desde) {
+    ensureMedDatalist();
+    const list = document.getElementById('rel-uso-list'); if (!list) return;
+    const row = document.createElement('div');
+    row.className = 'trat-row uso-row';
+    row.innerHTML =
+      `<input list="dl-meds" class="uso-med" placeholder="Medicamento em uso" value="${med||''}"/>
+       <input class="uso-dose" placeholder="Dose / posologia" value="${dose||''}"/>
+       <label class="trat-dt">desde<input type="date" class="uso-desde" value="${desde||''}"/></label>
+       <button class="trat-x" onclick="this.closest('.uso-row').remove()" title="Remover">✕</button>`;
+    list.appendChild(row);
+  }
+  function lerMedsEmUso() {
+    return [...document.querySelectorAll('#rel-uso-list .uso-row')].map(r => {
+      const med = r.querySelector('.uso-med')?.value.trim() || '';
+      const dose = r.querySelector('.uso-dose')?.value.trim() || '';
+      const d = r.querySelector('.uso-desde')?.value || '';
+      const desde = d ? 'desde ' + d.split('-').reverse().join('/') : '';
+      return { med, txt: [med, dose, desde].filter(Boolean).join(' — ') };
+    }).filter(x => x.med);
+  }
+
+  /* ══ (63) Laudos salvos por paciente ══ */
+  const LAUDOS_KEY = 'meus_laudos_pacientes';
+  function carregarLaudos() { try { return JSON.parse(localStorage.getItem(LAUDOS_KEY) || '{}'); } catch(e) { return {}; } }
+  function salvarLaudosObj(o) { try { localStorage.setItem(LAUDOS_KEY, JSON.stringify(o)); } catch(e) {} }
+  function renderLaudosSelect() {
+    const sel = document.getElementById('rel-laudos-sel'); if (!sel) return;
+    const l = carregarLaudos();
+    const ids = Object.keys(l).sort((a,b) => (l[b].ts||0) - (l[a].ts||0));
+    sel.innerHTML = '<option value="">— laudos salvos —</option>' +
+      ids.map(id => `<option value="${id}">${l[id].paciente} · ${l[id].doenca} · ${l[id].data}</option>`).join('');
+  }
+  function salvarLaudoPaciente() {
+    const txt = document.getElementById('rel-texto')?.value || '';
+    if (!txt.trim()) { alert('Gere a prévia do laudo antes de salvar.'); return; }
+    const p = getPaciente();
+    if (!p.nome) { alert('Informe o nome do paciente antes de salvar o laudo.'); return; }
+    const d = relDoencaKey ? MODELO_DOENCAS[relDoencaKey].label : 'Sem doença';
+    const l = carregarLaudos();
+    const agora = new Date();
+    l['L' + agora.getTime()] = {
+      paciente: p.nome, doenca: d, texto: txt, ts: agora.getTime(),
+      data: agora.toLocaleDateString('pt-BR'),
+    };
+    salvarLaudosObj(l); renderLaudosSelect();
+    alert('Laudo salvo para ' + p.nome + '.');
+  }
+  function carregarLaudoPaciente() {
+    const sel = document.getElementById('rel-laudos-sel'); if (!sel || !sel.value) return;
+    const l = carregarLaudos()[sel.value]; if (!l) return;
+    const ta = document.getElementById('rel-texto');
+    if (ta.value.trim() && ta.value !== _relLastGen && !confirm('Substituir o texto atual pelo laudo salvo?')) { sel.value=''; return; }
+    ta.value = l.texto; _relLastGen = l.texto;
+    document.getElementById('rel-editor-wrap').style.display = 'block';
+    atualizarLacunas();
+  }
+  function excluirLaudoPaciente() {
+    const sel = document.getElementById('rel-laudos-sel');
+    if (!sel || !sel.value) { alert('Selecione um laudo salvo para excluir.'); return; }
+    if (!confirm('Excluir este laudo salvo?')) return;
+    const l = carregarLaudos(); delete l[sel.value]; salvarLaudosObj(l); renderLaudosSelect();
+  }
+  document.addEventListener('DOMContentLoaded', () => { ensureCidDatalist(); renderLaudosSelect(); });
 
   /* ── MEUS MODELOS DE RELATÓRIO (salvos no navegador) ── */
   const MODELOS_REL_KEY = 'meus_modelos_relatorio';

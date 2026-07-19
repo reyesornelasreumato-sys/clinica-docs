@@ -238,7 +238,9 @@
             <option>Moderada a grave</option><option>Refratária</option>
           </select>
         </div>
-        <div class="field"><label>Subtipo / forma clínica (opcional)</label><input id="rel-subtipo" placeholder="Ex: nefrite lúpica, difusa…"/></div>
+        <div class="field" id="rel-subtipo-wrap" style="display:none"></div>
+        <div class="field"><label>CID-10 (pesquisável)</label><input id="rel-cid" list="dl-cid" placeholder="Digite código ou nome"/></div>
+        <div class="field"><label>Complemento do subtipo (opcional)</label><input id="rel-subtipo" placeholder="Ex: com vasculite cutânea…"/></div>
       </div>
 
       <p class="section-label">Manifestações clínicas presentes</p>
@@ -247,6 +249,10 @@
         <label>Outras manifestações (texto livre)</label>
         <textarea id="rel-outras-manif" placeholder="Descreva manifestações adicionais…" style="min-height:50px"></textarea>
       </div>
+
+      <p class="section-label">Medicações em uso atualmente</p>
+      <div id="rel-uso-list" style="display:flex;flex-direction:column;gap:6px"></div>
+      <button class="btn" style="margin-top:8px;font-size:13px" onclick="addRelUsoRow()">+ Adicionar medicação em uso</button>
 
       <p class="section-label">Histórico de tratamentos realizados</p>
       <div id="rel-trat-list" style="display:flex;flex-direction:column;gap:6px"></div>
@@ -315,6 +321,14 @@
         </select>
         <button class="btn" style="font-size:12px;padding:5px 12px" onclick="salvarModeloRelatorio()">Salvar como modelo</button>
         <button class="btn" style="font-size:12px;padding:5px 12px" onclick="excluirModeloRelatorio()">Excluir</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+        <span style="font-size:12px;color:var(--text-secondary);font-weight:600">Laudos do paciente:</span>
+        <select id="rel-laudos-sel" onchange="carregarLaudoPaciente()" style="font-size:12.5px;padding:5px 8px;border-radius:6px;border:1px solid var(--border);background:var(--surface);min-width:200px">
+          <option value="">— laudos salvos —</option>
+        </select>
+        <button class="btn" style="font-size:12px;padding:5px 12px" onclick="salvarLaudoPaciente()">Salvar laudo</button>
+        <button class="btn" style="font-size:12px;padding:5px 12px" onclick="excluirLaudoPaciente()">Excluir</button>
       </div>
       <div id="rel-lacunas-bar" style="display:none;align-items:center;gap:10px;margin-bottom:8px;padding:7px 12px;background:#fff6e6;border:1px solid #e6c67a;border-radius:7px;font-size:12.5px;color:#8a6416">
         <span id="rel-lacunas-txt" style="font-weight:600"></span>
