@@ -1816,6 +1816,7 @@
   function gerarUm(tipo) {
     if (!validarPaciente()) return;
     if (!validarData(tipo)) return;
+    if (tipo === 'relatorio' && !validarRelatorioAntesGerar()) return;
     const html = buildHtml(tipo);
     if (html) abrirPDF(html);
   }
@@ -1825,6 +1826,7 @@
     if (!validarPaciente()) return;
     const tipos = [...activeTabs];
     for (const t of tipos) { if (!validarData(t)) return; }
+    if (tipos.includes('relatorio') && !validarRelatorioAntesGerar()) return;
     const SEP = `<div style="page-break-after:always;height:0;margin:0;padding:0"></div>`;
     const html = tipos.map(t => buildHtml(t)).join(SEP);
     abrirPDF(html);
@@ -2736,7 +2738,7 @@ ${timbrado ? `<div class="timbrado-bg"></div><table class="timbrado-table"><thea
   /* ══ ELEGIBILIDADE PARA IMUNOBIOLÓGICO (DUT-65) ══ */
   // Rastreio de segurança exigido antes de qualquer imunobiológico.
   const DUT_SEGURANCA = [
-    { id: 'seg-tb',  label: 'Rastreio de tuberculose latente (PPD ou IGRA) + radiografia de tórax' },
+    { id: 'seg-tb',  label: 'Rastreio de tuberculose latente (PPD ou IGRA) + radiografia de tórax', validade: 12 },
     { id: 'seg-hbv', label: 'Sorologias de Hepatite B (HBsAg, anti-HBc, anti-HBs)' },
     { id: 'seg-hcv', label: 'Sorologia de Hepatite C (anti-HCV)' },
     { id: 'seg-hiv', label: 'Sorologia anti-HIV' },
@@ -2847,8 +2849,13 @@ ${timbrado ? `<div class="timbrado-bg"></div><table class="timbrado-table"><thea
         <div style="font-weight:700;font-size:12.5px;color:var(--brand);margin-bottom:8px">Critérios de elegibilidade — ${cr.fonte}</div>
         ${cr.grupos.map(grupoHtml).join('')}
         <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--brand-mid);margin:6px 0 4px">Rastreio pré-imunobiológico (segurança)</div>
-        ${DUT_SEGURANCA.map(s => `<label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;padding:2px 0;cursor:pointer">
-          <input type="checkbox" class="dut-seg" data-id="${s.id}" style="width:15px;height:15px;margin-top:2px"><span>${s.label}</span></label>`).join('')}
+        ${DUT_SEGURANCA.map(s => `<div style="display:flex;align-items:center;gap:8px;padding:2px 0;flex-wrap:wrap">
+          <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;cursor:pointer;flex:1 1 240px">
+            <input type="checkbox" class="dut-seg" data-id="${s.id}" style="width:15px;height:15px;margin-top:2px"><span>${s.label}</span></label>
+          <input type="date" class="dut-seg-data" data-id="${s.id}" title="Data do exame"
+            style="font-size:11px;padding:2px 5px;border:1px solid var(--border);border-radius:5px;background:var(--surface);color:var(--text-secondary)">
+          <span class="dut-seg-alerta" data-id="${s.id}" style="font-size:11px;font-weight:600"></span>
+        </div>`).join('')}
         <div id="rel-eleg-verdict" style="margin-top:10px"></div>
       </div>`;
     atualizarAutoCriterios();
@@ -2886,12 +2893,32 @@ ${timbrado ? `<div class="timbrado-bg"></div><table class="timbrado-table"><thea
       const ok = info.modo === 'algum' ? info.marcados >= 1 : info.marcados === info.total;
       if (!ok) pend.push(g);
     });
-    const segPend = [...document.querySelectorAll('#rel-dut-criterios .dut-seg')].filter(c => !c.checked)
-      .map(c => DUT_SEGURANCA.find(s => s.id === c.dataset.id)?.label);
+    const segPend = [];
+    document.querySelectorAll('#rel-dut-criterios .dut-seg').forEach(c => {
+      const s = DUT_SEGURANCA.find(x => x.id === c.dataset.id); if (!s) return;
+      if (!c.checked) { segPend.push(s.label); return; }
+      if (s.validade) {
+        const dt = document.querySelector(`#rel-dut-criterios .dut-seg-data[data-id="${s.id}"]`);
+        const meses = (dt && dt.value) ? _mesesEntre(dt.value, '', true) : null;
+        if (meses != null && meses > s.validade) segPend.push(s.label + ' — vencido (' + meses + ' meses)');
+      }
+    });
     return { elegivel: pend.length === 0 && Object.keys(grupos).length > 0, pendGrupos: pend, segPend };
   }
   function atualizarVerdict() {
     const el = document.getElementById('rel-eleg-verdict'); if (!el) return;
+    // alerta de validade do rastreio
+    document.querySelectorAll('#rel-dut-criterios .dut-seg-data').forEach(dt => {
+      const s = DUT_SEGURANCA.find(x => x.id === dt.dataset.id);
+      const av = document.querySelector(`#rel-dut-criterios .dut-seg-alerta[data-id="${dt.dataset.id}"]`);
+      if (!av) return;
+      if (!s?.validade || !dt.value) { av.textContent = ''; return; }
+      const meses = _mesesEntre(dt.value, '', true);
+      if (meses == null) { av.textContent = ''; return; }
+      const venc = meses > s.validade;
+      av.textContent = venc ? `vencido (${meses} meses)` : `válido (${meses} meses)`;
+      av.style.color = venc ? '#bd4429' : '#166a58';
+    });
     const r = avaliarElegibilidade();
     let html;
     if (r.elegivel && !r.segPend.length)
@@ -3036,8 +3063,59 @@ ${timbrado ? `<div class="timbrado-bg"></div><table class="timbrado-table"><thea
 
     document.getElementById('rel-texto').value = t;
     _relLastGen = t;
+    atualizarLacunas();
     document.getElementById('rel-editor-wrap').style.display = 'block';
     document.getElementById('rel-editor-wrap').scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+
+
+  /* ══ (43/44) Lacunas [PREENCHER] no texto do laudo ══ */
+  const _RE_LACUNA = /\[[A-ZÁÀÂÃÉÊÍÓÔÕÚÜÇÑ][^\]]*\]/g;
+  function contarLacunas(txt) { return (String(txt).match(_RE_LACUNA) || []).length; }
+  function atualizarLacunas() {
+    const ta = document.getElementById('rel-texto');
+    const bar = document.getElementById('rel-lacunas-bar');
+    const txtEl = document.getElementById('rel-lacunas-txt');
+    if (!ta || !bar || !txtEl) return;
+    const n = contarLacunas(ta.value);
+    bar.style.display = n ? 'flex' : 'none';
+    txtEl.textContent = n === 1 ? '1 lacuna por preencher' : `${n} lacunas por preencher`;
+  }
+  function irProximaLacuna() {
+    const ta = document.getElementById('rel-texto'); if (!ta) return;
+    const from = ta.selectionEnd || 0;
+    _RE_LACUNA.lastIndex = 0;
+    let m, alvo = null;
+    while ((m = _RE_LACUNA.exec(ta.value)) !== null) {
+      if (m.index >= from) { alvo = m; break; }
+      if (alvo === null) alvo = alvo;
+    }
+    if (!alvo) { _RE_LACUNA.lastIndex = 0; alvo = _RE_LACUNA.exec(ta.value); }  // volta ao início
+    if (!alvo) return;
+    ta.focus();
+    ta.setSelectionRange(alvo.index, alvo.index + alvo[0].length);
+    // rola até a seleção
+    const antes = ta.value.slice(0, alvo.index).split('\n').length;
+    const linhaAlt = ta.scrollHeight / (ta.value.split('\n').length || 1);
+    ta.scrollTop = Math.max(0, (antes - 5) * linhaAlt);
+  }
+
+  /* ══ (75/44) Validação antes de emitir o laudo ══ */
+  function validarRelatorioAntesGerar() {
+    const ta = document.getElementById('rel-texto');
+    const texto = (ta?.value || '').trim();
+    if (!texto) { alert('Gere a prévia do relatório antes de emitir o PDF.'); return false; }
+    const faltando = [];
+    if (!relDoencaKey) faltando.push('selecionar a doença / modelo');
+    if (document.getElementById('rel-solicita-bio')?.checked && !document.getElementById('rel-bio-select')?.value)
+      faltando.push('escolher o imunobiológico solicitado');
+    if (faltando.length) { alert('Complete antes de gerar o laudo:\n\n• ' + faltando.join('\n• ')); return false; }
+    const n = contarLacunas(texto);
+    if (n > 0) {
+      const ok = confirm(`O laudo ainda tem ${n} lacuna(s) por preencher (ex.: [PREENCHER]).\n\nDeseja gerar mesmo assim?`);
+      if (!ok) { irProximaLacuna(); return false; }
+    }
+    return true;
   }
 
   /* ── MEUS MODELOS DE RELATÓRIO (salvos no navegador) ── */
