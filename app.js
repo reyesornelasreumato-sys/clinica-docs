@@ -2578,7 +2578,9 @@ ${timbrado ? `<div class="timbrado-bg"></div><table class="timbrado-table"><thea
     relDoencaKey = key;
     const d = MODELO_DOENCAS[key];
 
-    document.getElementById('rel-doenca-banner').textContent = d.label + ' — CID-10: ' + d.cid;
+    const banner = document.getElementById('rel-doenca-banner');
+    banner.innerHTML = `<span>${d.label} — CID-10: ${d.cid}</span>
+      <button class="btn" style="padding:2px 10px;font-size:11.5px;margin-left:auto" onclick="abrirEditorDoenca('${key}')">editar modelo</button>`;
     document.getElementById('rel-form-wrap').style.display = 'block';
     document.getElementById('rel-editor-wrap').style.display = 'none';
     document.getElementById('rel-texto').value = '';
@@ -3133,6 +3135,87 @@ ${timbrado ? `<div class="timbrado-bg"></div><table class="timbrado-table"><thea
     return true;
   }
 
+
+
+  /* ══ (7) Editor de doenças do usuário ══ */
+  const DOENCAS_USER_KEY = 'minhas_doencas';
+  function carregarDoencasUser() { try { return JSON.parse(localStorage.getItem(DOENCAS_USER_KEY) || '{}'); } catch(e) { return {}; } }
+  function salvarDoencasUser(o) { try { localStorage.setItem(DOENCAS_USER_KEY, JSON.stringify(o)); } catch(e) {} }
+
+  function aplicarDoencasUser() {
+    const u = carregarDoencasUser();
+    Object.entries(u).forEach(([k, d]) => { MODELO_DOENCAS[k] = d; });
+    renderBotoesDoencasUser();
+  }
+  function renderBotoesDoencasUser() {
+    const cont = document.getElementById('rel-doenca-btns'); if (!cont) return;
+    cont.querySelectorAll('.med-class-btn[data-user="1"]').forEach(b => b.remove());
+    const u = carregarDoencasUser();
+    const novo = document.getElementById('btn-nova-doenca');
+    Object.entries(u).forEach(([k, d]) => {
+      if (document.querySelector(`#rel-doenca-btns .med-class-btn[data-key="${k}"]:not([data-user])`)) return; // override de doença existente
+      const b = document.createElement('button');
+      b.className = 'med-class-btn'; b.dataset.key = k; b.dataset.user = '1';
+      b.textContent = '★ ' + d.label;
+      b.onclick = () => selecionarDoencaRel(k);
+      cont.insertBefore(b, novo || null);
+    });
+  }
+
+  function abrirEditorDoenca(key) {
+    const d = key ? MODELO_DOENCAS[key] : null;
+    const esc = d ? d.escores.map(e => [e.label, e.faixa || '', e.ref || ''].join(' | ')).join('\n') : '';
+    const esc2 = (s) => String(s).replace(/"/g, '&quot;');
+    const ehUser = key && carregarDoencasUser()[key];
+    _modal(d ? 'Editar modelo — ' + d.label : 'Nova doença', `
+      <p class="calc-hint">Edite o modelo clínico usado no laudo. Fica salvo neste navegador; ao editar uma doença existente, sua versão passa a valer.</p>
+      <div class="calc-grid">
+        <div class="calc-f"><label>Nome da doença</label><input id="ed-label" value="${d ? esc2(d.label) : ''}"></div>
+        <div class="calc-f"><label>CID-10</label><input id="ed-cid" list="dl-cid" value="${d ? esc2(d.cid) : ''}"></div>
+      </div>
+      <div class="calc-f" style="margin-top:10px"><label>Manifestações clínicas (uma por linha)</label>
+        <textarea id="ed-manif" rows="6">${d ? d.manifestacoes.join('\n') : ''}</textarea></div>
+      <div class="calc-f" style="margin-top:10px"><label>Escores — formato: <b>Nome | faixa | referência</b> (um por linha)</label>
+        <textarea id="ed-escores" rows="5">${esc}</textarea></div>
+      <div class="calc-f" style="margin-top:10px"><label>Imunobiológicos disponíveis (um por linha)</label>
+        <textarea id="ed-bio" rows="4">${d ? (d.biologicos || []).join('\n') : ''}</textarea></div>
+      <div class="calc-f" style="margin-top:10px"><label>DUT / PCDT de referência</label>
+        <input id="ed-dut" value="${d ? esc2(d.dut || '') : ''}"></div>
+      <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="salvarDoencaEditor('${key || ''}')">Salvar doença</button>
+        ${ehUser ? `<button class="btn" onclick="excluirDoencaUser('${key}')">Excluir / restaurar padrão</button>` : ''}
+        <button class="btn" onclick="fecharCalc()" style="margin-left:auto">Cancelar</button>
+      </div>`);
+  }
+
+  function salvarDoencaEditor(key) {
+    const label = document.getElementById('ed-label').value.trim();
+    if (!label) { alert('Informe o nome da doença.'); return; }
+    const cid = (document.getElementById('ed-cid').value.trim().split('—')[0].trim()) || 'NE';
+    const manif = document.getElementById('ed-manif').value.split('\n').map(s => s.trim()).filter(Boolean);
+    const escores = document.getElementById('ed-escores').value.split('\n').map(s => s.trim()).filter(Boolean)
+      .map((l, i) => { const p = l.split('|').map(x => (x || '').trim()); return { id: 'u' + i, label: p[0], faixa: p[1] || '', ref: p[2] || '' }; })
+      .filter(e => e.label);
+    const biologicos = document.getElementById('ed-bio').value.split('\n').map(s => s.trim()).filter(Boolean);
+    const dut = document.getElementById('ed-dut').value.trim();
+    if (!manif.length) { alert('Informe ao menos uma manifestação clínica.'); return; }
+    const k = key || ('u_' + label.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-z0-9]+/g, '_').slice(0, 20) + '_' + Date.now().toString(36));
+    const u = carregarDoencasUser();
+    u[k] = { label, cid, manifestacoes: manif, escores, biologicos, dut };
+    salvarDoencasUser(u);
+    MODELO_DOENCAS[k] = u[k];
+    renderBotoesDoencasUser();
+    fecharCalc();
+    selecionarDoencaRel(k);
+  }
+
+  function excluirDoencaUser(key) {
+    if (!confirm('Excluir esta doença personalizada?\n\nSe for uma edição de doença existente, o modelo padrão volta a valer. A página será recarregada.')) return;
+    const u = carregarDoencasUser(); delete u[key]; salvarDoencasUser(u);
+    location.reload();
+  }
+  document.addEventListener('DOMContentLoaded', aplicarDoencasUser);
 
   /* ══ (97) CID-10 pesquisável (reumatologia) ══ */
   const CID10_REUMATO = [

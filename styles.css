@@ -392,3 +392,9 @@
 .trat-dur.warn { color: #9c7415; font-weight: 600; }
 .trat-x { background: none; border: none; color: #c0392b; font-size: 16px; cursor: pointer;
   padding: 2px 6px; margin-left: auto; flex-shrink: 0; }
+
+/* ── Editor de doenças ── */
+.calc-f textarea { font-size: 12.5px; padding: 7px 9px; border: 1px solid var(--border);
+  border-radius: 6px; background: var(--surface); font-family: inherit; resize: vertical; width: 100%; }
+#rel-doenca-banner .btn { background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.35); color: #fff; }
+#rel-doenca-banner .btn:hover { background: rgba(255,255,255,.28); }

@@ -223,11 +223,12 @@
       <button class="med-class-btn" data-key="gota"   onclick="selecionarDoencaRel('gota')">Gota</button>
       <button class="med-class-btn" data-key="still"  onclick="selecionarDoencaRel('still')">Doença de Still</button>
       <button class="med-class-btn" data-key="behcet" onclick="selecionarDoencaRel('behcet')">Behçet</button>
+      <button class="med-class-btn" id="btn-nova-doenca" onclick="abrirEditorDoenca('')" style="border-style:dashed">+ Nova doença</button>
     </div>
 
     <!-- FORMULÁRIO ESTRUTURADO (aparece após selecionar doença) -->
     <div id="rel-form-wrap" style="display:none">
-      <div id="rel-doenca-banner" style="background:var(--brand);color:#fff;border-radius:8px;padding:9px 14px;font-weight:700;font-size:14px;margin:1rem 0 1.2rem"></div>
+      <div id="rel-doenca-banner" style="background:var(--brand);color:#fff;border-radius:8px;padding:9px 14px;font-weight:700;font-size:14px;margin:1rem 0 1.2rem;display:flex;align-items:center;gap:10px;flex-wrap:wrap"></div>
 
       <p class="section-label">Dados do diagnóstico</p>
       <div class="form-grid cols-3">
