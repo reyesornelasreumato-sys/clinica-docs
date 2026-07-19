@@ -2534,28 +2534,42 @@ Início de efeito esperado em 24 a 72 horas</textarea>
         // topo, assinatura + caixa de identificação embaixo — e as medicações
         // são distribuídas para caber, de modo que a caixa nunca quebre e
         // apareça em toda página.
-        const budget = usaTimbrado() ? 100 : 95;   // mm disponíveis p/ medicações por página
+        // Valores baseados em medição (área útil: timbrado 233mm / normal 247mm;
+        // cabeçalho ~39/71mm; rodapé assinatura+caixa ~82mm).
+        const footReserve = 84;                          // mm reservados embaixo p/ assinatura + caixa
+        const pageMinH    = usaTimbrado() ? 232 : 246;   // altura da folha (ancora a caixa no rodapé)
+        const budget      = usaTimbrado() ? 105 : 86;    // mm p/ medicações + observações por página
+
+        // Fluxo paginável = medicações + (observações, se houver)
+        const flow = medObjs.map(m => ({ html: m.html, h: m.h, med: true }));
+        if (obs) {
+          const obsLines = obs.split('\n').reduce((s,l) => s + Math.max(1, Math.ceil(l.length / _cpl)), 0);
+          flow.push({ med: false, h: 15 + 5.4 * obsLines,
+            html: `<hr class="doc-divider"/>${docSec(t('Observações'), `<p>${nl2br(obs)}</p>`)}` });
+        }
+
         const pages = [];
         let cur = [], curH = 0;
-        medObjs.forEach(m => {
-          if (cur.length && curH + m.h > budget) { pages.push(cur); cur = []; curH = 0; }
-          cur.push(m); curH += m.h;
+        flow.forEach(it => {
+          if (cur.length && curH + it.h > budget) { pages.push(cur); cur = []; curH = 0; }
+          cur.push(it); curH += it.h;
         });
         if (cur.length) pages.push(cur);
         if (!pages.length) pages.push([]);   // sem medicações → 1 página vazia
 
         const foot = `<div class="rx-foot">${assinatura('receita')}${footerEspecial()}</div>`;
         const buildVia = (label) => pages.map((chunk, pi) => {
-          const isLast = pi === pages.length - 1;
-          const meds = chunk.length ? chunk.map(m => m.html).join('') : `<p style="color:#8a9e99">${_vazioMsg}</p>`;
+          const meds = chunk.filter(x => x.med);
+          const obsItem = chunk.find(x => !x.med);
           const folha = pages.length > 1
             ? ` <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#666">(${docLang==='es'?'hoja':'folha'} ${pi+1}/${pages.length})</span>` : '';
-          return `<div class="rx-page">
+          const medsHtml2 = meds.length ? meds.map(m => m.html).join('') : (pi === 0 ? `<p style="color:#8a9e99">${_vazioMsg}</p>` : '');
+          return `<div class="rx-page" style="min-height:${pageMinH}mm;padding-bottom:${footReserve}mm">
             <div style="font-size:10px;color:#222;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">${label}${folha}</div>
             ${letterhead(titulo)}
             ${docSec(t('Paciente'), pacienteHtml(p))}
-            <div class="doc-section"><div class="doc-section-label">${t('Prescrição')}</div>${meds}</div>
-            ${isLast && obs ? `<hr class="doc-divider"/>${docSec(t('Observações'), `<p>${nl2br(obs)}</p>`)}` : ''}
+            ${(meds.length || pi === 0) ? `<div class="doc-section"><div class="doc-section-label">${t('Prescrição')}</div>${medsHtml2}</div>` : ''}
+            ${obsItem ? obsItem.html : ''}
             ${foot}
           </div>`;
         }).join('<div style="page-break-after:always"></div>');
@@ -3076,7 +3090,8 @@ Início de efeito esperado em 24 a 72 horas</textarea>
   .exam-bullet{width:5px;height:5px;border-radius:50%;background:#333;flex-shrink:0}
   .exam-list-2col{column-count:2;column-gap:2rem}
   .exam-list-2col li{break-inside:avoid}
-  .rx-foot{break-inside:avoid;-webkit-column-break-inside:avoid}
+  .rx-page{position:relative}
+  .rx-foot{position:absolute;left:0;right:0;bottom:0;break-inside:avoid;-webkit-column-break-inside:avoid}
   @page { margin: 2.5cm 2cm; size: A4; }
   @media print { body { padding: 0; } }
   ${timbrado ? TIMBRADO_CSS : ''}`;
