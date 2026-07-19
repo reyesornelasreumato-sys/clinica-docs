@@ -968,7 +968,11 @@ Início de efeito esperado em 24 a 72 horas</textarea>
   const TIMBRADO_CSS = `
   body.timbrado{padding:0;background:#fff;position:relative;-webkit-print-color-adjust:exact;print-color-adjust:exact}
   .timbrado-bg{position:fixed;top:0;left:0;width:210mm;height:297mm;background-image:url("${TIMBRADO_LAERTE}");background-size:210mm 297mm;background-repeat:no-repeat;z-index:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .timbrado-content{position:relative;z-index:1;padding:34mm 16mm 30mm 16mm}
+  .timbrado-table{position:relative;z-index:1;width:100%;border-collapse:collapse}
+  .timbrado-table > thead td,.timbrado-table > tfoot td{padding:0;border:0}
+  .timbrado-head-space{height:34mm}
+  .timbrado-foot-space{height:30mm}
+  .timbrado-table > tbody > tr > td{padding:0 16mm;vertical-align:top}
   @page{margin:0;size:A4}
   @media screen{
     body.timbrado{width:210mm;min-height:297mm;margin:0 auto}
@@ -3051,7 +3055,7 @@ Início de efeito esperado em 24 a 72 horas</textarea>
 <style>${CSS}</style>
 </head>
 <body class="${timbrado ? 'timbrado' : ''}">
-${timbrado ? `<div class="timbrado-bg"></div><div class="timbrado-content">${html}</div>` : html}
+${timbrado ? `<div class="timbrado-bg"></div><table class="timbrado-table"><thead><tr><td><div class="timbrado-head-space"></div></td></tr></thead><tfoot><tr><td><div class="timbrado-foot-space"></div></td></tr></tfoot><tbody><tr><td>${html}</td></tr></tbody></table>` : html}
 <script>window.addEventListener('load',function(){setTimeout(function(){window.print();},400);});<\/script>
 </body>
 </html>`;
