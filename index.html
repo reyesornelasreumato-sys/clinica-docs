@@ -2286,7 +2286,7 @@ Início de efeito esperado em 24 a 72 horas</textarea>
       `<div style="margin-bottom:7px;font-size:10px"><span style="font-weight:600">${label}</span> <span style="border-bottom:1px solid #333;display:inline-block;width:calc(100% - 50px);vertical-align:bottom">&nbsp;</span></div>`;
 
     return `
-    <table style="width:100%;border-collapse:collapse;border:1.5px solid #333;margin-top:2.5rem;font-size:10px;font-family:'Inter',sans-serif">
+    <table style="width:100%;border-collapse:collapse;border:1.5px solid #333;margin-top:1.2rem;font-size:10px;font-family:'Inter',sans-serif;break-inside:avoid;-webkit-column-break-inside:avoid">
       <tr>
         <td style="width:33%;border-right:1.5px solid #333;padding:0;vertical-align:top">
           <div style="font-size:9px;font-weight:700;text-transform:uppercase;text-align:center;background:#f0f0f0;border-bottom:1px solid #333;padding:4px">${t('Identificação do Emitente')}</div>
@@ -2492,7 +2492,8 @@ Início de efeito esperado em 24 a 72 horas</textarea>
       const _vazioMsg = docLang==='es'?'Ningún medicamento prescrito.':'Nenhum medicamento prescrito.';
       const cards = [...document.querySelectorAll('#meds-list .med-card')];
       let idx = 0;
-      const medsHtml = cards.map(card => {
+      const _cpl = 82; // caracteres por linha aprox. (13px @ 178mm)
+      const medObjs = cards.map(card => {
         let nome = '', pos = '', dur = '';
         if (card.dataset.tipo === 'livre') {
           nome = card.querySelector('.med-nome')?.value.trim() || '';
@@ -2504,15 +2505,22 @@ Início de efeito esperado em 24 a 72 horas</textarea>
         dur = card.querySelector('.med-dur')?.value || '';
         if (dur === 'personalizado') dur = card.querySelector('.med-dur-custom')?.value.trim() || '';
         const medObs = card.querySelector('.med-obs')?.value.trim() || '';
-        if (!nome) return '';
+        if (!nome) return null;
         idx++;
-        return `<div class="med-item">
+        // altura estimada (mm) para paginação da receita especial
+        let h = 3.6 + 6.2 * Math.max(1, Math.ceil((nome.length + 4) / _cpl));
+        if (pos)    h += 5.4 * Math.max(1, Math.ceil(pos.length / _cpl));
+        if (dur)    h += 5.4;
+        if (medObs) h += 5.4 * Math.max(1, Math.ceil(medObs.length / _cpl));
+        const html = `<div class="med-item">
           <strong>${idx}. ${nome}</strong>
           ${pos ? `<span>${pos}</span>` : ''}
           ${dur ? `<span style="color:#111;font-size:12px;font-weight:600;display:block;margin-top:2px">${_durLabel} ${dur}</span>` : ''}
           ${medObs ? `<span style="font-size:12px;color:#444;display:block;margin-top:2px;font-style:italic">${_obsLabel}: ${medObs}</span>` : ''}
         </div>`;
-      }).filter(Boolean).join('');
+        return { html, h };
+      }).filter(Boolean);
+      const medsHtml = medObjs.map(m => m.html).join('');
 
       const titulo = isEspecial ? t('Receita de Controle Especial') : t('Receita Médica');
       const corpo = `${letterhead(titulo)}
@@ -2522,11 +2530,38 @@ Início de efeito esperado em 24 a 72 horas</textarea>
         ${assinatura('receita')}`;
 
       if (isEspecial) {
-        const footer = footerEspecial();
-        const via1 = `<div style="font-size:10px;color:#222;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">${docLang==='es'?'1ª Copia — Farmacia':'1ª Via — Farmácia'}</div>${corpo}${footer}`;
-        const via2 = `<div style="font-size:10px;color:#222;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">${docLang==='es'?'2ª Copia — Paciente':'2ª Via — Paciente'}</div>${corpo}${footer}`;
-        const sep  = `<div style="border-top:1px dashed #aaa;margin:2.5rem 0;page-break-after:always"></div>`;
-        return via1 + sep + via2;
+        // Paginação manual: cada página é uma receita COMPLETA — paciente no
+        // topo, assinatura + caixa de identificação embaixo — e as medicações
+        // são distribuídas para caber, de modo que a caixa nunca quebre e
+        // apareça em toda página.
+        const budget = usaTimbrado() ? 100 : 95;   // mm disponíveis p/ medicações por página
+        const pages = [];
+        let cur = [], curH = 0;
+        medObjs.forEach(m => {
+          if (cur.length && curH + m.h > budget) { pages.push(cur); cur = []; curH = 0; }
+          cur.push(m); curH += m.h;
+        });
+        if (cur.length) pages.push(cur);
+        if (!pages.length) pages.push([]);   // sem medicações → 1 página vazia
+
+        const foot = `<div class="rx-foot">${assinatura('receita')}${footerEspecial()}</div>`;
+        const buildVia = (label) => pages.map((chunk, pi) => {
+          const isLast = pi === pages.length - 1;
+          const meds = chunk.length ? chunk.map(m => m.html).join('') : `<p style="color:#8a9e99">${_vazioMsg}</p>`;
+          const folha = pages.length > 1
+            ? ` <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#666">(${docLang==='es'?'hoja':'folha'} ${pi+1}/${pages.length})</span>` : '';
+          return `<div class="rx-page">
+            <div style="font-size:10px;color:#222;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:6px">${label}${folha}</div>
+            ${letterhead(titulo)}
+            ${docSec(t('Paciente'), pacienteHtml(p))}
+            <div class="doc-section"><div class="doc-section-label">${t('Prescrição')}</div>${meds}</div>
+            ${isLast && obs ? `<hr class="doc-divider"/>${docSec(t('Observações'), `<p>${nl2br(obs)}</p>`)}` : ''}
+            ${foot}
+          </div>`;
+        }).join('<div style="page-break-after:always"></div>');
+        const via1 = buildVia(docLang==='es'?'1ª Copia — Farmacia':'1ª Via — Farmácia');
+        const via2 = buildVia(docLang==='es'?'2ª Copia — Paciente':'2ª Via — Paciente');
+        return via1 + `<div style="page-break-after:always"></div>` + via2;
       }
       return corpo;
     }
@@ -3041,6 +3076,7 @@ Início de efeito esperado em 24 a 72 horas</textarea>
   .exam-bullet{width:5px;height:5px;border-radius:50%;background:#333;flex-shrink:0}
   .exam-list-2col{column-count:2;column-gap:2rem}
   .exam-list-2col li{break-inside:avoid}
+  .rx-foot{break-inside:avoid;-webkit-column-break-inside:avoid}
   @page { margin: 2.5cm 2cm; size: A4; }
   @media print { body { padding: 0; } }
   ${timbrado ? TIMBRADO_CSS : ''}`;
