@@ -1993,6 +1993,99 @@
       biologicos: ['Mepolizumabe 300mg SC (Nucala®) — aprovado para GEPA','Benralizumabe SC — off-label','Rituximabe IV (MabThera®) — casos refratários com ANCA+'],
       dut: 'DUT-65 e PCDT das Vasculites ANCA-positivas / GEPA (CONITEC/MS)',
     },
+    ea: {
+      label: 'Espondilite Anquilosante (EA)', cid: 'M45',
+      manifestacoes: ['Dor lombar inflamatória (> 3 meses)','Rigidez matinal > 30 minutos','Melhora com exercício e não com repouso','Dor noturna com melhora ao levantar','Sacroiliíte (RX / RM)','Sindesmófitos / coluna em bambu','Entesite (calcâneo, fáscia plantar)','Dactilite','Artrite periférica (predominantemente MMII)','Limitação da mobilidade lombar (Schober)','Redução da expansão torácica','Comprometimento de quadris','Uveíte anterior aguda','Doença inflamatória intestinal associada','Psoríase associada','Fadiga importante'],
+      escores: [
+        {id:'basdai',label:'BASDAI',faixa:'0–10',ref:'≥ 4 doença ativa'},
+        {id:'asdas',label:'ASDAS-PCR',faixa:'',ref:'< 1,3 inativa · 1,3–2,1 baixa · 2,1–3,5 alta · > 3,5 muito alta'},
+        {id:'basfi',label:'BASFI (funcional)',faixa:'0–10',ref:'quanto maior, pior a função'},
+        {id:'schober',label:'Teste de Schober (cm)',faixa:'',ref:'< 4 cm alterado'},
+        {id:'exptorax',label:'Expansão torácica (cm)',faixa:'',ref:'< 2,5 cm alterada'},
+        {id:'pcr',label:'PCR (mg/L)',faixa:'',ref:''},
+        {id:'vhs',label:'VHS (mm/h)',faixa:'',ref:''},
+      ],
+      biologicos: ['Adalimumabe 40mg SC (Humira®)','Etanercepte 50mg SC (Enbrel®)','Infliximabe IV (Remicade®)','Golimumabe 50mg SC (Simponi®)','Certolizumabe Pegol 200mg SC (Cimzia®)','Secuquinumabe 150mg SC (Cosentyx®)','Ixequizumabe 80mg SC (Taltz®)','Upadacitinibe 15mg (Rinvoq®)','Tofacitinibe 5mg (Xeljanz®)'],
+      dut: 'DUT-65 — Terapia Imunobiológica (Espondilite Anquilosante)',
+    },
+    aps: {
+      label: 'Artrite Psoriásica (APs)', cid: 'M07.3',
+      manifestacoes: ['Artrite periférica assimétrica','Poliartrite simétrica (padrão AR-símile)','Envolvimento de interfalangeanas distais (IFD)','Dactilite ("dedo em salsicha")','Entesite','Espondilite / sacroiliíte','Psoríase cutânea em atividade','Onicopatia psoriásica (pitting, onicólise)','Artrite mutilante','Uveíte','Fadiga'],
+      escores: [
+        {id:'das28_pcr',label:'DAS28-PCR',faixa:'0–9,4',ref:'> 3,2 atividade moderada/alta'},
+        {id:'das28_vhs',label:'DAS28-VHS',faixa:'0–9,4',ref:'> 3,2 atividade moderada/alta'},
+        {id:'basdai',label:'BASDAI',faixa:'0–10',ref:'≥ 4 doença axial ativa'},
+        {id:'eva',label:'EVA dor (0–10)',faixa:'0–10',ref:'≥ 5 dor significativa'},
+        {id:'artdol',label:'Articulações dolorosas (nº)',faixa:'',ref:''},
+        {id:'artede',label:'Articulações edemaciadas (nº)',faixa:'',ref:''},
+        {id:'pasi',label:'PASI (pele)',faixa:'0–72',ref:'> 10 psoríase grave'},
+        {id:'pcr',label:'PCR (mg/L)',faixa:'',ref:''},
+        {id:'vhs',label:'VHS (mm/h)',faixa:'',ref:''},
+      ],
+      biologicos: ['Adalimumabe 40mg SC (Humira®)','Etanercepte 50mg SC (Enbrel®)','Infliximabe IV (Remicade®)','Golimumabe 50mg SC (Simponi®)','Certolizumabe Pegol 200mg SC (Cimzia®)','Secuquinumabe 150mg SC (Cosentyx®)','Ixequizumabe 80mg SC (Taltz®)','Ustequinumabe 45mg SC (Stelara®)','Guselcumabe 100mg SC (Tremfya®)','Abatacepte 125mg SC (Orencia®)','Tofacitinibe 5mg (Xeljanz®)','Upadacitinibe 15mg (Rinvoq®)','Apremilaste 30mg (Otezla®)'],
+      dut: 'DUT-65 — Terapia Imunobiológica (Artrite Psoriásica)',
+    },
+    pmr: {
+      label: 'Polimialgia Reumática (PMR)', cid: 'M35.3',
+      manifestacoes: ['Dor e rigidez em cintura escapular','Dor e rigidez em cintura pélvica','Rigidez matinal > 45 minutos','Início abrupto após os 50 anos','Sintomas constitucionais (febre, perda de peso, astenia)','Bursite subacromial / subdeltoidea','Sinovite de ombros e quadris','Resposta rápida a corticoide em dose baixa','Arterite de células gigantes associada','Elevação acentuada de VHS/PCR'],
+      escores: [
+        {id:'vhs',label:'VHS (mm/h)',faixa:'',ref:'geralmente > 40'},
+        {id:'pcr',label:'PCR (mg/L)',faixa:'',ref:''},
+        {id:'eva',label:'EVA dor (0–10)',faixa:'0–10',ref:''},
+        {id:'pred',label:'Prednisona atual (mg/dia)',faixa:'',ref:'alvo: desmame progressivo'},
+      ],
+      biologicos: ['Tocilizumabe 162mg SC (Actemra®) — corticodependência','Tocilizumabe IV (Actemra®) — corticodependência'],
+      dut: 'PCDT / indicação aprovada pela ANVISA (tocilizumabe em PMR corticodependente)',
+    },
+    acg: {
+      label: 'Arterite de Células Gigantes (ACG)', cid: 'M31.6',
+      manifestacoes: ['Cefaleia temporal de início recente','Claudicação de mandíbula','Amaurose fugaz / perda visual','Hipersensibilidade do couro cabeludo','Artéria temporal espessada, dolorosa ou sem pulso','Polimialgia reumática associada','Febre e perda de peso','Elevação acentuada de VHS/PCR','Biópsia de artéria temporal positiva','Acometimento de grandes vasos (aortite) ao PET/angio-TC'],
+      escores: [
+        {id:'vhs',label:'VHS (mm/h)',faixa:'',ref:'geralmente > 50'},
+        {id:'pcr',label:'PCR (mg/L)',faixa:'',ref:''},
+        {id:'hb',label:'Hemoglobina (g/dL)',faixa:'',ref:'anemia de doença crônica'},
+        {id:'pred',label:'Prednisona atual (mg/dia)',faixa:'',ref:''},
+      ],
+      biologicos: ['Tocilizumabe 162mg SC (Actemra®)','Tocilizumabe IV (Actemra®)'],
+      dut: 'PCDT / indicação aprovada pela ANVISA (tocilizumabe em ACG)',
+    },
+    gota: {
+      label: 'Gota / Artrite por Microcristais', cid: 'M10',
+      manifestacoes: ['Monoartrite aguda (podagra)','Crises recorrentes de artrite','Artrite oligo/poliarticular','Tofos','Artropatia crônica gotosa','Cristais de urato monossódico no líquido sinovial','Hiperuricemia','Nefrolitíase por ácido úrico','Doença renal crônica associada','Síndrome metabólica associada'],
+      escores: [
+        {id:'au',label:'Ácido úrico sérico (mg/dL)',faixa:'',ref:'alvo < 6 (com tofos < 5)'},
+        {id:'crises',label:'Nº de crises nos últimos 12 meses',faixa:'',ref:'≥ 2 indica terapia hipouricemiante'},
+        {id:'tfg',label:'TFG estimada (mL/min)',faixa:'',ref:'ajuste de dose'},
+        {id:'pcr',label:'PCR (mg/L)',faixa:'',ref:''},
+      ],
+      biologicos: ['Canaquinumabe 150mg SC (Ilaris®) — crises refratárias','Pegloticase IV — gota tofácea refratária'],
+      dut: 'PCDT da Gota / indicação aprovada pela ANVISA',
+    },
+    still: {
+      label: 'Doença de Still do Adulto', cid: 'M06.1',
+      manifestacoes: ['Febre alta intermitente (> 39°C)','Rash evanescente cor salmão','Artrite / artralgia','Odinofagia','Linfadenopatia','Hepatoesplenomegalia','Serosite (pleurite / pericardite)','Leucocitose com neutrofilia','Ferritina muito elevada','Síndrome de ativação macrofágica'],
+      escores: [
+        {id:'ferritina',label:'Ferritina (ng/mL)',faixa:'',ref:'> 5× o normal sugere atividade'},
+        {id:'pcr',label:'PCR (mg/L)',faixa:'',ref:''},
+        {id:'vhs',label:'VHS (mm/h)',faixa:'',ref:''},
+        {id:'leuco',label:'Leucócitos (/mm³)',faixa:'',ref:'> 10.000 com neutrofilia'},
+        {id:'tgp',label:'ALT/TGP (U/L)',faixa:'',ref:''},
+      ],
+      biologicos: ['Anacinra 100mg SC (Kineret®)','Canaquinumabe 150mg SC (Ilaris®)','Tocilizumabe IV/SC (Actemra®)'],
+      dut: 'PCDT / indicação aprovada pela ANVISA',
+    },
+    behcet: {
+      label: 'Doença de Behçet', cid: 'M35.2',
+      manifestacoes: ['Úlceras orais recorrentes','Úlceras genitais','Uveíte / vasculite retiniana','Eritema nodoso','Pseudofoliculite / lesões papulopustulosas','Teste de patergia positivo','Artrite','Trombose venosa','Neuro-Behçet','Acometimento gastrointestinal','Aneurisma de artéria pulmonar'],
+      escores: [
+        {id:'bdcaf',label:'BDCAF (atividade)',faixa:'0–12',ref:'quanto maior, mais ativa'},
+        {id:'pcr',label:'PCR (mg/L)',faixa:'',ref:''},
+        {id:'vhs',label:'VHS (mm/h)',faixa:'',ref:''},
+        {id:'ulceras',label:'Nº de úlceras orais/mês',faixa:'',ref:''},
+      ],
+      biologicos: ['Infliximabe IV (Remicade®)','Adalimumabe 40mg SC (Humira®)','Interferon-alfa','Tocilizumabe IV (Actemra®) — casos refratários'],
+      dut: 'PCDT / indicação aprovada pela ANVISA',
+    },
     aij: {
       label: 'Artrite Idiopática Juvenil (AIJ)', cid: 'M08',
       manifestacoes: ['Artrite oligoarticular (≤ 4 articulações)','Artrite poliarticular (≥ 5 articulações)','Artrite sistêmica (febre quotidiana, rash, serosite)','Uveíte anterior crônica (assintomática)','Entesite (inserções tendíneas)','Artrite sacroilíaca / coluna','Lesão articular / erosões','Limitação funcional / escoliose','Retardo do crescimento','Amiloidose secundária (rara)','Anemia de doença crônica','Ferritina muito elevada (forma sistêmica)'],
@@ -2434,6 +2527,35 @@ ${timbrado ? `<div class="timbrado-bg"></div><table class="timbrado-table"><thea
   // Critérios específicos por doença. Só a AR tem limiares numéricos na DUT-65
   // (Portaria SAS/MS 391/2015). As demais usam o modelo geral (criteriosDoenca).
   const DUT_CRITERIOS = {
+    ea: {
+      fonte: 'DUT 65 — Terapia Imunobiológica (Portaria SAS/MS nº 391/2015)',
+      grupos: [
+        { id: 'dx', titulo: 'Diagnóstico', modo: 'todos', itens: [
+          { id: 'ea-dx', label: 'Diagnóstico confirmado de Espondilite Anquilosante (CID-10 M45)' } ] },
+        { id: 'atv', titulo: 'Atividade de doença', modo: 'algum', itens: [
+          { id: 'ea-basdai', label: 'BASDAI ≥ 4',   escore: ['BASDAI'],              op: '>=', val: 4 },
+          { id: 'ea-asdas',  label: 'ASDAS ≥ 4,5',  escore: ['ASDAS-PCR', 'ASDAS'],  op: '>=', val: 4.5 } ] },
+        { id: 'ref', titulo: 'Refratariedade ao tratamento convencional', modo: 'todos', itens: [
+          { id: 'ea-aine', label: 'Falha a ≥ 2 AINEs em dose plena por período mínimo de 3 meses' } ] },
+        { id: 'perif', titulo: 'Doença periférica', modo: 'algum', itens: [
+          { id: 'ea-na',     label: 'Não se aplica — doença predominantemente axial' },
+          { id: 'ea-sszmtx', label: 'Ausência de resposta a sulfassalazina ou metotrexato por 3 meses adicionais' } ] },
+      ],
+    },
+    aps: {
+      fonte: 'DUT 65 — Terapia Imunobiológica (Portaria SAS/MS nº 391/2015)',
+      grupos: [
+        { id: 'dx', titulo: 'Diagnóstico', modo: 'todos', itens: [
+          { id: 'aps-dx', label: 'Diagnóstico confirmado de Artrite Psoriásica (CID-10 M07.3)' } ] },
+        { id: 'atv', titulo: 'Atividade de doença', modo: 'algum', itens: [
+          { id: 'aps-das28', label: 'Periférica: DAS28 > 3,2', escore: ['DAS28-PCR', 'DAS28-VHS'], op: '>', val: 3.2 },
+          { id: 'aps-eva',   label: 'Periférica: EVA ≥ 5 com ≥ 3 articulações dolorosas ou edemaciadas', escore: ['EVA dor (0–10)'], op: '>=', val: 5 },
+          { id: 'aps-axial', label: 'Axial associada: BASDAI ≥ 4', escore: ['BASDAI'], op: '>=', val: 4 } ] },
+        { id: 'ref', titulo: 'Refratariedade ao tratamento convencional', modo: 'algum', itens: [
+          { id: 'aps-dmcd', label: 'Periférica: ≥ 6 meses com pelo menos 2 DMCDs', falhas: 2 },
+          { id: 'aps-aine', label: 'Axial: ≥ 3 meses com doses plenas de pelo menos 2 AINEs' } ] },
+      ],
+    },
     ar: {
       fonte: 'DUT 65 — Terapia Imunobiológica (Portaria SAS/MS nº 391/2015)',
       grupos: [
