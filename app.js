@@ -2431,6 +2431,147 @@ ${timbrado ? `<div class="timbrado-bg"></div><table class="timbrado-table"><thea
   /* ── RELATÓRIO — FORMULÁRIO ESTRUTURADO + PRÉVIA EDITÁVEL ── */
   let relDoencaKey = null;
 
+
+  /* ══ ESCORES: interpretação, data e calculadoras ══ */
+  const ESCORE_INTERP = {
+    'DAS28-PCR': v => v < 2.6 ? ['remissão','ok'] : v <= 3.2 ? ['atividade baixa','ok'] : v <= 5.1 ? ['atividade moderada','warn'] : ['atividade alta','bad'],
+    'DAS28-VHS': v => v < 2.6 ? ['remissão','ok'] : v <= 3.2 ? ['atividade baixa','ok'] : v <= 5.1 ? ['atividade moderada','warn'] : ['atividade alta','bad'],
+    'CDAI':      v => v <= 2.8 ? ['remissão','ok'] : v <= 10 ? ['atividade baixa','ok'] : v <= 22 ? ['atividade moderada','warn'] : ['atividade alta','bad'],
+    'SDAI':      v => v <= 3.3 ? ['remissão','ok'] : v <= 11 ? ['atividade baixa','ok'] : v <= 26 ? ['atividade moderada','warn'] : ['atividade alta','bad'],
+    'BASDAI':    v => v >= 4 ? ['doença ativa (≥ 4)','bad'] : ['atividade baixa','ok'],
+    'ASDAS-PCR': v => v < 1.3 ? ['inativa','ok'] : v < 2.1 ? ['atividade baixa','ok'] : v <= 3.5 ? ['atividade alta','warn'] : ['atividade muito alta','bad'],
+    'SLEDAI-2K': v => v < 4 ? ['inativo','ok'] : v <= 9 ? ['atividade leve','warn'] : v <= 19 ? ['atividade moderada','warn'] : ['atividade grave','bad'],
+    'BASFI (funcional)':  v => v >= 4 ? ['limitação funcional relevante','warn'] : ['limitação leve','ok'],
+    'HAQ-DI (funcional)': v => v <= 0.25 ? ['sem incapacidade','ok'] : v <= 1 ? ['incapacidade leve/moderada','warn'] : ['incapacidade grave','bad'],
+    'PASI (pele)':        v => v > 10 ? ['psoríase grave','bad'] : v >= 5 ? ['moderada','warn'] : ['leve','ok'],
+    'Ácido úrico sérico (mg/dL)': v => v < 6 ? ['na meta (< 6)','ok'] : ['acima da meta','bad'],
+    'MMT-8 (força muscular)': v => v < 40 ? ['fraqueza grave','bad'] : v <= 64 ? ['fraqueza moderada','warn'] : ['fraqueza leve','ok'],
+  };
+  const _INTERP_COR = { ok:'#166a58', warn:'#9c7415', bad:'#bd4429' };
+  function interpretarEscore(inp) {
+    const span = inp.parentElement.querySelector('.rel-escore-interp');
+    if (!span) return;
+    const fn = ESCORE_INTERP[inp.dataset.label];
+    const v = parseFloat((inp.value || '').replace(',', '.'));
+    if (!fn || isNaN(v)) { span.textContent = ''; return; }
+    const [txt, nivel] = fn(v);
+    span.textContent = '→ ' + txt;
+    span.style.color = _INTERP_COR[nivel] || 'inherit';
+  }
+  function textoInterp(label, valor) {
+    const fn = ESCORE_INTERP[label]; const v = parseFloat(String(valor).replace(',', '.'));
+    if (!fn || isNaN(v)) return '';
+    return ' — ' + fn(v)[0];
+  }
+
+  /* Quais escores têm calculadora */
+  const ESCORE_CALC = {
+    'DAS28-PCR':'ar', 'DAS28-VHS':'ar', 'CDAI':'ar', 'SDAI':'ar',
+    'BASDAI':'esp', 'ASDAS-PCR':'esp',
+    'SLEDAI-2K':'sledai',
+  };
+
+  function _num(id){ const e=document.getElementById(id); const v=parseFloat((e?.value||'').replace(',','.')); return isNaN(v)?0:v; }
+  function _setEscore(label, valor) {
+    const inp = [...document.querySelectorAll('#rel-escores .rel-escore-input')].find(i => i.dataset.label === label);
+    if (!inp) return false;
+    inp.value = String(valor).replace('.', ',');
+    inp.dispatchEvent(new Event('input', { bubbles:true }));
+    return true;
+  }
+  function fecharCalc(){ const m=document.getElementById('calc-modal'); if(m) m.remove(); }
+  function _modal(titulo, corpo) {
+    fecharCalc();
+    const d = document.createElement('div');
+    d.id = 'calc-modal'; d.className = 'calc-overlay';
+    d.innerHTML = `<div class="calc-box" role="dialog" aria-label="${titulo}">
+      <div class="calc-head"><span>${titulo}</span><button class="calc-x" onclick="fecharCalc()" aria-label="Fechar">✕</button></div>
+      <div class="calc-body">${corpo}</div></div>`;
+    d.addEventListener('click', e => { if (e.target === d) fecharCalc(); });
+    document.body.appendChild(d);
+    return d;
+  }
+  const _campo = (id, lab, extra='') =>
+    `<div class="calc-f"><label for="${id}">${lab}</label><input id="${id}" type="number" step="0.1" min="0" ${extra} oninput="calcAtualizar()"/></div>`;
+
+  function abrirCalc(tipo) {
+    if (tipo === 'ar') {
+      _modal('Calculadora de atividade — Artrite Reumatoide', `
+        <p class="calc-hint">Preencha as 28 articulações e os marcadores; DAS28, CDAI e SDAI são calculados juntos.</p>
+        <div class="calc-grid">
+          ${_campo('c-t28','Articulações dolorosas (0–28)','max="28"')}
+          ${_campo('c-s28','Articulações edemaciadas (0–28)','max="28"')}
+          ${_campo('c-pga','Avaliação global do paciente (0–10)','max="10"')}
+          ${_campo('c-ega','Avaliação global do médico (0–10)','max="10"')}
+          ${_campo('c-vhs','VHS (mm/h)')}
+          ${_campo('c-pcr','PCR (mg/dL)')}
+        </div>
+        <div id="calc-out" class="calc-out"></div>`);
+    } else if (tipo === 'esp') {
+      _modal('Calculadora — BASDAI e ASDAS', `
+        <p class="calc-hint">BASDAI: responda de 0 a 10. ASDAS usa os mesmos itens + PCR.</p>
+        <div class="calc-grid">
+          ${_campo('c-q1','1. Fadiga / cansaço (0–10)','max="10"')}
+          ${_campo('c-q2','2. Dor em coluna/pescoço/quadril (0–10)','max="10"')}
+          ${_campo('c-q3','3. Dor ou edema em outras articulações (0–10)','max="10"')}
+          ${_campo('c-q4','4. Desconforto em áreas sensíveis ao toque (0–10)','max="10"')}
+          ${_campo('c-q5','5. Intensidade da rigidez matinal (0–10)','max="10"')}
+          ${_campo('c-q6','6. Duração da rigidez matinal (0–10)','max="10"')}
+          ${_campo('c-gp','Avaliação global do paciente (0–10)','max="10"')}
+          ${_campo('c-pcre','PCR (mg/L)')}
+        </div>
+        <div id="calc-out" class="calc-out"></div>`);
+    } else if (tipo === 'sledai') {
+      const itens = [
+        [8,'Convulsão'],[8,'Psicose'],[8,'Síndrome orgânica cerebral'],[8,'Distúrbio visual'],
+        [8,'Distúrbio de nervo craniano'],[8,'Cefaleia lúpica'],[8,'Acidente vascular cerebral'],[8,'Vasculite'],
+        [4,'Artrite'],[4,'Miosite'],[4,'Cilindros urinários'],[4,'Hematúria'],[4,'Proteinúria'],[4,'Piúria'],
+        [2,'Rash cutâneo'],[2,'Alopecia'],[2,'Úlceras mucosas'],[2,'Pleurite'],[2,'Pericardite'],
+        [2,'Complemento baixo'],[2,'Aumento de anti-DNA'],
+        [1,'Febre'],[1,'Trombocitopenia'],[1,'Leucopenia'],
+      ];
+      _modal('Calculadora — SLEDAI-2K', `
+        <p class="calc-hint">Marque os descritores presentes nos últimos 10 dias. O peso de cada item aparece à direita.</p>
+        <div class="calc-list">
+          ${itens.map((it,i)=>`<label class="calc-chk"><input type="checkbox" class="sledai-i" data-peso="${it[0]}" onchange="calcAtualizar()"><span>${it[1]}</span><b>${it[0]}</b></label>`).join('')}
+        </div>
+        <div id="calc-out" class="calc-out"></div>`);
+    }
+    calcAtualizar();
+  }
+
+  function calcAtualizar() {
+    const out = document.getElementById('calc-out'); if (!out) return;
+    const btn = (lab, val) => `<button type="button" class="btn" onclick="_setEscore('${lab}','${val}')&&fecharCalc()">usar em ${lab}</button>`;
+    if (document.getElementById('c-t28')) {
+      const t=_num('c-t28'), s=_num('c-s28'), pga=_num('c-pga'), ega=_num('c-ega'), vhs=_num('c-vhs'), pcr=_num('c-pcr');
+      const dVhs = vhs>0 ? (0.56*Math.sqrt(t)+0.28*Math.sqrt(s)+0.70*Math.log(vhs)+0.014*(pga*10)) : null;
+      const dPcr = 0.56*Math.sqrt(t)+0.28*Math.sqrt(s)+0.36*Math.log(pcr*10+1)+0.014*(pga*10)+0.96;
+      const cdai = t+s+pga+ega;
+      const sdai = t+s+pga+ega+pcr;
+      const r = (x)=> x==null?'—':x.toFixed(2).replace('.',',');
+      out.innerHTML = `
+        <div class="calc-res"><span>DAS28-VHS</span><b>${r(dVhs)}</b>${dVhs!=null?btn('DAS28-VHS', dVhs.toFixed(2)):''}</div>
+        <div class="calc-res"><span>DAS28-PCR</span><b>${r(dPcr)}</b>${btn('DAS28-PCR', dPcr.toFixed(2))}</div>
+        <div class="calc-res"><span>CDAI</span><b>${r(cdai)}</b>${btn('CDAI', cdai.toFixed(1))}</div>
+        <div class="calc-res"><span>SDAI</span><b>${r(sdai)}</b>${btn('SDAI', sdai.toFixed(1))}</div>
+        <p class="calc-hint">PCR em mg/dL. Avaliação global convertida para escala 0–100 na fórmula.</p>`;
+    } else if (document.getElementById('c-q1')) {
+      const q=[1,2,3,4,5,6].map(i=>_num('c-q'+i));
+      const basdai = (q[0]+q[1]+q[2]+q[3] + (q[4]+q[5])/2) / 5;
+      const gp=_num('c-gp'), pcr=_num('c-pcre');
+      const asdas = 0.121*q[1] + 0.110*gp + 0.073*q[2] + 0.058*q[5] + 0.579*Math.log(pcr+1);
+      const r=(x)=>x.toFixed(2).replace('.',',');
+      out.innerHTML = `
+        <div class="calc-res"><span>BASDAI</span><b>${r(basdai)}</b>${btn('BASDAI', basdai.toFixed(2))}</div>
+        <div class="calc-res"><span>ASDAS-PCR</span><b>${r(asdas)}</b>${btn('ASDAS-PCR', asdas.toFixed(2))}</div>`;
+    } else if (document.querySelector('.sledai-i')) {
+      let tot = 0;
+      document.querySelectorAll('.sledai-i:checked').forEach(c => tot += parseInt(c.dataset.peso));
+      out.innerHTML = `<div class="calc-res"><span>SLEDAI-2K</span><b>${tot}</b>${btn('SLEDAI-2K', tot)}</div>`;
+    }
+  }
+
   function selecionarDoencaRel(key) {
     relDoencaKey = key;
     const d = MODELO_DOENCAS[key];
@@ -2448,13 +2589,23 @@ ${timbrado ? `<div class="timbrado-bg"></div><table class="timbrado-table"><thea
     ).join('');
 
     // Escores
-    document.getElementById('rel-escores').innerHTML = d.escores.map(e =>
-      `<div class="field">
-        <label style="font-size:12px">${e.label}${e.faixa?' ('+e.faixa+')':''}</label>
-        <input class="rel-escore-input" data-label="${e.label.replace(/"/g,'&quot;')}"
-          placeholder="${e.ref||'Valor'}" style="font-size:13px"/>
-      </div>`
-    ).join('');
+    document.getElementById('rel-escores').innerHTML = d.escores.map(e => {
+      const lab = e.label.replace(/"/g,'&quot;');
+      const calc = ESCORE_CALC[e.label];
+      return `<div class="field">
+        <label style="font-size:12px;display:flex;align-items:center;gap:6px">
+          <span>${e.label}${e.faixa?' ('+e.faixa+')':''}</span>
+          ${calc?`<button type="button" class="btn" style="padding:1px 8px;font-size:10.5px;margin-left:auto" onclick="abrirCalc('${calc}')">calcular</button>`:''}
+        </label>
+        <input class="rel-escore-input" data-label="${lab}" placeholder="${e.ref||'Valor'}"
+          style="font-size:13px" oninput="interpretarEscore(this)"/>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:3px">
+          <input type="date" class="rel-escore-data" data-label="${lab}" title="Data do escore"
+            style="font-size:11px;padding:2px 5px;border:1px solid var(--border);border-radius:5px;background:var(--surface);color:var(--text-secondary)"/>
+          <span class="rel-escore-interp"></span>
+        </div>
+      </div>`;
+    }).join('');
 
     // DUT-65
     const dutWrap = document.getElementById('rel-dut-wrap');
@@ -2773,6 +2924,9 @@ ${timbrado ? `<div class="timbrado-bg"></div><table class="timbrado-table"><thea
     document.querySelectorAll('#rel-escores .rel-escore-input').forEach(inp => {
       const e = d.escores.find(e => e.label === inp.dataset.label);
       t += '• ' + inp.dataset.label + ': ' + (inp.value || '[PREENCHER]');
+      if (inp.value) t += textoInterp(inp.dataset.label, inp.value);
+      const dt = document.querySelector(`#rel-escores .rel-escore-data[data-label="${inp.dataset.label.replace(/"/g,'\\"')}"]`);
+      if (dt && dt.value) { const [yy,mm,dd] = dt.value.split('-'); t += ' (em ' + dd + '/' + mm + '/' + yy + ')'; }
       if (e?.ref && !inp.value) t += ' (Ref: ' + e.ref.split('·')[0].trim() + ')';
       t += '\n';
     });
