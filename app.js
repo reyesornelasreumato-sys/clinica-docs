@@ -2391,12 +2391,28 @@ ${timbrado ? `<div class="timbrado-bg"></div><table class="timbrado-table"><thea
     );
   }
 
+  /* Lista de medicações para autocompletar no histórico de tratamentos */
+  function _todosMedicamentos() {
+    const set = new Set();
+    try { Object.values(MED_CATALOG).forEach(c => (c.meds || []).forEach(m => { if (m && m.nome) set.add(String(m.nome).replace(/⚠️/g, '').trim()); })); } catch (e) {}
+    try { Object.values(MODELO_DOENCAS).forEach(d => (d.biologicos || []).forEach(b => set.add(b))); } catch (e) {}
+    return [...set].filter(Boolean).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  }
+  function ensureMedDatalist() {
+    if (document.getElementById('dl-meds')) return;
+    const dl = document.createElement('datalist');
+    dl.id = 'dl-meds';
+    dl.innerHTML = _todosMedicamentos().map(n => `<option value="${n.replace(/"/g, '&quot;')}"></option>`).join('');
+    document.body.appendChild(dl);
+  }
+
   function addRelTratRow() {
+    ensureMedDatalist();
     const list = document.getElementById('rel-trat-list');
     const row = document.createElement('div');
     row.style.cssText = 'display:flex;gap:6px;align-items:center';
     row.innerHTML =
-      `<input placeholder="Medicamento" style="flex:2;font-size:12.5px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface)"/>
+      `<input list="dl-meds" placeholder="Medicamento — digite ou escolha" style="flex:2;font-size:12.5px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface)"/>
        <input placeholder="Dose" style="flex:1;font-size:12.5px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface)"/>
        <input placeholder="Duração" style="flex:1;font-size:12.5px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--surface)"/>
        <select style="flex:1.5;font-size:12px;padding:6px 6px;border:1px solid var(--border);border-radius:6px;background:var(--surface)">
@@ -2472,16 +2488,14 @@ ${timbrado ? `<div class="timbrado-bg"></div><table class="timbrado-table"><thea
     if (!box) return;
     if (!relDoencaKey || !document.getElementById('rel-solicita-bio')?.checked) { box.innerHTML = ''; return; }
     const cr = criteriosDoenca(relDoencaKey);
-    const grupoHtml = (g) => `
+    const grupoHtml = (g, gi) => `
       <div style="margin-bottom:10px">
         <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--brand-mid);margin-bottom:4px">${g.titulo}${g.modo === 'algum' ? ' — pelo menos um' : ''}</div>
-        ${g.itens.map(it => {
-          const auto = _autoCheck(it);
-          const hint = it.escore ? (() => { const e = _escoreVal(it.escore); return e ? ` <span style="color:var(--text-muted)">(informado: ${e.label} ${e.val})</span>` : ''; })()
-                     : it.falhas ? ` <span style="color:var(--text-muted)">(falhas informadas: ${_falhasNum() || 0})</span>` : '';
+        ${g.itens.map((it, ii) => {
+          const isAuto = !!(it.escore || it.falhas);
           return `<label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;padding:2px 0;cursor:pointer">
-            <input type="checkbox" class="dut-crit" data-grupo="${g.id}" data-modo="${g.modo}" ${auto === true ? 'checked' : ''} style="width:15px;height:15px;margin-top:2px">
-            <span>${it.label}${hint}</span></label>`;
+            <input type="checkbox" class="dut-crit" data-grupo="${g.id}" data-modo="${g.modo}" data-gi="${gi}" data-ii="${ii}"${isAuto ? ' data-auto="1"' : ''} style="width:15px;height:15px;margin-top:2px">
+            <span>${it.label}<span class="dut-hint" style="color:var(--text-muted)"></span></span></label>`;
         }).join('')}
       </div>`;
     box.innerHTML = `
@@ -2493,6 +2507,27 @@ ${timbrado ? `<div class="timbrado-bg"></div><table class="timbrado-table"><thea
           <input type="checkbox" class="dut-seg" data-id="${s.id}" style="width:15px;height:15px;margin-top:2px"><span>${s.label}</span></label>`).join('')}
         <div id="rel-eleg-verdict" style="margin-top:10px"></div>
       </div>`;
+    atualizarAutoCriterios();
+  }
+
+  /* Recalcula os critérios derivados dos dados já preenchidos (escores, nº de
+     falhas) sem apagar as marcações manuais, e atualiza o veredito. */
+  function atualizarAutoCriterios() {
+    if (!relDoencaKey) return;
+    const cr = criteriosDoenca(relDoencaKey);
+    document.querySelectorAll('#rel-dut-criterios .dut-crit').forEach(c => {
+      const g = cr.grupos[+c.dataset.gi]; if (!g) return;
+      const it = g.itens[+c.dataset.ii]; if (!it) return;
+      const hint = c.parentElement.querySelector('.dut-hint');
+      if (it.escore) {
+        const e = _escoreVal(it.escore);
+        if (hint) hint.textContent = e ? ` (informado: ${e.label} ${e.val})` : ' (escore não informado)';
+      } else if (it.falhas) {
+        const f = _falhasNum();
+        if (hint) hint.textContent = ` (informado: ${f === 99 ? 'intolerância/contraindicação' : (f || 0) + ' falha(s)'})`;
+      }
+      if (c.dataset.auto) { const a = _autoCheck(it); if (a !== null) c.checked = a; }
+    });
     atualizarVerdict();
   }
   function avaliarElegibilidade() {
@@ -2523,30 +2558,15 @@ ${timbrado ? `<div class="timbrado-bg"></div><table class="timbrado-table"><thea
       html = `<div style="background:#fdeceb;border:1px solid #e6a49c;color:#9a3128;border-radius:6px;padding:8px 12px;font-size:13px"><b>⚠ Paciente ainda NÃO elegível.</b> Faltam critérios em ${r.pendGrupos.length} grupo(s) — marque os itens atendidos.</div>`;
     el.innerHTML = html;
   }
-  function criteriosParaTexto() {
-    const cr = criteriosDoenca(relDoencaKey);
-    const crits = [...document.querySelectorAll('#rel-dut-criterios .dut-crit')];
-    const segs  = [...document.querySelectorAll('#rel-dut-criterios .dut-seg')];
-    let ci = 0, s = 'CRITÉRIOS DE ELEGIBILIDADE — ' + cr.fonte + '\n\n';
-    cr.grupos.forEach(g => {
-      s += g.titulo + (g.modo === 'algum' ? ' (pelo menos um):' : ':') + '\n';
-      g.itens.forEach(it => { const c = crits[ci++]; s += '  ' + (c && c.checked ? '[X]' : '[  ]') + ' ' + it.label + '\n'; });
-    });
-    s += '\nRastreio pré-imunobiológico (segurança):\n';
-    DUT_SEGURANCA.forEach((sg, i) => { const c = segs[i]; s += '  ' + (c && c.checked ? '[X]' : '[  ]') + ' ' + sg.label + '\n'; });
-    const r = avaliarElegibilidade();
-    s += '\n' + '─'.repeat(58) + '\nCONCLUSÃO DE ELEGIBILIDADE:\n';
-    if (r.elegivel && !r.segPend.length) s += '>> PACIENTE ELEGÍVEL — todos os critérios da DUT atendidos.\n';
-    else {
-      s += r.elegivel ? '>> Critérios da DUT atendidos.\n'
-                      : '>> PACIENTE NÃO ELEGÍVEL no momento — há critérios não atendidos (itens sem [X] acima).\n';
-      if (r.segPend.length) { s += '   Pendências de rastreio antes de iniciar:\n'; r.segPend.forEach(p => s += '     - ' + p + '\n'); }
-    }
-    return s;
-  }
+  /* Checagem automática ao vivo: recalcula ao digitar escores ou mudar o nº de falhas. */
   document.addEventListener('change', e => {
-    const tgt = e.target;
-    if (tgt && tgt.closest && tgt.closest('#rel-dut-criterios')) atualizarVerdict();
+    const tgt = e.target; if (!tgt) return;
+    if (tgt.closest && tgt.closest('#rel-dut-criterios')) { atualizarVerdict(); return; }
+    if (tgt.id === 'rel-falhas' || (tgt.classList && tgt.classList.contains('rel-escore-input'))) atualizarAutoCriterios();
+  });
+  document.addEventListener('input', e => {
+    const tgt = e.target; if (!tgt) return;
+    if (tgt.id === 'rel-falhas' || (tgt.classList && tgt.classList.contains('rel-escore-input'))) atualizarAutoCriterios();
   });
 
   function toggleRelBioSection() {
@@ -2652,7 +2672,6 @@ ${timbrado ? `<div class="timbrado-bg"></div><table class="timbrado-table"><thea
       }
       t += 'Solicito autorização para uso de: ' + (bioSel||'[IMUNOBIOLÓGICO]') + '\n\n';
       if (justif) t += 'Justificativa complementar: ' + justif + '\n\n';
-      t += criteriosParaTexto() + '\n';
     }
 
     const padrao = (document.getElementById('rel-texto-padrao')?.value || '').trim();
