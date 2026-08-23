@@ -369,8 +369,7 @@
   function onPacienteChange() {
     const nome = document.getElementById('pac-nome').value.trim();
     const nasc = document.getElementById('pac-nasc').value;
-    const end  = document.getElementById('pac-end').value.trim();
-    document.getElementById('patient-badge').classList.toggle('visible', !!(nome && nasc && end));
+    document.getElementById('patient-badge').classList.toggle('visible', !!(nome && nasc));
     // IMC automático
     const peso = parseFloat(document.getElementById('pac-peso')?.value);
     const alt  = parseFloat(document.getElementById('pac-altura')?.value);
@@ -398,8 +397,12 @@
     const campos = [
       { id: 'pac-nome', err: 'err-pac-nome' },
       { id: 'pac-nasc', err: 'err-pac-nasc' },
-      { id: 'pac-end',  err: 'err-pac-end'  },
     ];
+    // Endereço é opcional — limpa qualquer marcação de erro remanescente.
+    const _endEl = document.getElementById('pac-end');
+    if (_endEl) _endEl.classList.remove('error');
+    const _endErr = document.getElementById('err-pac-end');
+    if (_endErr) _endErr.classList.remove('visible');
     let ok = true;
     campos.forEach(({ id, err }) => {
       const el = document.getElementById(id);
@@ -414,13 +417,12 @@
 
   /* ── TABS (multi-select) ── */
   const ALL_TABS = ['relatorio','receita','exames','imagem','atestado','encaminhamento'];
-  const activeTabs = new Set(['relatorio']);
+  const activeTabs = new Set();
 
   function toggleTab(btn) {
     const tab = btn.dataset.tab;
     const el  = document.getElementById('tab-' + tab);
     if (activeTabs.has(tab)) {
-      if (activeTabs.size === 1) return;
       activeTabs.delete(tab);
       btn.classList.remove('active');
       el.style.display = 'none';
@@ -436,7 +438,10 @@
   function updateGerarTodos() {
     const wrap = document.getElementById('gerar-todos-wrap');
     if (wrap) wrap.style.display = activeTabs.size > 1 ? 'block' : 'none';
+    const empty = document.getElementById('tabs-empty');
+    if (empty) empty.style.display = activeTabs.size === 0 ? 'block' : 'none';
   }
+  document.addEventListener('DOMContentLoaded', updateGerarTodos);
 
   /* ── DATA POR DOCUMENTO ── */
   function setDocData(btn) {
@@ -1869,6 +1874,135 @@
     if (html) abrirPDF(html);
   }
 
+  /* ── CONFERÊNCIA DA RECEITA (verificar antes de gerar) ── */
+  function _escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // Lê os cartões de medicação exatamente como o buildHtml('receita') faria.
+  function lerCardsReceita() {
+    return [...document.querySelectorAll('#meds-list .med-card')].map(card => {
+      const livre = card.dataset.tipo === 'livre';
+      let nome = '', pos = '', especial = false;
+      if (livre) {
+        nome = card.querySelector('.med-nome')?.value.trim() || '';
+      } else {
+        const sel = card.querySelector('.med-select');
+        if (sel && sel.value !== '') {
+          const opt = sel.options[sel.selectedIndex];
+          nome = opt.text.replace(/⚠️/g,'').trim();
+          especial = opt.dataset.especial === '1';
+        }
+        pos = card.querySelector('.med-pos')?.value.trim() || '';
+      }
+      let dur = card.querySelector('.med-dur')?.value || '';
+      if (dur === 'personalizado') dur = card.querySelector('.med-dur-custom')?.value.trim() || '';
+      return {
+        livre, nome, pos, dur, especial,
+        obs:  card.querySelector('.med-obs')?.value.trim() || '',
+        via:  card.querySelector('.med-via')?.value || '',
+        tipo: card.querySelector('.med-tipo')?.value || '',
+        vazio: !nome,
+      };
+    });
+  }
+
+  function verificarReceita() {
+    if (!validarPaciente()) return;
+    if (!validarData('receita')) return;
+
+    const cards    = lerCardsReceita();
+    const meds     = cards.filter(m => !m.vazio);
+    const isEsp    = !!document.getElementById('receita-especial-check')?.checked;
+    const p        = getPaciente();
+    const obsGeral = v('rc-obs');
+
+    /* alertas */
+    const avisos = [];
+    if (!meds.length) {
+      avisos.push({ n: 'erro', txt: 'Nenhum medicamento prescrito — a receita sairá em branco.' });
+    }
+    const semNome = cards.length - meds.length;
+    if (semNome > 0) {
+      avisos.push({ n: 'aviso', txt: semNome + (semNome === 1
+        ? ' cartão sem medicamento selecionado — será ignorado no PDF.'
+        : ' cartões sem medicamento selecionado — serão ignorados no PDF.') });
+    }
+    meds.forEach((m, i) => {
+      const ref = '“' + m.nome + '”';
+      if (!m.livre && !m.pos) avisos.push({ n: 'aviso', txt: (i+1) + '. ' + ref + ' está sem posologia.' });
+      if (!m.dur)             avisos.push({ n: 'aviso', txt: (i+1) + '. ' + ref + ' está sem duração do tratamento.' });
+    });
+    const especiais = meds.filter(m => m.especial);
+    if (especiais.length && !isEsp) {
+      avisos.push({ n: 'erro', txt: 'Há medicamento de controle especial (' + especiais.map(m => m.nome).join(', ')
+        + ') e a opção “Receita de Controle Especial” está desmarcada — o PDF sairá em via única.' });
+    }
+    if (isEsp && !especiais.length) {
+      avisos.push({ n: 'info', txt: 'A receita está marcada como Controle Especial (2 vias), mas nenhum medicamento do catálogo marcado como controlado foi selecionado. Confirme se é isso mesmo.' });
+    }
+
+    const cor = { erro:  ['#fdecec','#e3a2a2','#8a2020'],
+                  aviso: ['#fff6e6','#e6c67a','#8a6416'],
+                  info:  ['#eaf6f1','#a8d8c4','#1a6b5a'] };
+    const alertasHtml = avisos.length
+      ? avisos.map(a => {
+          const c = cor[a.n];
+          return '<div style="background:' + c[0] + ';border:1px solid ' + c[1] + ';color:' + c[2]
+            + ';border-radius:7px;padding:8px 12px;font-size:12.5px;margin-bottom:6px">'
+            + (a.n === 'erro' ? '⛔ ' : a.n === 'aviso' ? '⚠️ ' : 'ℹ️ ') + _escHtml(a.txt) + '</div>';
+        }).join('')
+      : '<div style="background:#eaf6f1;border:1px solid #a8d8c4;color:#1a6b5a;border-radius:7px;padding:8px 12px;font-size:12.5px">✓ Nenhum problema encontrado.</div>';
+
+    /* prévia */
+    const linhaInfo = (rot, val) => val
+      ? '<div style="font-size:12px;color:#444;margin-top:2px"><strong>' + rot + ':</strong> ' + _escHtml(val) + '</div>' : '';
+    const medsHtml = meds.length
+      ? meds.map((m, i) => {
+          const viaTipo = [m.via, m.tipo].filter(Boolean).join(' · ');
+          return '<div style="padding:9px 0;border-bottom:1px solid var(--border-soft)">'
+            + '<div style="font-weight:600">' + (i+1) + '. ' + _escHtml(m.nome)
+            + (m.especial ? ' <span style="color:#8a2020;font-size:11.5px">⚠️ controle especial</span>' : '') + '</div>'
+            + (m.pos ? '<div style="font-size:12.5px;margin-top:2px">' + _escHtml(m.pos) + '</div>'
+                     : (!m.livre ? '<div style="font-size:12px;color:#8a2020;margin-top:2px">— sem posologia —</div>' : ''))
+            + linhaInfo('Via/Tipo', viaTipo)
+            + (m.dur ? linhaInfo('Duração', m.dur)
+                     : '<div style="font-size:12px;color:#8a2020;margin-top:2px"><strong>Duração:</strong> não informada</div>')
+            + linhaInfo('Obs', m.obs)
+            + '</div>';
+        }).join('')
+      : '<p style="color:var(--text-muted)">Nenhum medicamento prescrito.</p>';
+
+    const dataTxt = getDocData('receita') === 'sem' ? 'sem data' : 'com data';
+    const cab = '<div style="padding-bottom:9px;border-bottom:1px solid var(--border);margin-bottom:9px">'
+      + '<div style="font-weight:600;font-size:14px">' + _escHtml(isEsp ? 'Receita de Controle Especial (2 vias)' : 'Receita Médica') + '</div>'
+      + '<div style="font-size:12.5px;color:var(--text-secondary);margin-top:3px">'
+      + _escHtml([p.nome, p.nasc ? 'DN: ' + p.nasc : '', p.sexo].filter(Boolean).join(' · ')) + '</div>'
+      + (p.end ? '<div style="font-size:12px;color:var(--text-muted);margin-top:2px">' + _escHtml(p.end) + '</div>' : '')
+      + '<div style="font-size:12px;color:var(--text-muted);margin-top:2px">Documento será emitido <strong>' + dataTxt + '</strong></div>'
+      + '</div>';
+
+    const rodape = obsGeral
+      ? '<div style="margin-top:10px;padding-top:9px;border-top:1px solid var(--border)"><strong style="font-size:12.5px">Observações:</strong>'
+        + '<div style="font-size:12.5px;margin-top:3px">' + nl2br(_escHtml(obsGeral)) + '</div></div>' : '';
+
+    document.getElementById('rc-check-alertas').innerHTML = alertasHtml;
+    document.getElementById('rc-check-box').innerHTML = cab + medsHtml + rodape;
+    const wrap = document.getElementById('rc-check-wrap');
+    wrap.style.display = 'block';
+    wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function fecharConferenciaReceita() {
+    const wrap = document.getElementById('rc-check-wrap');
+    if (wrap) wrap.style.display = 'none';
+  }
+
+  function gerarReceitaConferida() {
+    fecharConferenciaReceita();
+    gerarUm('receita');
+  }
+
   /* ── GERAR TODOS ── */
   function gerarTodos() {
     if (!validarPaciente()) return;
@@ -2447,6 +2581,7 @@ ${timbrado ? `<div class="timbrado-bg"></div><table class="timbrado-table"><thea
       document.getElementById('meds-list').innerHTML = '';
       const chk = document.getElementById('receita-especial-check');
       if (chk) chk.checked = false;
+      fecharConferenciaReceita();
       updateEspecialUI();
     }
     if (tipo === 'exames') {
