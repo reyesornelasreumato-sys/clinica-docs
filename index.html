@@ -138,7 +138,7 @@
     </div>
     <div class="form-grid cols-1" style="margin-top:14px">
       <div class="field">
-        <label>Endereço completo <span class="required-star">*</span></label>
+        <label>Endereço completo <span style="font-weight:400;color:var(--text-muted);font-size:11.5px">(opcional)</span></label>
         <input id="pac-end" placeholder="Rua, número, bairro, cidade — SP" oninput="onPacienteChange()" />
         <span class="field-error" id="err-pac-end">Campo obrigatório</span>
       </div>
@@ -152,7 +152,7 @@
   </div>
 
   <div class="tabs" role="tablist" id="tabs-row">
-    <button class="tab-btn active" data-tab="relatorio" onclick="toggleTab(this)">
+    <button class="tab-btn" data-tab="relatorio" onclick="toggleTab(this)">
       <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
       Relatório médico
     </button>
@@ -182,6 +182,13 @@
     </button>
   </div>
 
+  <!-- ESTADO VAZIO — nenhum documento selecionado -->
+  <div id="tabs-empty" class="card" style="display:none;text-align:center;padding:2.25rem 1.5rem;color:var(--text-secondary)">
+    <svg viewBox="0 0 24 24" style="width:34px;height:34px;stroke:var(--text-muted);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;margin-bottom:10px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    <div style="font-size:14.5px;font-weight:600;color:var(--text);margin-bottom:4px">Escolha o documento que quer gerar</div>
+    <div style="font-size:12.5px">Clique em uma das abas acima. Você pode selecionar mais de uma e gerar tudo de uma vez.</div>
+  </div>
+
   <!-- BOTÃO GERAR TUDO -->
   <div id="gerar-todos-wrap" style="display:none;margin-bottom:1.25rem">
     <button class="btn btn-gerar-todos" onclick="gerarTodos()">
@@ -191,16 +198,9 @@
   </div>
 
   <!-- ══ RELATÓRIO ══ -->
-  <div id="tab-relatorio" class="card doc-card" style="display:block">
+  <div id="tab-relatorio" class="card doc-card" style="display:none">
     <div class="doc-card-header">
       <span class="doc-card-title">Relatório médico</span>
-      <div class="date-toggle-inline">
-        <span class="date-toggle-label">Data:</span>
-        <button class="dtb" data-doc="relatorio" data-val="com" onclick="setDocData(this)">Com data</button>
-        <button class="dtb" data-doc="relatorio" data-val="sem" onclick="setDocData(this)">Sem data</button>
-        <input type="hidden" class="doc-data-val" id="data-relatorio" value="">
-        <span class="date-req-err" id="err-data-relatorio">Selecione</span>
-      </div>
     </div>
     <p class="section-label">Selecione o modelo de doença</p>
     <div class="med-class-btns" id="rel-doenca-btns" style="flex-wrap:wrap">
@@ -344,11 +344,18 @@
       </div>
     </div>
 
-    <div class="form-actions">
+    <div class="form-actions" style="flex-wrap:wrap">
       <button class="btn btn-primary" onclick="gerarUm('relatorio')">
         <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Gerar PDF
       </button>
       <button class="btn" onclick="limpar('relatorio')">Limpar</button>
+      <div class="date-toggle-inline" style="margin-left:auto">
+        <span class="date-toggle-label">Data:</span>
+        <button class="dtb" data-doc="relatorio" data-val="com" onclick="setDocData(this)">Com data</button>
+        <button class="dtb" data-doc="relatorio" data-val="sem" onclick="setDocData(this)">Sem data</button>
+        <input type="hidden" class="doc-data-val" id="data-relatorio" value="">
+        <span class="date-req-err" id="err-data-relatorio">Selecione</span>
+      </div>
     </div>
   </div>
 
@@ -356,13 +363,6 @@
   <div id="tab-receita" class="card doc-card" style="display:none">
     <div class="doc-card-header">
       <span class="doc-card-title">Receita médica</span>
-      <div class="date-toggle-inline">
-        <span class="date-toggle-label">Data:</span>
-        <button class="dtb" data-doc="receita" data-val="com" onclick="setDocData(this)">Com data</button>
-        <button class="dtb" data-doc="receita" data-val="sem" onclick="setDocData(this)">Sem data</button>
-        <input type="hidden" class="doc-data-val" id="data-receita" value="">
-        <span class="date-req-err" id="err-data-receita">Selecione</span>
-      </div>
     </div>
 
     <p class="section-label">Tipo de receita</p>
@@ -392,11 +392,35 @@
     <div class="form-grid cols-1">
       <div class="field"><textarea id="rc-obs" placeholder="Retornar em 30 dias..."></textarea></div>
     </div>
-    <div class="form-actions">
-      <button class="btn btn-primary" onclick="gerarUm('receita')">
-        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Gerar PDF
+    <!-- CONFERÊNCIA DA RECEITA (aparece após clicar "Verificar receita") -->
+    <div id="rc-check-wrap" style="display:none;margin-top:1.5rem">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+        <span class="section-label" style="margin:0">Conferência da receita</span>
+        <button class="btn" style="font-size:12px;padding:5px 12px" onclick="fecharConferenciaReceita()">Fechar</button>
+      </div>
+      <div id="rc-check-alertas" style="margin-bottom:10px"></div>
+      <div id="rc-check-box" style="border:1px solid var(--border);border-radius:var(--radius-md);padding:1.25rem 1.5rem;background:var(--surface);font-size:13px;line-height:1.75;max-height:520px;overflow-y:auto;color:var(--text)"></div>
+      <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-primary" onclick="gerarReceitaConferida()">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>Está correto — gerar PDF
+        </button>
+        <button class="btn" onclick="fecharConferenciaReceita()">Voltar e corrigir</button>
+      </div>
+    </div>
+
+    <div class="form-actions" style="flex-wrap:wrap">
+      <button class="btn btn-primary" onclick="verificarReceita()">
+        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Verificar receita
       </button>
+      <button class="btn" onclick="gerarUm('receita')">Gerar PDF direto</button>
       <button class="btn" onclick="limpar('receita')">Limpar</button>
+      <div class="date-toggle-inline" style="margin-left:auto">
+        <span class="date-toggle-label">Data:</span>
+        <button class="dtb" data-doc="receita" data-val="com" onclick="setDocData(this)">Com data</button>
+        <button class="dtb" data-doc="receita" data-val="sem" onclick="setDocData(this)">Sem data</button>
+        <input type="hidden" class="doc-data-val" id="data-receita" value="">
+        <span class="date-req-err" id="err-data-receita">Selecione</span>
+      </div>
     </div>
   </div>
 
@@ -404,13 +428,6 @@
   <div id="tab-exames" class="card doc-card" style="display:none">
     <div class="doc-card-header">
       <span class="doc-card-title">Exames laboratoriais</span>
-      <div class="date-toggle-inline">
-        <span class="date-toggle-label">Data:</span>
-        <button class="dtb" data-doc="exames" data-val="com" onclick="setDocData(this)">Com data</button>
-        <button class="dtb" data-doc="exames" data-val="sem" onclick="setDocData(this)">Sem data</button>
-        <input type="hidden" class="doc-data-val" id="data-exames" value="">
-        <span class="date-req-err" id="err-data-exames">Selecione</span>
-      </div>
     </div>
     <p class="section-label" style="margin-top:0">Selecione um ou mais painéis</p>
     <div class="preset-grid">
@@ -448,11 +465,18 @@
       <div class="field"><label>Hipótese diagnóstica</label><input id="ex-hip" placeholder="Ex: Investigação de artrite inflamatória" /></div>
       <div class="field"><label>Observações</label><textarea id="ex-obs" placeholder="Jejum, urgência, preparo especial..."></textarea></div>
     </div>
-    <div class="form-actions">
+    <div class="form-actions" style="flex-wrap:wrap">
       <button class="btn btn-primary" onclick="gerarUm('exames')">
         <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Gerar PDF
       </button>
       <button class="btn" onclick="limpar('exames')">Limpar</button>
+      <div class="date-toggle-inline" style="margin-left:auto">
+        <span class="date-toggle-label">Data:</span>
+        <button class="dtb" data-doc="exames" data-val="com" onclick="setDocData(this)">Com data</button>
+        <button class="dtb" data-doc="exames" data-val="sem" onclick="setDocData(this)">Sem data</button>
+        <input type="hidden" class="doc-data-val" id="data-exames" value="">
+        <span class="date-req-err" id="err-data-exames">Selecione</span>
+      </div>
     </div>
   </div>
 
@@ -460,13 +484,6 @@
   <div id="tab-imagem" class="card doc-card" style="display:none">
     <div class="doc-card-header">
       <span class="doc-card-title">Exames de imagem</span>
-      <div class="date-toggle-inline">
-        <span class="date-toggle-label">Data:</span>
-        <button class="dtb" data-doc="imagem" data-val="com" onclick="setDocData(this)">Com data</button>
-        <button class="dtb" data-doc="imagem" data-val="sem" onclick="setDocData(this)">Sem data</button>
-        <input type="hidden" class="doc-data-val" id="data-imagem" value="">
-        <span class="date-req-err" id="err-data-imagem">Selecione</span>
-      </div>
     </div>
     <p class="section-label" style="margin-top:0">Selecione os exames</p>
     <div id="img-catalog-inner"></div>
@@ -484,11 +501,18 @@
       <div class="field"><label>Hipótese diagnóstica</label><input id="img-hip" placeholder="Ex: Investigação de artropatia inflamatória" /></div>
       <div class="field"><label>Observações</label><textarea id="img-obs" placeholder="Contraste, urgência, lateralidade..."></textarea></div>
     </div>
-    <div class="form-actions">
+    <div class="form-actions" style="flex-wrap:wrap">
       <button class="btn btn-primary" onclick="gerarUm('imagem')">
         <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Gerar PDF
       </button>
       <button class="btn" onclick="limpar('imagem')">Limpar</button>
+      <div class="date-toggle-inline" style="margin-left:auto">
+        <span class="date-toggle-label">Data:</span>
+        <button class="dtb" data-doc="imagem" data-val="com" onclick="setDocData(this)">Com data</button>
+        <button class="dtb" data-doc="imagem" data-val="sem" onclick="setDocData(this)">Sem data</button>
+        <input type="hidden" class="doc-data-val" id="data-imagem" value="">
+        <span class="date-req-err" id="err-data-imagem">Selecione</span>
+      </div>
     </div>
   </div>
 
@@ -496,13 +520,6 @@
   <div id="tab-atestado" class="card doc-card" style="display:none">
     <div class="doc-card-header">
       <span class="doc-card-title">Atestado médico</span>
-      <div class="date-toggle-inline">
-        <span class="date-toggle-label">Data:</span>
-        <button class="dtb" data-doc="atestado" data-val="com" onclick="setDocData(this)">Com data</button>
-        <button class="dtb" data-doc="atestado" data-val="sem" onclick="setDocData(this)">Sem data</button>
-        <input type="hidden" class="doc-data-val" id="data-atestado" value="">
-        <span class="date-req-err" id="err-data-atestado">Selecione</span>
-      </div>
     </div>
     <div class="form-grid cols-2" style="margin-top:0">
       <div class="field"><label>CPF do paciente (opcional)</label><input id="at-cpf" placeholder="000.000.000-00" /></div>
@@ -516,11 +533,18 @@
     <div class="form-grid cols-1" style="margin-top:12px">
       <div class="field"><label>Observações</label><textarea id="at-obs" placeholder="Recomenda-se repouso relativo..."></textarea></div>
     </div>
-    <div class="form-actions">
+    <div class="form-actions" style="flex-wrap:wrap">
       <button class="btn btn-primary" onclick="gerarUm('atestado')">
         <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Gerar PDF
       </button>
       <button class="btn" onclick="limpar('atestado')">Limpar</button>
+      <div class="date-toggle-inline" style="margin-left:auto">
+        <span class="date-toggle-label">Data:</span>
+        <button class="dtb" data-doc="atestado" data-val="com" onclick="setDocData(this)">Com data</button>
+        <button class="dtb" data-doc="atestado" data-val="sem" onclick="setDocData(this)">Sem data</button>
+        <input type="hidden" class="doc-data-val" id="data-atestado" value="">
+        <span class="date-req-err" id="err-data-atestado">Selecione</span>
+      </div>
     </div>
   </div>
 
@@ -528,13 +552,6 @@
   <div id="tab-encaminhamento" class="card doc-card" style="display:none">
     <div class="doc-card-header">
       <span class="doc-card-title">Encaminhamento médico</span>
-      <div class="date-toggle-inline">
-        <span class="date-toggle-label">Data:</span>
-        <button class="dtb" data-doc="encaminhamento" data-val="com" onclick="setDocData(this)">Com data</button>
-        <button class="dtb" data-doc="encaminhamento" data-val="sem" onclick="setDocData(this)">Sem data</button>
-        <input type="hidden" class="doc-data-val" id="data-encaminhamento" value="">
-        <span class="date-req-err" id="err-data-encaminhamento">Selecione</span>
-      </div>
     </div>
     <p class="section-label">Destino</p>
     <div class="form-grid cols-2">
@@ -590,11 +607,18 @@
         <textarea id="enc-obs" placeholder="Ex: Em uso de Metotrexato 15mg/semana. VHS: 45 mm/h. Alérgica a sulfa."></textarea>
       </div>
     </div>
-    <div class="form-actions">
+    <div class="form-actions" style="flex-wrap:wrap">
       <button class="btn btn-primary" onclick="gerarUm('encaminhamento')">
         <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Gerar PDF
       </button>
       <button class="btn" onclick="limpar('encaminhamento')">Limpar</button>
+      <div class="date-toggle-inline" style="margin-left:auto">
+        <span class="date-toggle-label">Data:</span>
+        <button class="dtb" data-doc="encaminhamento" data-val="com" onclick="setDocData(this)">Com data</button>
+        <button class="dtb" data-doc="encaminhamento" data-val="sem" onclick="setDocData(this)">Sem data</button>
+        <input type="hidden" class="doc-data-val" id="data-encaminhamento" value="">
+        <span class="date-req-err" id="err-data-encaminhamento">Selecione</span>
+      </div>
     </div>
   </div>
 
@@ -658,7 +682,7 @@ Início de efeito esperado em 24 a 72 horas</textarea>
     <div id="tcle-preview-box" style="border:1px solid var(--border);border-radius:var(--radius-md);padding:1.25rem 1.5rem;background:var(--surface);font-size:13px;line-height:1.8;max-height:520px;overflow-y:auto;color:var(--text)">
     </div>
 
-    <div class="form-actions">
+    <div class="form-actions" style="flex-wrap:wrap">
       <button class="btn btn-primary" onclick="gerarTcle()">
         <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Gerar PDF
       </button>
